@@ -1,0 +1,42 @@
+<article class="aj-card">
+    <header class="aj-card-head">
+        <span class="aj-head-icon">
+            <svg appIcono [appIcono]="iconoEscudo"></svg>
+        </span>
+        <div>
+            <h2 class="aj-card-title">Seguridad</h2>
+            <p class="aj-card-sub">Cambie la contraseña de acceso al sistema.</p>
+        </div>
+    </header>
+
+    <form class="aj-form" [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+        <div class="aj-card-body">
+            <div class="form-error" role="alert" [hidden]="!mensajeError()">{{ mensajeError() }}</div>
+
+            @for (campo of campos; track campo.id) {
+                <div class="aj-pass-field">
+                    <div class="field">
+                        <label [for]="campo.id">{{ campo.etiqueta }}</label>
+                        <input [type]="estaVisible(campo.id) ? 'text' : 'password'" [id]="campo.id"
+                            [formControlName]="campo.id" [placeholder]="campo.placeholder"
+                            [attr.autocomplete]="campo.autocomplete">
+                        <button type="button" class="aj-eye" (click)="alternarVisible(campo.id)"
+                            aria-label="Mostrar u ocultar contraseña" title="Mostrar / ocultar">
+                            <svg appIcono [appIcono]="estaVisible(campo.id) ? iconoOjoOff : iconoOjo"></svg>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <footer class="aj-card-foot">
+            <span class="aj-hint">
+                <svg appIcono [appIcono]="iconoInfo"></svg>
+                La contraseña debe incluir números y caracteres especiales.
+            </span>
+            <button type="submit" class="btn-primary" [disabled]="guardando()">
+                {{ guardando() ? 'Guardando…' : 'Guardar Cambios' }}
+            </button>
+        </footer>
+    </form>
+</article>

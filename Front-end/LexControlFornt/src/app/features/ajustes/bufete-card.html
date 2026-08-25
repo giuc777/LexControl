@@ -1,0 +1,33 @@
+<article class="aj-card">
+    <header class="aj-card-head">
+        <span class="aj-head-icon">
+            <svg appIcono [appIcono]="iconoEdificio"></svg>
+        </span>
+        <div>
+            <h2 class="aj-card-title">Configuración del Bufete</h2>
+            <p class="aj-card-sub">Valores del seed de CONFIGURACION.</p>
+        </div>
+    </header>
+
+    <form class="aj-form" [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+        <div class="aj-card-body">
+            @for (campo of campos; track campo.clave) {
+                <div class="field">
+                    <label [for]="'bufete' + campo.clave">{{ campo.etiqueta }}</label>
+                    <input [type]="campo.tipo" [id]="'bufete' + campo.clave"
+                        [formControlName]="campo.clave" [placeholder]="campo.etiqueta"
+                        autocomplete="off" [class.aj-input-code]="campo.codigo">
+                    <small class="aj-hint">
+                        <svg appIcono [appIcono]="iconoInfo"></svg>
+                        {{ campo.ayuda }}
+                    </small>
+                </div>
+            }
+        </div>
+
+        <footer class="aj-card-foot">
+            <span class="aj-card-sub">Impacta en reportes, documentos y expedientes.</span>
+            <button type="submit" class="btn-primary" [disabled]="formulario.invalid">Guardar cambios</button>
+        </footer>
+    </form>
+</article>

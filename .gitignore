@@ -1,0 +1,31 @@
+# Bases de datos y scripts SQL
+*.sql
+*.mdf
+*.ldf
+*.ndf
+*.bak
+*.trn
+
+# Variables de entorno
+.env
+.env.*
+*.env
+
+# .NET (build y caché de Visual Studio)
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+
+# Sistema operativo / editor
+Thumbs.db
+.DS_Store
+
+# Notas locales
+Linkgit.txt

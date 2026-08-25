@@ -1,0 +1,231 @@
+/* Login portado de Pototipo/css/login.css.
+   Adaptación SPA: body.login-page → .login-page (host del componente).
+   Los radios propios del login se aplican en el contenedor para no
+   pisar los tokens globales del resto de la app.
+   NOTA: .field, .btn-primary y .alert quedan scopeados bajo .login-page
+   porque styles/modules/clientes.css define las versiones globales
+   usadas por el resto de módulos (en el prototipo cada página cargaba
+   su propio CSS; aquí todo es global). */
+
+.login-page {
+    --radius-card: 8px;
+    --radius-field: 6px;
+
+    font-family: var(--font);
+    color: var(--ink);
+    background: linear-gradient(160deg, var(--bg-top) 0%, var(--bg-base) 55%, var(--bg-deep) 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.pattern-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(-45deg,
+            rgba(255, 255, 255, 0.05) 0 1px,
+            transparent 1px 26px),
+        repeating-linear-gradient(45deg,
+            rgba(255, 255, 255, 0.05) 0 1px,
+            transparent 1px 26px);
+    mask-image: radial-gradient(circle at 50% 40%, #000 30%, transparent 85%);
+    -webkit-mask-image: radial-gradient(circle at 50% 40%, #000 30%, transparent 85%);
+}
+
+.login-container {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: relative;
+}
+
+.login-card {
+    background: var(--brand-invert);
+    border-radius: var(--radius-card);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+    padding: 40px 36px 28px;
+}
+
+.branding-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.brand-title {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.8px;
+    line-height: 1.2;
+    color: var(--ink);
+}
+
+.brand-subtitle {
+    margin-top: 4px;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--muted);
+}
+
+.login-page .alert {
+    border-radius: var(--radius-field);
+    padding: 11px 14px;
+    font-size: 14px;
+    line-height: 1.45;
+    margin-bottom: 16px;
+}
+
+.login-page .alert-success {
+    background: var(--success-bg);
+    color: var(--success-ink);
+    border: 1px solid #b7e3cd;
+}
+
+.login-page .alert-error {
+    background: var(--error-bg);
+    color: var(--error-ink);
+    border: 1px solid #f3c2be;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.login-page .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.login-page .field label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #5b6b6e;
+}
+
+.input-wrap {
+    position: relative;
+}
+
+.input-wrap input {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--field-bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-field);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input-wrap input::placeholder {
+    color: #9db0b3;
+}
+
+.input-wrap input:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px rgba(53, 130, 146, 0.18);
+    background: #ffffff;
+}
+
+.input-wrap input.input-error {
+    border-color: var(--error-ink);
+    box-shadow: 0 0 0 3px rgba(176, 50, 42, 0.14);
+}
+
+.login-page .btn-primary {
+    width: 100%;
+    margin-top: 4px;
+    padding: 13px 16px;
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--brand-invert);
+    background: var(--brand);
+    border: none;
+    border-radius: var(--radius-field);
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(53, 130, 146, 0.35);
+    transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
+}
+
+.login-page .btn-primary:hover {
+    background: var(--brand-dark);
+}
+
+.login-page .btn-primary:active {
+    transform: translateY(1px);
+}
+
+.login-page .btn-primary:disabled {
+    background: #9db0b3;
+    box-shadow: none;
+    cursor: default;
+}
+
+.secondary-footer {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 13.5px;
+    color: var(--muted);
+}
+
+.secondary-footer a {
+    color: var(--brand);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.secondary-footer a:hover {
+    text-decoration: underline;
+}
+
+.global-footer {
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.global-footer p {
+    margin-bottom: 6px;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+    color: #ffffff;
+}
+
+@media (max-width: 480px) {
+    .login-page {
+        padding: 16px;
+    }
+
+    .login-card {
+        padding: 32px 24px 24px;
+    }
+}

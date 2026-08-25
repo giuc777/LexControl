@@ -1,0 +1,35 @@
+/* Tokens de diseño LexControl — unión de los :root de layout.css y
+   login.css del prototipo. No hardcodear colores fuera de este archivo. */
+:root {
+    --brand: #358292;
+    --brand-dark: #2a6b77;
+    --deep: #066575;
+    --deep-dark: #054e5a;
+
+    --sidebar-bg: #358292;
+    --topbar-bg: #f9f9fc;
+    --divider: #bec8cb;
+    --field-line: #d8dede;
+    --panel-line: #e5e8ea;
+
+    --ink: #1a1c1e;
+    --muted: #3f484b;
+    --subtle: #8b9aa0;
+
+    --radius-card: 10px;
+    --radius-field: 8px;
+
+    --font: 'Hanken Grotesk', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+    /* Exclusivos del login (Pototipo/css/login.css) */
+    --brand-invert: #ffffff;
+    --bg-deep: #053e4a;
+    --bg-base: #066575;
+    --bg-top: #0b7d92;
+    --line: #d8dede;
+    --field-bg: #f9fbfa;
+    --success-bg: #e8f6ef;
+    --success-ink: #18724a;
+    --error-bg: #fdecec;
+    --error-ink: #b0322a;
+}

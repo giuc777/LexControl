@@ -1,0 +1,27 @@
+<article class="aj-card">
+    <header class="aj-card-head">
+        <span class="aj-head-icon">
+            <svg appIcono [appIcono]="iconoCampana"></svg>
+        </span>
+        <div>
+            <h2 class="aj-card-title">Preferencias</h2>
+            <p class="aj-card-sub">Notificaciones y avisos del sistema.</p>
+        </div>
+    </header>
+
+    <div class="aj-card-body" style="padding: 4px 0">
+        @for (pref of preferencias(); track pref.clave) {
+            <div class="aj-pref-row">
+                <div class="aj-pref-text">
+                    <strong>{{ pref.titulo }}</strong>
+                    <span>{{ pref.descripcion }}</span>
+                </div>
+                <button type="button" class="aj-toggle" [class.activo]="pref.activo"
+                    [attr.aria-pressed]="pref.activo" (click)="alternar(pref)">
+                    <span class="aj-toggle-track"><span class="aj-toggle-thumb"></span></span>
+                    <span class="aj-toggle-label">{{ pref.activo ? 'Activo' : 'Inactivo' }}</span>
+                </button>
+            </div>
+        }
+    </div>
+</article>

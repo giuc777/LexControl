@@ -1,0 +1,60 @@
+<article class="aj-card">
+    <header class="aj-card-head">
+        <span class="aj-head-icon">
+            <svg appIcono [appIcono]="iconoLlaves"></svg>
+        </span>
+        <div>
+            <h2 class="aj-card-title">Permisos de Roles</h2>
+            <p class="aj-card-sub">Controle qué módulos ve cada rol del sistema.</p>
+        </div>
+    </header>
+
+    @if (cargando()) {
+        <div class="table-scroll">
+            <div class="empty-state"><span>Cargando permisos…</span></div>
+        </div>
+    } @else {
+        <div class="table-scroll">
+            <table class="data-table perm-table">
+                <thead>
+                    <tr>
+                        <th class="perm-rol">Rol</th>
+                        @for (col of columnas(); track col.clave) {
+                            <th [title]="col.nombre">{{ col.nombre }}</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (fila of filas(); track fila.rolId) {
+                        <tr>
+                            <td class="perm-rol">{{ fila.rol }}</td>
+                            @for (col of columnas(); track col.clave) {
+                                @if (moduloDe(fila, col.clave); as mod) {
+                                    <td class="perm-cell">
+                                        <input type="checkbox" [checked]="mod.activo"
+                                            [disabled]="obligatorio(fila.rol, col.clave) || guardando()"
+                                            [attr.aria-label]="fila.rol + ' · ' + col.nombre"
+                                            (change)="alternar(fila, col.clave)">
+                                    </td>
+                                }
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <footer class="aj-card-foot">
+        <div class="form-error" role="alert" [hidden]="!mensajeError()">{{ mensajeError() }}</div>
+        <span class="aj-card-sub">Los módulos marcados quedan ocultos del menú para ese rol. «Panel» es obligatorio.</span>
+        <div class="aj-foot-btns">
+            <button type="button" class="btn-secondary" [disabled]="guardando()" (click)="restaurar()">
+                Restaurar valores
+            </button>
+            <button type="button" class="btn-primary" [disabled]="guardando() || cargando()" (click)="guardar()">
+                {{ guardando() ? 'Guardando…' : 'Guardar permisos' }}
+            </button>
+        </div>
+    </footer>
+</article>

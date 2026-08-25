@@ -1,0 +1,59 @@
+<section class="dash-grid" aria-label="Resumen del despacho">
+    @for (card of estadisticas; track card.label) {
+        <article class="stat-card">
+            <h3 class="stat-label">{{ card.label }}</h3>
+            <div class="stat-value">{{ card.valor }}</div>
+            <span [class]="'stat-badge' + (card.tono ? ' ' + card.tono : '')">{{ card.detalle }}</span>
+        </article>
+    }
+</section>
+
+<section class="agenda-card" aria-label="Agenda semanal">
+    <header class="agenda-header">
+        <div>
+            <h2 class="agenda-title">Agenda Semanal</h2>
+            <span class="agenda-range">{{ rangoAgenda() }}</span>
+        </div>
+        <button type="button" class="agenda-today" (click)="irHoy()">HOY</button>
+    </header>
+
+    <div class="week-scroll">
+        <div class="week-grid">
+            <div class="week-gutter-head"></div>
+
+            @for (dia of dias; track dia.etiqueta) {
+                <div class="week-day-head" [class.today]="dia.esHoy">{{ dia.etiqueta }}</div>
+            }
+
+            @for (hora of horas; track hora; let h = $index) {
+                <div class="week-time-label" [style.gridRow]="h + 2">{{ hora }}</div>
+
+                @if (h === 0) {
+                    @for (dia of dias; track dia.etiqueta; let d = $index) {
+                        <div class="day-col" [style.gridRow]="'2 / 7'" [style.gridColumn]="d + 2"
+                            [attr.data-hoy]="dia.esHoy ? '1' : null">
+                            @for (ev of eventosDeDia(d); track ev.id) {
+                                <div class="cal-event" [class.outline]="ev.outline"
+                                    [style.top.%]="ev.arriba" [style.height.%]="ev.alto"
+                                    [style.background]="ev.colorEvento ?? null"
+                                    title="Ver detalle" (click)="verEvento(ev)">
+                                    <span class="ev-kind">{{ ev.tipoEvento }}</span>
+                                    <span class="ev-title">{{ ev.titulo }}</span>
+                                    <span class="ev-meta">{{ ev.ubicacion }}</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            }
+        </div>
+    </div>
+</section>
+
+<button type="button" class="fab" aria-label="Nuevo Expediente" (click)="irAExpedientes()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+    </svg>
+    <span>Nuevo Expediente</span>
+</button>

@@ -1,0 +1,135 @@
+@LexControlApi_HostAddress = http://localhost:5181
+@ContentType = application/json
+
+### 1. LOGIN (admin / admin123)
+# Copia el valor de "token" de la respuesta en la variable @Token de abajo
+POST {{LexControlApi_HostAddress}}/api/auth/login
+Content-Type: {{ContentType}}
+
+{
+  "usuario": "admin",
+  "contrasena": "admin123"
+}
+
+###
+
+@Token = pega_aqui_el_token_del_login
+
+### 2. PERFIL del usuario autenticado
+GET {{LexControlApi_HostAddress}}/api/perfil
+Authorization: Bearer {{Token}}
+
+###
+
+### 3. ACTUALIZAR PERFIL propio
+PUT {{LexControlApi_HostAddress}}/api/perfil
+Authorization: Bearer {{Token}}
+Content-Type: {{ContentType}}
+
+{
+  "nombreCompleto": "Administrador del Sistema",
+  "email": "admin@bufete.com",
+  "telefono": "+502 5555-0111"
+}
+
+###
+
+### 4. CAMBIO DE CONTRASEÑA propia
+PUT {{LexControlApi_HostAddress}}/api/perfil/contrasena
+Authorization: Bearer {{Token}}
+Content-Type: {{ContentType}}
+
+{
+  "contrasenaActual": "admin123",
+  "contrasenaNueva": "Nueva#Clave2026",
+  "confirmacion": "Nueva#Clave2026"
+}
+
+###
+
+### 5. LISTAR USUARIOS (solo Administrador)
+GET {{LexControlApi_HostAddress}}/api/usuarios
+Authorization: Bearer {{Token}}
+
+###
+
+### 6. FILTRAR usuarios por nombre
+GET {{LexControlApi_HostAddress}}/api/usuarios?filtroNombre=admin&activo=true
+Authorization: Bearer {{Token}}
+
+###
+
+### 7. ROLES disponibles (para el formulario)
+GET {{LexControlApi_HostAddress}}/api/usuarios/roles
+Authorization: Bearer {{Token}}
+
+###
+
+### 8. CREAR usuario (contraseña: mín. 8, con número y carácter especial)
+POST {{LexControlApi_HostAddress}}/api/usuarios
+Authorization: Bearer {{Token}}
+Content-Type: {{ContentType}}
+
+{
+  "nombreCompleto": "Lic. Daniela Orozco de León",
+  "email": "daniela@bufete.com",
+  "telefono": "+502 5555-0122",
+  "cuenta": "daniela",
+  "rolId": 2,
+  "contrasena": "Secreta#2026"
+}
+
+###
+
+### 9. EDITAR usuario (contraseña vacía = conservar la actual)
+PUT {{LexControlApi_HostAddress}}/api/usuarios/2
+Authorization: Bearer {{Token}}
+Content-Type: {{ContentType}}
+
+{
+  "nombreCompleto": "Lic. Daniela Orozco de León",
+  "email": "daniela.orozco@bufete.com",
+  "telefono": "+502 5555-0122",
+  "cuenta": "daniela",
+  "rolId": 2,
+  "contrasena": ""
+}
+
+###
+
+### 10. DESACTIVAR cuenta (rechaza administradores con 409)
+PUT {{LexControlApi_HostAddress}}/api/usuarios/2/estado
+Authorization: Bearer {{Token}}
+Content-Type: {{ContentType}}
+
+{
+  "activo": false
+}
+
+###
+
+### 11. REACTIVAR cuenta
+PUT {{LexControlApi_HostAddress}}/api/usuarios/2/estado
+Authorization: Bearer {{Token}}
+Content-Type: {{ContentType}}
+
+{
+  "activo": true
+}
+
+###
+
+### 12. DESBLOQUEAR cuenta (tras 5 intentos fallidos)
+POST {{LexControlApi_HostAddress}}/api/usuarios/2/desbloquear
+Authorization: Bearer {{Token}}
+
+###
+
+### 13. LOGIN con credenciales inválidas (espera 401)
+POST {{LexControlApi_HostAddress}}/api/auth/login
+Content-Type: {{ContentType}}
+
+{
+  "usuario": "admin",
+  "contrasena": "incorrecta"
+}

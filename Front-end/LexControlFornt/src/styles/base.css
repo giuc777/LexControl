@@ -1,0 +1,21 @@
+/* Reset base portado del prototipo (Pototipo/css). */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+/* Adaptación SPA: los hosts de Angular son elementos custom (inline por
+   defecto); se normalizan a block para que el layout del prototipo aplique. */
+app-root,
+app-shell,
+app-toast {
+    display: block;
+}

@@ -1,0 +1,58 @@
+<div class="pattern-overlay" aria-hidden="true"></div>
+
+<main class="login-container">
+    <section class="login-card" aria-labelledby="login-title">
+
+        <header class="branding-header">
+            <h1 class="brand-title" id="login-title">LexControl</h1>
+            <p class="brand-subtitle">Sistema de Gestión Legal</p>
+        </header>
+
+        @if (estado() === 'exito') {
+            <div class="alert alert-success" role="status">
+                Sesión iniciada correctamente. Bienvenido al sistema LexControl.
+            </div>
+        }
+
+        @if (mensajeError()) {
+            <div class="alert alert-error" role="alert">{{ mensajeError() }}</div>
+        }
+
+        <form class="login-form" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+            <div class="field">
+                <label for="usuario">Usuario</label>
+                <div class="input-wrap">
+                    <input type="text" id="usuario" formControlName="usuario" placeholder="Nombre de usuario"
+                        autocomplete="username" autocapitalize="none" spellcheck="false"
+                        [class.input-error]="intentado() && controlUsuario.invalid">
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="password">Contraseña</label>
+                <div class="input-wrap">
+                    <input type="password" id="password" formControlName="contrasena" placeholder="••••••••"
+                        autocomplete="current-password"
+                        [class.input-error]="intentado() && controlContrasena.invalid">
+                </div>
+            </div>
+
+            <button class="btn-primary" type="submit" [disabled]="estado() !== 'idle'">
+                {{ etiquetaBoton }}
+            </button>
+        </form>
+
+        <footer class="secondary-footer">
+            <p>¿No tienes una cuenta? <a href="#" (click)="solicitarAcceso($event)">Solicitar acceso</a></p>
+        </footer>
+    </section>
+
+    <footer class="global-footer">
+        <p>© 2026 LexControl. Control de Audiencias y Trámites.</p>
+        <nav class="footer-links" aria-label="Enlaces legales">
+            <a href="#" (click)="solicitarAcceso($event)">Privacidad</a>
+            <a href="#" (click)="solicitarAcceso($event)">Términos</a>
+            <a href="#" (click)="solicitarAcceso($event)">Soporte</a>
+        </nav>
+    </footer>
+</main>

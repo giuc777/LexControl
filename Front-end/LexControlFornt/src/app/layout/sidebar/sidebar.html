@@ -1,0 +1,25 @@
+<div class="sidebar-brand">
+    <img src="img/LexControlIcon.png" alt="LexControl">
+    <div>
+        <div class="brand-name">LexControl</div>
+        <div class="brand-tag">Gestión Legal Centralizada</div>
+    </div>
+</div>
+
+<ul class="nav-list">
+    @for (item of items(); track item.ruta) {
+        <li class="nav-item" routerLinkActive="active">
+            <a [routerLink]="'/' + item.ruta">
+                <svg appIcono [appIcono]="item.icon" class="nav-icon"></svg>
+                <span>{{ item.label }}</span>
+            </a>
+        </li>
+    }
+</ul>
+
+<footer class="sidebar-footer">
+    <button type="button" class="btn-logout" (click)="cerrarSesion()">
+        <svg appIcono [appIcono]="iconoLogout" class="nav-icon"></svg>
+        <span>Cerrar Sesión</span>
+    </button>
+</footer>

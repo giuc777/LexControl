@@ -1,0 +1,23 @@
+<section class="page-header">
+    <div>
+        <span class="page-overline">Configuración</span>
+        <h1 class="page-title">Ajustes</h1>
+        <p class="page-desc">Perfil del usuario, preferencias, datos del bufete y seguridad del sistema.</p>
+    </div>
+</section>
+
+<section class="aj-grid" [class.aj-grid-uno]="!esAdmin()" aria-label="Perfil y preferencias">
+    <app-perfil-card />
+    @if (esAdmin()) {
+        <app-preferencias-card />
+    }
+</section>
+
+<div class="aj-stack">
+    @if (esAdmin()) {
+        <app-usuarios-card />
+        <app-permisos-card />
+        <app-bufete-card />
+    }
+    <app-seguridad-card />
+</div>

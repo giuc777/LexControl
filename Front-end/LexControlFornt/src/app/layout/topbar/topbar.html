@@ -1,0 +1,30 @@
+<div class="topbar-left">
+    <button type="button" class="btn-menu-toggle" aria-label="Abrir menú" (click)="menuToggle.emit()">
+        <svg appIcono [appIcono]="iconoMenu"></svg>
+    </button>
+
+    <div class="search-box">
+        <svg appIcono [appIcono]="iconoSearch"></svg>
+        <input type="search" placeholder="Buscar expedientes, clientes o audiencias..." aria-label="Buscar">
+    </div>
+</div>
+
+<div class="topbar-right">
+    @if (mostrarOj()) {
+        <a class="oj-chip" href="#" (click)="verPortalOj($event)">OJ ONLINE</a>
+        <span class="topbar-divider" aria-hidden="true"></span>
+    }
+
+    <button type="button" class="icon-btn" aria-label="Notificaciones" (click)="verNotificaciones()">
+        <svg appIcono [appIcono]="iconoBell"></svg>
+        <span class="badge-dot">3</span>
+    </button>
+
+    <div class="user-chip">
+        <div class="user-avatar">{{ iniciales() }}</div>
+        <div>
+            <div class="user-name">{{ auth.nombre() || 'Administrador' }}</div>
+            <div class="user-role">{{ auth.rol() }}</div>
+        </div>
+    </div>
+</div>

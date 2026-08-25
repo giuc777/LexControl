@@ -1,0 +1,59 @@
+<app-modal [titulo]="titulo" [abierto]="abierto()" ancho="min(580px,94vw)" (cerrado)="cerrar()">
+    <form class="modal-form" [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+        <div class="form-error" role="alert" [hidden]="!mensajeError()">{{ mensajeError() }}</div>
+
+        <div class="form-grid">
+            <div class="field full">
+                <label for="usuarioNombre">Nombre completo<span class="req"> *</span></label>
+                <input type="text" id="usuarioNombre" formControlName="nombreCompleto"
+                    maxlength="100" placeholder="Nombre como aparece en PERSONA">
+            </div>
+
+            <div class="field">
+                <label for="usuarioCuenta">Usuario<span class="req"> *</span></label>
+                <input type="text" id="usuarioCuenta" formControlName="cuenta"
+                    maxlength="50" placeholder="usuario de acceso" autocomplete="off">
+            </div>
+
+            <div class="field">
+                <label for="usuarioRol">Rol<span class="req"> *</span></label>
+                <select id="usuarioRol" formControlName="rolId">
+                    <option value="" disabled>Seleccione…</option>
+                    @for (rol of roles(); track rol.id) {
+                        <option [value]="rol.id">{{ rol.nombre }}</option>
+                    }
+                </select>
+            </div>
+
+            <div class="field full">
+                <label for="usuarioEmail">Correo electrónico<span class="req"> *</span></label>
+                <input type="email" id="usuarioEmail" formControlName="email"
+                    maxlength="100" placeholder="correo@bufete.com" autocomplete="off">
+            </div>
+
+            <div class="field full">
+                <label for="usuarioTelefono">Teléfono de contacto</label>
+                <input type="tel" id="usuarioTelefono" formControlName="telefono"
+                    maxlength="20" placeholder="+502 5XXX-XXXX" autocomplete="off">
+            </div>
+
+            <div class="field full">
+                <label for="usuarioContrasena">Contraseña<span class="req">{{ usuario() ? '' : ' *' }}</span></label>
+                <input type="password" id="usuarioContrasena" formControlName="contrasena"
+                    autocomplete="new-password"
+                    [placeholder]="usuario() ? 'Deje vacía para conservar la actual' : 'Min. 8 caracteres'">
+                <small class="aj-hint">
+                    <svg appIcono [appIcono]="iconoInfo"></svg>
+                    Debe incluir números y caracteres especiales.
+                </small>
+            </div>
+        </div>
+
+        <footer class="modal-footer">
+            <button type="button" class="btn-secondary" (click)="cerrar()">Cancelar</button>
+            <button type="submit" class="btn-primary" [disabled]="guardando()">
+                {{ guardando() ? 'Guardando…' : 'Guardar usuario' }}
+            </button>
+        </footer>
+    </form>
+</app-modal>

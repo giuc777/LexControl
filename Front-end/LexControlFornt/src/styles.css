@@ -1,0 +1,14 @@
+/* Estilos globales de LexControl — portados del prototipo (Pototipo/css).
+   Orden: reset base → tokens → layout de app → módulos.
+   Los estilos por página viven aquí (globales), no en los componentes,
+   para garantizar fidelidad 1:1 con el prototipo y respetar el budget
+   anyComponentStyle de angular.json (ver agents.md §10.2). */
+@import './styles/base.css';
+@import './styles/tokens.css';
+@import './styles/layout.css';
+@import './styles/login.css';
+/* Primitivas compartidas del prototipo (page-header, botones, tablas,
+   modales, fields) + estilos por módulo. Orden: primitivas → módulos. */
+@import './styles/modules/clientes.css';
+@import './styles/modules/dashboard.css';
+@import './styles/modules/ajustes.css';

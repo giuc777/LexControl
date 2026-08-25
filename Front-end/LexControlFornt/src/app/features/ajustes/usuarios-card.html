@@ -1,0 +1,111 @@
+<article class="aj-card">
+    <header class="aj-card-head aj-users-head">
+        <span class="aj-head-icon">
+            <svg appIcono [appIcono]="iconoUsuarios"></svg>
+        </span>
+        <div>
+            <h2 class="aj-card-title">Usuarios del Sistema</h2>
+            <p class="aj-card-sub">Cuentas de acceso (USUARIO · PERSONA · ROL).</p>
+        </div>
+        <button type="button" class="btn-primary" (click)="abrirNuevo()">
+            <svg appIcono [appIcono]="iconoPlus"></svg>
+            Nuevo usuario
+        </button>
+    </header>
+
+    <div class="filters-bar" [formGroup]="filtros">
+        <div class="filter-field filter-buscar">
+            <label class="filter-label" for="filtroNombreU">Buscar</label>
+            <input type="search" id="filtroNombreU" formControlName="filtroNombre"
+                placeholder="Nombre completo…" autocomplete="off">
+        </div>
+
+        <div class="filter-field">
+            <label class="filter-label" for="filtroRolU">Rol</label>
+            <select class="filter-select" id="filtroRolU" formControlName="rolId">
+                <option value="">Todos</option>
+                @for (rol of roles(); track rol.id) {
+                    <option [value]="rol.id">{{ rol.nombre }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="filter-field">
+            <label class="filter-label" for="filtroActivoU">Estado</label>
+            <select class="filter-select" id="filtroActivoU" formControlName="activo">
+                <option value="">Todos</option>
+                <option value="true">Activos</option>
+                <option value="false">Inactivos</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-scroll">
+        @if (cargando()) {
+            <div class="empty-state"><span>Cargando usuarios…</span></div>
+        } @else if (usuarios(); as lista) {
+            @if (lista.length === 0) {
+                <div class="empty-state"><span>No hay usuarios que coincidan con los filtros.</span></div>
+            } @else {
+                <table class="data-table aj-users-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Nombre</th>
+                            <th>Rol</th>
+                            <th>Correo</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (u of lista; track u.id) {
+                            <tr [class.fila-inactiva]="!u.activo">
+                                <td class="aj-u-usuario">{{ u.usuario }}</td>
+                                <td>{{ u.nombreCompleto }}</td>
+                                <td>
+                                    <span class="aj-pill" [style.background]="colorDeRol(u.rol).bg"
+                                        [style.color]="colorDeRol(u.rol).fg">{{ u.rol }}</span>
+                                </td>
+                                <td class="aj-u-email">{{ u.email }}</td>
+                                <td>
+                                    @if (u.bloqueado) {
+                                        <span class="aj-pill aj-pill-off">Bloqueado</span>
+                                    } @else if (u.activo) {
+                                        <span class="aj-pill aj-pill-ok">Activo</span>
+                                    } @else {
+                                        <span class="aj-pill aj-pill-off">Inactivo</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="aj-u-acciones">
+                                        <button type="button" class="btn-link" (click)="abrirEdicion(u)">Editar</button>
+
+                                        @if (u.bloqueado) {
+                                            <button type="button" class="btn-link" [disabled]="procesando()"
+                                                (click)="desbloquear(u)">Desbloquear</button>
+                                        } @else {
+                                            <button type="button" class="aj-toggle" [class.activo]="u.activo"
+                                                [attr.aria-pressed]="u.activo" title="Activar / desactivar"
+                                                [disabled]="procesando()" (click)="alternarActivo(u)">
+                                                <span class="aj-toggle-track"><span class="aj-toggle-thumb"></span></span>
+                                                <span class="aj-toggle-label">{{ u.activo ? 'Activo' : 'Inactivo' }}</span>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+    </div>
+
+    <footer class="aj-card-foot aj-users-foot">
+        <span class="aj-card-sub">Las cuentas desactivadas no pueden iniciar sesión; el borrado siempre es lógico.</span>
+    </footer>
+</article>
+
+<app-usuario-modal [abierto]="modalAbierto()" [roles]="roles()" [usuario]="editando()"
+    (cerrado)="cerrarModal()" (guardado)="alGuardar()" />

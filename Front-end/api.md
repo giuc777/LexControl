@@ -404,5 +404,187 @@ const perfil = await resPerfil.json();
 - **Fechas**: siempre ISO 8601 UTC (`2026-08-24T15:30:00Z`).
 - **JSON**: propiedades en camelCase; el binding acepta camelCase o PascalCase en el body entrante.
 - **Borrado lógico**: no hay `DELETE`; se desactiva con `PUT .../estado { "activo": false }`.
-- **Endpoints futuros** (clientes, expedientes, agenda, reportes): seguirán este mismo sobre y patrón de rutas REST.
+- **Endpoints futuros** (expedientes, agenda, reportes): seguirán este mismo sobre y patrón de rutas REST.
 - **Menú por rol**: usar `GET /api/permisos/{rolId}` (o el claim `rol_id` del token) para filtrar los módulos visibles al iniciar sesión.
+
+---
+
+### 4.5 Clientes — `/api/clientes` (requiere token)
+
+CRUD completo de clientes del bufete. Datos de PERSONA + CLIENTE en transacción.
+
+#### `GET /api/clientes`
+
+Listado paginado con filtros opcionales (query string).
+
+| Parámetro | Tipo | Descripción |
+|---|---|---|
+| `filtroNombre` | string? | Busca por nombre completo (LIKE) |
+| `filtroEstado` | bool? | `true` = solo activos, `false` = solo inactivos, omitir = todos |
+| `filtroTipo` | string? | Filtra por tipo de cliente (ej. "Particular", "Empresa") |
+| `pagina` | int? | Página (default: 1) |
+| `tamanioPagina` | int? | Registros por página (default: 20) |
+
+Ejemplo: `GET /api/clientes?filtroNombre=Morales&filtroEstado=true&pagina=1&tamanioPagina=10`
+
+**200 OK** → `data` es un array + header `X-Total-Count`:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "nombreCompleto": "Carlos Morales Ortiz",
+      "dpi": "2983123450101",
+      "telefonoPrincipal": "+502 5555-0123",
+      "emailPrincipal": "carlos.mo@email.com",
+      "direccion": "Calle Principal 5-20, Zona 1",
+      "fechaNacimiento": null,
+      "genero": null,
+      "telefonoSecundario": null,
+      "emailSecundario": null,
+      "tipoCliente": "Particular",
+      "notas": "Cliente referido por recomendación.",
+      "activo": true,
+      "fechaCreacion": "2026-08-31T22:54:06",
+      "totalExpedientes": 2,
+      "expedientesActivos": 1,
+      "ultimaActividad": "2026-08-15"
+    }
+  ],
+  "error": null
+}
+```
+
+#### `GET /api/clientes/estadisticas`
+
+Estadísticas para el bento grid. **200 OK**:
+
+```json
+{
+  "success": true,
+  "data": {
+    "totalClientes": 45,
+    "totalInactivos": 3,
+    "totalExpedientesActivos": 12,
+    "totalExpedientes": 28
+  }
+}
+```
+
+#### `GET /api/clientes/{id}`
+
+Detalle de un cliente (sin campos de paginación ni conteos). **200 OK**:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "nombreCompleto": "Carlos Morales Ortiz",
+    "dpi": "2983123450101",
+    "telefonoPrincipal": "+502 5555-0123",
+    "emailPrincipal": "carlos.mo@email.com",
+    "direccion": "Calle Principal 5-20, Zona 1",
+    "fechaNacimiento": "1985-03-12",
+    "genero": "M",
+    "telefonoSecundario": "+502 5555-0456",
+    "emailSecundario": "carlos.personal@email.com",
+    "tipoCliente": "Particular",
+    "notas": "Cliente referido por recomendación.",
+    "activo": true,
+    "fechaCreacion": "2026-08-31T22:54:06"
+  }
+}
+```
+
+**Errores**: `404` no existe.
+
+#### `GET /api/clientes/{id}/expedientes`
+
+Expedientes de un cliente específico (para la página de detalle). **200 OK**:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "numero": "CIV-2026-0045",
+      "fechaIngreso": "2026-01-15",
+      "descripcion": "Demanda por incumplimiento de contrato.",
+      "rama": "Civil",
+      "estado": "Activo",
+      "estadoColor": "#2ECC71",
+      "juzgado": "Juzgado de Primera Instancia Civil de Sololá",
+      "ultimaActuacion": "Audiencia de conciliación programada",
+      "fechaUltimaActuacion": "2026-08-10"
+    }
+  ]
+}
+```
+
+#### `POST /api/clientes` (solo rol Administrador)
+
+Crea Persona + Cliente en transacción. **201 Created** con el cliente creado.
+
+**Body**
+
+```json
+{
+  "nombreCompleto": "Carlos Morales Ortiz",
+  "dpi": "2983123450101",
+  "telefonoPrincipal": "+502 5555-0123",
+  "emailPrincipal": "carlos.mo@email.com",
+  "direccion": "Calle Principal 5-20, Zona 1, Panajachel",
+  "telefonoSecundario": null,
+  "emailSecundario": null,
+  "tipoCliente": "Particular",
+  "notas": "Cliente referido por recomendación."
+}
+```
+
+| Campo | Obligatorio | Notas |
+|---|---|---|
+| `nombreCompleto` | Sí | Máx. 100 caracteres |
+| `dpi` | No | Máx. 20 caracteres |
+| `telefonoPrincipal` | No | Máx. 20 caracteres |
+| `emailPrincipal` | No | Debe ser email válido |
+| `direccion` | No | Máx. 200 caracteres |
+| `tipoCliente` | No | Default: "Particular" |
+| `notas` | No | Máx. 500 caracteres |
+
+**Errores**: `400` validaciones · `409` duplicado.
+
+#### `PUT /api/clientes/{id}` (solo rol Administrador)
+
+Actualiza datos del cliente y su Persona asociada. Usa patrón ISNULL (NULL = conservar actual). **200 OK** con el cliente actualizado.
+
+**Body** (igual que crear, todos los campos opcionales excepto `nombreCompleto`):
+
+```json
+{
+  "nombreCompleto": "Carlos Morales Ortiz",
+  "dpi": "2983123450101",
+  "telefonoPrincipal": "+502 5555-9999",
+  "emailPrincipal": "carlos.nuevo@email.com",
+  "direccion": "Nueva dirección 123",
+  "tipoCliente": "Empresa",
+  "notas": "Cliente actualizado"
+}
+```
+
+**Errores**: `404` · `409` duplicado.
+
+#### `PUT /api/clientes/{id}/estado` (solo rol Administrador)
+
+Activa o desactiva un cliente (borrado lógico). **204 No Content**.
+
+**Body**
+
+```json
+{ "activo": false }
+```
+
+**Errores**: `404` no existe.

@@ -1,0 +1,125 @@
+@if (cliente(); as cli) {
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+        <a routerLink="/clientes">Clientes</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>{{ cli.nombreCompleto }}</span>
+    </nav>
+
+    <h1 class="page-title">Detalle del Cliente</h1>
+
+    <section class="info-card">
+        <div class="info-head">
+            <span class="avatar avatar-lg"
+                [style.background]="colorAvatar(cli.nombreCompleto)">
+                {{ iniciales(cli.nombreCompleto) }}
+            </span>
+            <div class="info-head-main">
+                <div class="info-head-titles">
+                    <h2 class="info-nombre">{{ cli.nombreCompleto }}</h2>
+                    <div class="info-badges">
+                        <span class="badge badge-activo"
+                            [class.inactivo]="!cli.activo">
+                            {{ cli.activo ? 'ACTIVO' : 'INACTIVO' }}
+                        </span>
+                        <span class="badge badge-tipo">{{ cli.tipoCliente || 'Particular' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <dl class="info-dl">
+            <div class="info-item">
+                <dt class="info-dt">DPI</dt>
+                <dd class="info-dd">{{ formatearDpi(cli.dpi) }}</dd>
+            </div>
+            <div class="info-item">
+                <dt class="info-dt">Teléfono principal</dt>
+                <dd class="info-dd">{{ cli.telefonoPrincipal || '—' }}</dd>
+            </div>
+            <div class="info-item">
+                <dt class="info-dt">Email principal</dt>
+                <dd class="info-dd">{{ cli.emailPrincipal || '—' }}</dd>
+            </div>
+            <div class="info-item">
+                <dt class="info-dt">Dirección</dt>
+                <dd class="info-dd">{{ cli.direccion || '—' }}</dd>
+            </div>
+            <div class="info-item">
+                <dt class="info-dt">Teléfono secundario</dt>
+                <dd class="info-dd">{{ cli.telefonoSecundario || '—' }}</dd>
+            </div>
+            <div class="info-item">
+                <dt class="info-dt">Email secundario</dt>
+                <dd class="info-dd">{{ cli.emailSecundario || '—' }}</dd>
+            </div>
+            <div class="info-item">
+                <dt class="info-dt">Fecha de nacimiento</dt>
+                <dd class="info-dd">{{ formatearFecha(cli.fechaNacimiento) }}</dd>
+            </div>
+            <div class="info-item">
+                <dt class="info-dt">Género</dt>
+                <dd class="info-dd">{{ generoTexto(cli.genero) }}</dd>
+            </div>
+            <div class="info-item">
+                <dt class="info-dt">Notas</dt>
+                <dd class="info-dd">{{ cli.notas || '—' }}</dd>
+            </div>
+        </dl>
+
+        <div class="info-actions">
+            <button type="button" class="btn-secondary" (click)="abrirModalEdicion()">Editar cliente</button>
+            <button type="button" class="btn-primary" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Nuevo expediente
+            </button>
+        </div>
+    </section>
+
+    <section class="panel" aria-label="Expedientes del cliente">
+        <header class="panel-head">
+            <h2 class="panel-title">Expedientes de {{ cli.nombreCompleto }}</h2>
+        </header>
+        <div class="table-scroll">
+            <table class="data-table data-table-exp">
+                <thead>
+                    <tr>
+                        <th>No. EXPEDIENTE</th>
+                        <th>RAMA</th>
+                        <th>FECHA DE INGRESO</th>
+                        <th>ESTADO</th>
+                        <th>JUZGADO</th>
+                        <th>ÚLTIMA ACTUACIÓN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (expedientes().length === 0) {
+                        <tr>
+                            <td colspan="6">
+                                <app-empty-state mensaje="Este cliente no tiene expedientes registrados." />
+                            </td>
+                        </tr>
+                    }
+                    @for (exp of expedientes(); track exp.id) {
+                        <tr>
+                            <td class="cell-id">{{ exp.numero }}</td>
+                            <td>{{ exp.rama }}</td>
+                            <td>{{ formatearFecha(exp.fechaIngreso) }}</td>
+                            <td>
+                                <app-badge-estado [texto]="exp.estado"
+                                    [variante]="varianteEstado(exp.estado)" />
+                            </td>
+                            <td>{{ exp.juzgado || '—' }}</td>
+                            <td>{{ exp.ultimaActuacion || '—' }}</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <app-cliente-modal [abierto]="modalAbierto()" modo="editar" [cliente]="cli"
+        (cerrado)="cerrarModal()" (guardado)="alGuardar($event)" />
+}

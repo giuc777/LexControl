@@ -23,6 +23,16 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/dashboard/dashboard-page').then(m => m.DashboardPage)
             },
             {
+                path: 'clientes',
+                canActivate: [moduloGuard('clientes')],
+                loadComponent: () => import('./features/clientes/clientes-page').then(m => m.ClientesPage)
+            },
+            {
+                path: 'clientes/:id',
+                canActivate: [moduloGuard('clientes')],
+                loadComponent: () => import('./features/clientes/cliente-detalle-page').then(m => m.ClienteDetallePage)
+            },
+            {
                 path: 'ajustes',
                 canActivate: [moduloGuard('ajustes')],
                 loadComponent: () => import('./features/ajustes/ajustes-page').then(m => m.AjustesPage)
@@ -34,7 +44,7 @@ export const routes: Routes = [
             },
             /* Los demás módulos se registran con la página provisional;
                cada fase del plan reemplazará su loadComponent. */
-            ...MODULOS.filter(m => m.key !== 'dashboard' && m.key !== 'ajustes' && m.key !== 'reportes').map(m => ({
+            ...MODULOS.filter(m => m.key !== 'dashboard' && m.key !== 'ajustes' && m.key !== 'reportes' && m.key !== 'clientes').map(m => ({
                 path: m.ruta,
                 canActivate: [moduloGuard(m.key)],
                 loadComponent: () =>

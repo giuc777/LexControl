@@ -1,0 +1,81 @@
+<app-modal [titulo]="titulo()" [abierto]="abierto" (cerrado)="cerrado.emit()">
+    <form class="modal-form" (submit)="alEnviar($event)" novalidate>
+        <fieldset>
+            <legend>Datos personales</legend>
+            <div class="form-grid">
+                <div class="field full">
+                    <label for="cliNombreCompleto">Nombre completo <span class="req">*</span></label>
+                    <input type="text" id="cliNombreCompleto" [(ngModel)]="nombre" name="nombre"
+                        maxlength="100" placeholder="Ej. Carlos Morales Ortiz">
+                </div>
+                <div class="field">
+                    <label for="cliDpi">DPI <span class="req">*</span></label>
+                    <input type="text" id="cliDpi" [(ngModel)]="dpi" name="dpi"
+                        inputmode="numeric" maxlength="13" placeholder="2983123450101">
+                </div>
+                <div class="field">
+                    <label for="cliFechaNacimiento">Fecha de nacimiento</label>
+                    <input type="date" id="cliFechaNacimiento" [(ngModel)]="fechaNacimiento" name="fechaNacimiento">
+                </div>
+                <div class="field">
+                    <label for="cliGenero">Género</label>
+                    <select id="cliGenero" [(ngModel)]="genero" name="genero">
+                        <option value="">Seleccionar</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
+                        <option value="O">Otro</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="cliTipoCliente">Tipo de cliente</label>
+                    <select id="cliTipoCliente" [(ngModel)]="tipoCliente" name="tipoCliente">
+                        <option value="Particular">Particular</option>
+                        <option value="Empresa">Empresa</option>
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Contacto</legend>
+            <div class="form-grid">
+                <div class="field">
+                    <label for="cliTelefonoPrincipal">Teléfono principal <span class="req">*</span></label>
+                    <input type="tel" id="cliTelefonoPrincipal" [(ngModel)]="telefonoPrincipal"
+                        name="telefonoPrincipal" placeholder="+502 5555-0123">
+                </div>
+                <div class="field">
+                    <label for="cliEmailPrincipal">Email principal <span class="req">*</span></label>
+                    <input type="email" id="cliEmailPrincipal" [(ngModel)]="emailPrincipal"
+                        name="emailPrincipal" placeholder="carlos@email.com">
+                </div>
+                <div class="field">
+                    <label for="cliTelefonoSecundario">Teléfono secundario</label>
+                    <input type="tel" id="cliTelefonoSecundario" [(ngModel)]="telefonoSecundario"
+                        name="telefonoSecundario" placeholder="+502 5555-0000">
+                </div>
+                <div class="field">
+                    <label for="cliEmailSecundario">Email secundario</label>
+                    <input type="email" id="cliEmailSecundario" [(ngModel)]="emailSecundario"
+                        name="emailSecundario" placeholder="contacto@email.com">
+                </div>
+                <div class="field full">
+                    <label for="cliDireccion">Dirección</label>
+                    <input type="text" id="cliDireccion" [(ngModel)]="direccion" name="direccion"
+                        maxlength="200" placeholder="Calle Principal 5-20, Zona 1, Panajachel">
+                </div>
+                <div class="field full">
+                    <label for="cliNotas">Notas</label>
+                    <textarea id="cliNotas" [(ngModel)]="notas" name="notas"
+                        rows="3" maxlength="500" placeholder="Observaciones del cliente"></textarea>
+                </div>
+            </div>
+        </fieldset>
+        @if (error()) {
+            <p class="form-error" role="alert">{{ error() }}</p>
+        }
+        <footer class="modal-footer">
+            <button type="button" class="btn-secondary" (click)="cerrado.emit()">Cancelar</button>
+            <button type="submit" class="btn-primary">{{ textoBoton() }}</button>
+        </footer>
+    </form>
+</app-modal>

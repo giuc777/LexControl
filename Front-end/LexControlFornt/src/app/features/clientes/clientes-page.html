@@ -1,0 +1,99 @@
+<app-page-header titulo="Clientes del Bufete" subtitulo="Gestione la base de datos de clientes y expedientes legales.">
+    <button type="button" class="btn-primary" (click)="abrirModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Nuevo Cliente
+    </button>
+</app-page-header>
+
+@if (estadisticas(); as stats) {
+    <section class="bento-grid" aria-label="Resumen de clientes">
+        <app-stat-card etiqueta="Total Clientes" [valor]="stats.totalClientes"
+            [badge]="stats.totalClientes + ' activos'" [advertencia]="stats.totalClientes === 0" />
+        <app-stat-card etiqueta="Casos Activos" [valor]="stats.totalExpedientesActivos"
+            badge="En seguimiento" [advertencia]="stats.totalExpedientesActivos === 0" />
+    </section>
+}
+
+<section class="panel" aria-label="Listado de clientes">
+    <form class="filters-bar">
+        <label class="filter-field">
+            <span class="filter-label">Estado:</span>
+            <select class="filter-select" [ngModel]="filtroEstado" name="filtroEstado"
+                (ngModelChange)="alCambiarFiltroEstado($event)">
+                <option value="">Todos</option>
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+            </select>
+        </label>
+    </form>
+
+    <div class="table-scroll">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>NOMBRE COMPLETO</th>
+                    <th>DPI / NIT</th>
+                    <th>CONTACTO</th>
+                    <th>EXPEDIENTES</th>
+                    <th>ÚLTIMA ACTIVIDAD</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (clientes().length === 0) {
+                    <tr>
+                        <td colspan="6">
+                            <app-empty-state mensaje="No se encontraron clientes con los filtros seleccionados." />
+                        </td>
+                    </tr>
+                }
+                @for (cliente of clientes(); track cliente.id) {
+                    <tr class="row-clickable" (click)="irADetalle(cliente.id)">
+                        <td class="cell-id">{{ cliente.id }}</td>
+                        <td>
+                            <div class="client-cell">
+                                <span class="avatar"
+                                    [style.background]="colorAvatar(cliente.nombreCompleto)">
+                                    {{ iniciales(cliente.nombreCompleto) }}
+                                </span>
+                                <div class="client-info">
+                                    <span class="client-name">{{ cliente.nombreCompleto }}</span>
+                                    <span class="client-sub">{{ cliente.tipoCliente || 'Particular' }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="cell-dpi">{{ formatearDpi(cliente.dpi) }}</span>
+                        </td>
+                        <td>
+                            <div class="contact-cell">
+                                <span>{{ cliente.telefonoPrincipal || '—' }}</span>
+                                <span class="contact-email">{{ cliente.emailPrincipal || '—' }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="exp-badges">
+                                <app-badge-estado [texto]="(cliente.expedientesActivos || 0) + ' Activos'" variante="activo" />
+                                <app-badge-estado [texto]="(cliente.totalExpedientes || 0) + ' Total'" variante="total" />
+                            </div>
+                        </td>
+                        <td>
+                            <div class="activity-cell">
+                                <span>{{ formatearFecha(cliente.ultimaActividad) }}</span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <app-paginacion [total]="total()" [paginaActual]="paginaActual()"
+        [tamanioPagina]="tamanioPagina" (paginar)="alPaginar($event)" />
+</section>
+
+<app-cliente-modal [abierto]="modalAbierto()" modo="nuevo"
+    (cerrado)="cerrarModal()" (guardado)="alGuardar($event)" />

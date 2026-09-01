@@ -43,7 +43,7 @@ public class PermisosController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Guardar(int rolId, PermisoGuardarDto solicitud)
     {
-        await _permisoService.GuardarRolAsync(rolId, solicitud, User.ObtenerUsuarioId());
+        await _permisoService.GuardarRolAsync(rolId, solicitud);
         return NoContent();
     }
 }

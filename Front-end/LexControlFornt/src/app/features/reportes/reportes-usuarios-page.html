@@ -1,0 +1,228 @@
+<!-- page-header -->
+<div class="page-header">
+    <div>
+        <span class="page-overline">Reportes</span>
+        <h1 class="page-title">Reporte de Usuarios</h1>
+        <p class="page-subtitle">Resumen de actividad y estado del sistema</p>
+    </div>
+    <div class="page-actions">
+        <button class="rep-export-btn" (click)="exportarPDF()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Exportar PDF
+        </button>
+    </div>
+</div>
+
+<!-- Stat cards -->
+<section class="rep-stats">
+    <article class="rep-stat">
+        <span class="rep-stat-label">Total Usuarios</span>
+        <span class="rep-stat-value">{{ total() }}</span>
+        <span class="rep-stat-badge info">Sistema completo</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Activos</span>
+        <span class="rep-stat-value">{{ activos() }}</span>
+        <span class="rep-stat-badge ok">En uso</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Inactivos</span>
+        <span class="rep-stat-value">{{ inactivos() }}</span>
+        @if (inactivos() > 0) {
+            <span class="rep-stat-badge warn">Desactivados</span>
+        } @else {
+            <span class="rep-stat-badge ok">Ninguno</span>
+        }
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Bloqueados</span>
+        <span class="rep-stat-value">{{ bloqueados() }}</span>
+        @if (bloqueados() > 0) {
+            <span class="rep-stat-badge danger">Requiere atención</span>
+        } @else {
+            <span class="rep-stat-badge ok">Ninguno</span>
+        }
+    </article>
+</section>
+
+<!-- Grid: Roles + Últimos accesos -->
+<section class="rep-grid">
+
+    <!-- Usuarios por Rol -->
+    <article class="rep-panel aj-card rep-c5">
+        <div class="aj-card-head">
+            <div class="aj-head-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+            </div>
+            <h2 class="aj-card-title">Usuarios por Rol</h2>
+        </div>
+        <div class="rep-progress-list">
+            @for (rol of porRol(); track rol.nombre) {
+                <div class="rep-progress-row">
+                    <div class="rep-progress-head">
+                        <span class="rep-progress-nombre">
+                            <span class="rep-dot" [style.background]="rol.color"></span>
+                            {{ rol.nombre }}
+                        </span>
+                        <span class="rep-progress-val">
+                            {{ rol.cantidad }} <small>({{ rol.porcentaje }}%)</small>
+                        </span>
+                    </div>
+                    <div class="rep-progress-track">
+                        <div class="rep-progress-fill" [style.width.%]="rol.porcentaje" [style.background]="rol.color"></div>
+                    </div>
+                </div>
+            }
+            @if (porRol().length === 0) {
+                <div class="rep-empty">Sin datos disponibles</div>
+            }
+        </div>
+    </article>
+
+    <!-- Últimos Accesos -->
+    <article class="rep-panel aj-card rep-c7">
+        <div class="aj-card-head">
+            <div class="aj-head-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+            </div>
+            <h2 class="aj-card-title">Últimos Accesos</h2>
+            <span class="rep-chip">Top 10</span>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="data-table rep-usuarios-table">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Último Acceso</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (u of ultimosAccesos(); track u.cuenta) {
+                        <tr>
+                            <td>
+                                <div class="rep-usuario-cell">
+                                    <div class="rep-usuario-avatar" [style.background]="u.colorRol">
+                                        {{ u.iniciales }}
+                                    </div>
+                                    <div class="rep-usuario-info">
+                                        <span class="rep-usuario-nombre">{{ u.nombre }}</span>
+                                        <span class="rep-usuario-cuenta">{{ u.cuenta }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="pill" [style.background]="u.colorRol + '18'" [style.color]="u.colorRol" [style.border]="'1px solid ' + u.colorRol + '40'">{{ u.rol }}</span>
+                            </td>
+                            <td class="rep-fecha">{{ u.ultimoAccesoFormato }}</td>
+                            <td>
+                                @if (u.activo) {
+                                    <span class="pill pill-activo">Activo</span>
+                                } @else {
+                                    <span class="pill pill-finalizado">Inactivo</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (ultimosAccesos().length === 0) {
+                        <tr><td colspan="4" class="empty-state">Sin datos de accesos</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+</section>
+
+<!-- Tabla completa de usuarios -->
+<section class="aj-card" style="margin-top: 22px;">
+    <div class="aj-card-head">
+        <div class="aj-head-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+            </svg>
+        </div>
+        <h2 class="aj-card-title">Todos los Usuarios</h2>
+        <span class="rep-chip">{{ total() }} registros</span>
+    </div>
+    <div style="overflow-x: auto;">
+        <table class="data-table rep-usuarios-table">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Correo</th>
+                    <th>Estado</th>
+                    <th>Bloqueado</th>
+                    <th>Creado</th>
+                    <th>Último Acceso</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (u of usuariosTabla(); track u.id) {
+                    <tr>
+                        <td>
+                            <div class="rep-usuario-cell">
+                                <div class="rep-usuario-avatar" [style.background]="u.colorRol">
+                                    {{ u.iniciales }}
+                                </div>
+                                <div class="rep-usuario-info">
+                                    <span class="rep-usuario-nombre">{{ u.nombreCompleto }}</span>
+                                    <span class="rep-usuario-cuenta">{{ u.usuario }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="pill" [style.background]="u.colorRol + '18'" [style.color]="u.colorRol" [style.border]="'1px solid ' + u.colorRol + '40'">{{ u.rol }}</span>
+                        </td>
+                        <td>{{ u.email }}</td>
+                        <td>
+                            @if (u.activo) {
+                                <span class="pill pill-activo">Activo</span>
+                            } @else {
+                                <span class="pill pill-finalizado">Inactivo</span>
+                            }
+                        </td>
+                        <td>
+                            @if (u.bloqueado) {
+                                <span class="pill" style="background: #fdecec; color: #b0322a;">Bloqueado</span>
+                            } @else {
+                                <span class="pill pill-activo">No</span>
+                            }
+                        </td>
+                        <td class="rep-fecha">{{ u.fechaCreacionFormato }}</td>
+                        <td class="rep-fecha">{{ u.ultimoAccesoFormato }}</td>
+                    </tr>
+                }
+                @if (usuariosTabla().length === 0) {
+                    <tr><td colspan="7" class="empty-state">No hay usuarios registrados</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<p class="rep-footnote">
+    Datos obtenidos del endpoint <em>GET /api/usuarios</em>. Los accesos y estados se calculan en tiempo real.
+</p>

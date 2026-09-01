@@ -1,0 +1,554 @@
+/* ============ Reportes ============ */
+/* Portado de Pototipo/css/reportes.css + estilos nuevos para
+   Reporte de Usuarios. Reutiliza primitivas de clientes.css
+   (page-header, data-table, pills). */
+
+/* ---------- Grid de categorías (estilo Mantenimiento) ---------- */
+
+.rep-cat-panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.rep-cat-panel {
+    display: flex;
+    gap: 14px;
+    background: #ffffff;
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.rep-cat-panel:hover,
+.rep-cat-panel:focus-visible {
+    border-color: var(--cat, var(--brand));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+    transform: translateY(-2px);
+    outline: none;
+}
+
+.rep-cat-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 auto;
+    border-radius: 11px;
+}
+
+.rep-cat-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.rep-cat-body {
+    min-width: 0;
+}
+
+.rep-cat-titulos {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.rep-cat-titulo {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+}
+
+.rep-cat-texto {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.45;
+    margin: 0 0 12px;
+}
+
+.rep-cat-ir {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--cat, var(--brand));
+}
+
+.rep-cat-ir svg {
+    width: 14px;
+    height: 14px;
+}
+
+.rep-chip-prox {
+    color: #8b9aa0;
+    background: #f2f5f6;
+    border-color: #e6ecee;
+}
+
+/* ---------- Botón volver ---------- */
+
+.rep-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font: 600 13px var(--font);
+    color: var(--muted);
+    background: #ffffff;
+    border: 1px solid var(--panel-line);
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    margin-bottom: 18px;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.rep-back-btn:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+}
+
+.rep-back-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ---------- Botón exportar PDF ---------- */
+
+.rep-export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font: 600 13px var(--font);
+    color: #ffffff;
+    background: var(--brand);
+    border: 1px solid var(--brand);
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: background 0.14s ease;
+}
+
+.rep-export-btn:hover {
+    background: var(--brand-dark);
+}
+
+.rep-export-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ---------- Page actions (extiende page-header de clientes.css) ---------- */
+
+.page-actions {
+    flex: 0 0 auto;
+    margin-top: 4px;
+}
+
+/* ---------- Grilla de reportes ---------- */
+
+.rep-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.rep-c4 { grid-column: span 4; }
+.rep-c5 { grid-column: span 5; }
+.rep-c6 { grid-column: span 6; }
+.rep-c7 { grid-column: span 7; }
+.rep-c8 { grid-column: span 8; }
+.rep-c12 { grid-column: span 12; }
+
+.rep-panel {
+    margin-bottom: 0;
+}
+
+/* ---------- Chips de resumen ---------- */
+
+.rep-chip {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--brand-dark);
+    background: rgba(53, 130, 146, 0.10);
+    border: 1px solid rgba(53, 130, 146, 0.25);
+    border-radius: 999px;
+    padding: 4px 12px;
+    white-space: nowrap;
+}
+
+.rep-chip-critica {
+    color: #c0392b;
+    background: rgba(231, 76, 60, 0.10);
+    border-color: rgba(231, 76, 60, 0.30);
+}
+
+/* ---------- Stat cards de reportes ---------- */
+
+.rep-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.rep-stat {
+    background: #ffffff;
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-card);
+    padding: 18px 18px 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rep-stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--subtle);
+}
+
+.rep-stat-value {
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ink);
+}
+
+.rep-stat-badge {
+    align-self: flex-start;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.rep-stat-badge.ok {
+    background: #e5f4eb;
+    color: #1e7a3c;
+}
+
+.rep-stat-badge.warn {
+    background: #fdf1e7;
+    color: #a15c2b;
+}
+
+.rep-stat-badge.danger {
+    background: #fdecec;
+    color: #b0322a;
+}
+
+.rep-stat-badge.info {
+    background: #eef3f4;
+    color: #3f6b74;
+}
+
+/* ---------- Barras verticales (audiencias) ---------- */
+
+.rep-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 22px 0;
+}
+
+.rep-bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.rep-bar-val {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.rep-bar-track {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: clamp(22px, 2.6vw, 34px);
+    min-height: 12px;
+    max-height: 150px;
+    background: #f2f5f6;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.rep-bar-fill {
+    width: 100%;
+}
+
+.rep-bar-fill.rea { background: #2ECC71; }
+.rep-bar-fill.pen { background: #F39C12; }
+
+.rep-bar-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--subtle);
+}
+
+.rep-legend {
+    display: flex;
+    gap: 18px;
+    padding: 14px 22px 16px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.rep-legend i {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 3px;
+    margin-right: 6px;
+}
+
+.rep-ley-rea { background: #2ECC71; }
+.rep-ley-pen { background: #F39C12; }
+
+/* ---------- Barras horizontales (progreso / roles) ---------- */
+
+.rep-progress-list {
+    padding: 8px 22px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.rep-progress-row {
+    display: block;
+}
+
+.rep-progress-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.rep-progress-nombre {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+}
+
+.rep-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 3px;
+    flex: 0 0 auto;
+}
+
+.rep-progress-val {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.rep-progress-val small {
+    font-size: 11px;
+    color: var(--subtle);
+    font-weight: 500;
+}
+
+.rep-progress-track {
+    height: 8px;
+    border-radius: 999px;
+    background: #eef2f3;
+    overflow: hidden;
+}
+
+.rep-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    border: none;
+}
+
+/* ---------- Lista de roles (barras por rama) ---------- */
+
+.rep-rama-list {
+    padding: 10px 22px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+}
+
+.rep-rama-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rep-rama-pill {
+    flex: 0 0 auto;
+    min-width: 46px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border: 1px solid;
+    border-radius: 6px;
+    padding: 3px 6px;
+    white-space: nowrap;
+}
+
+.rep-rama-nombre {
+    flex: 0 0 auto;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    min-width: 92px;
+}
+
+.rep-rama-track {
+    flex: 1 1 auto;
+    height: 8px;
+    border-radius: 999px;
+    background: #eef2f3;
+    overflow: hidden;
+}
+
+.rep-rama-fill {
+    height: 100%;
+    border-radius: 999px;
+    border: none;
+}
+
+.rep-rama-count {
+    flex: 0 0 auto;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    min-width: 26px;
+    text-align: right;
+}
+
+/* ---------- Tabla de usuarios (reporte) ---------- */
+
+.rep-usuarios-table {
+    min-width: 720px;
+}
+
+.rep-usuario-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rep-usuario-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+    display: grid;
+    place-items: center;
+    flex: none;
+}
+
+.rep-usuario-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.rep-usuario-nombre {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+}
+
+.rep-usuario-cuenta {
+    font-size: 11.5px;
+    color: var(--subtle);
+}
+
+/* ---------- Nota de pie ---------- */
+
+.rep-footnote {
+    margin-top: 18px;
+    font-size: 12px;
+    color: var(--subtle);
+    line-height: 1.5;
+}
+
+.rep-footnote em {
+    font-style: normal;
+    color: var(--muted);
+    font-weight: 500;
+}
+
+/* ---------- Loading / vacío ---------- */
+
+.rep-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    color: var(--subtle);
+    font-size: 14px;
+}
+
+.rep-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--subtle);
+    font-size: 13.5px;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1060px) {
+    .rep-c4,
+    .rep-c5,
+    .rep-c6,
+    .rep-c7,
+    .rep-c8,
+    .rep-c12 {
+        grid-column: span 12;
+    }
+
+    .rep-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 560px) {
+    .rep-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .rep-bars {
+        gap: 6px;
+        padding: 10px 14px 0;
+    }
+
+    .rep-bar-track {
+        width: 18px;
+    }
+}

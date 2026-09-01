@@ -14,7 +14,7 @@ public interface IPermisoService
     Task<List<PermisoDto>> ObtenerPorRolAsync(int rolId);
 
     /// <summary>Guarda la matriz completa de un rol en una transacción.</summary>
-    Task GuardarRolAsync(int rolId, PermisoGuardarDto solicitud, int usuarioId);
+    Task GuardarRolAsync(int rolId, PermisoGuardarDto solicitud);
 }
 
 public class PermisoService : IPermisoService
@@ -57,14 +57,14 @@ public class PermisoService : IPermisoService
         return filas.Select(Mapear).ToList();
     }
 
-    public async Task GuardarRolAsync(int rolId, PermisoGuardarDto solicitud, int usuarioId)
+    public async Task GuardarRolAsync(int rolId, PermisoGuardarDto solicitud)
     {
         var json = JsonSerializer.Serialize(
             solicitud.Modulos.Select(kv => new { clave = kv.Key, activo = kv.Value }),
             OpcionesJson);
 
         var retorno = await _repositorio.EjecutarRetornoAsync("SP_Permiso_GuardarRol",
-            new { Rol_ID = rolId, PermisosJson = json, Usuario_ID = usuarioId });
+            new { Rol_ID = rolId, PermisosJson = json });
 
         if (retorno != 0)
             throw MapearRechazo(retorno);

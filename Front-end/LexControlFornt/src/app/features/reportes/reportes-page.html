@@ -1,0 +1,87 @@
+<!-- page-header -->
+<section class="page-header">
+    <div>
+        <span class="page-overline">Análisis</span>
+        <h1 class="page-title">Reportes</h1>
+        <p class="page-desc">Seleccione un tipo de reporte para consultar estadísticas y datos del sistema.</p>
+    </div>
+</section>
+
+@if (reporteActivo() === null) {
+    <!-- Grid de categorías estilo Mantenimiento -->
+    <section class="rep-cat-panels" aria-label="Tipos de reporte">
+        @for (r of reportes; track r.key) {
+            <article class="rep-cat-panel" [style.--cat]="r.color" (click)="seleccionarReporte(r.key)" tabindex="0"
+                (keydown.enter)="seleccionarReporte(r.key)">
+                <div class="rep-cat-icon" [style.background]="r.color + '14'" [style.color]="r.color">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path [attr.d]="r.icono" />
+                        @if (r.key === 'usuarios') {
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        }
+                        @if (r.key === 'agenda') {
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        }
+                        @if (r.key === 'tramites') {
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                        }
+                        @if (r.key === 'notificaciones') {
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        }
+                        @if (r.key === 'rendimiento') {
+                            <line x1="18" y1="20" x2="18" y2="10" />
+                            <line x1="12" y1="20" x2="12" y2="4" />
+                            <line x1="6" y1="20" x2="6" y2="14" />
+                        }
+                    </svg>
+                </div>
+                <div class="rep-cat-body">
+                    <div class="rep-cat-titulos">
+                        <h3 class="rep-cat-titulo">{{ r.titulo }}</h3>
+                        @if (r.disponibles > 0) {
+                            <span class="rep-chip">{{ r.disponibles }} disponibles</span>
+                        } @else {
+                            <span class="rep-chip rep-chip-prox">Próximamente</span>
+                        }
+                    </div>
+                    <p class="rep-cat-texto">{{ r.descripcion }}</p>
+                    <span class="rep-cat-ir">
+                        @if (r.disponibles > 0) {
+                            Ver reporte
+                        } @else {
+                            En desarrollo
+                        }
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                    </span>
+                </div>
+            </article>
+        }
+    </section>
+} @else {
+    <!-- Botón volver -->
+    <button class="rep-back-btn" (click)="volver()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Volver a Reportes
+    </button>
+
+    <!-- Contenido del reporte seleccionado -->
+    @if (reporteActivo() === 'usuarios') {
+        <app-reportes-usuarios-page />
+    }
+}

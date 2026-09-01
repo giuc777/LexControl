@@ -27,9 +27,14 @@ export const routes: Routes = [
                 canActivate: [moduloGuard('ajustes')],
                 loadComponent: () => import('./features/ajustes/ajustes-page').then(m => m.AjustesPage)
             },
+            {
+                path: 'reportes',
+                canActivate: [moduloGuard('reportes')],
+                loadComponent: () => import('./features/reportes/reportes-page').then(m => m.ReportesPage)
+            },
             /* Los demás módulos se registran con la página provisional;
                cada fase del plan reemplazará su loadComponent. */
-            ...MODULOS.filter(m => m.key !== 'dashboard' && m.key !== 'ajustes').map(m => ({
+            ...MODULOS.filter(m => m.key !== 'dashboard' && m.key !== 'ajustes' && m.key !== 'reportes').map(m => ({
                 path: m.ruta,
                 canActivate: [moduloGuard(m.key)],
                 loadComponent: () =>

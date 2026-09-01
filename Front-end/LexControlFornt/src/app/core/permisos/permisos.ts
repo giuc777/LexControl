@@ -189,6 +189,7 @@ export class PermisosService {
     private ordenar(modulos: ModuloPermiso[]): ModuloPermiso[] {
         return [...modulos]
             .filter(m => m.activo)
-            .sort((a, b) => a.orden - b.orden);
+            .sort((a, b) => a.orden - b.orden)
+            .map(m => ({ ...m, clave: m.clave.toLowerCase() }));
     }
 }

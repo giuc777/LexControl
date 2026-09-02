@@ -1,0 +1,382 @@
+/* ============ Encabezado de lista ============ */
+
+.page-overline {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--subtle);
+    margin-bottom: 4px;
+}
+
+/* ============ Busqueda ============ */
+
+.exp-search {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex: 1;
+    min-width: 220px;
+    max-width: 460px;
+    background: #ffffff;
+    border: 1px solid var(--field-line);
+    border-radius: var(--radius-field);
+    padding: 8px 12px;
+    color: #9aa7ab;
+}
+
+.exp-search svg {
+    width: 15px;
+    height: 15px;
+    flex: none;
+}
+
+.exp-search input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+    color: var(--ink);
+    width: 100%;
+}
+
+.exp-search input::placeholder {
+    color: #9aa7ab;
+}
+
+/* ============ Pills de rama y estado ============ */
+
+.badge-rama {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 3px 9px;
+    border: 1.5px solid;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.estado-pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.data-table-expedientes {
+    min-width: 980px;
+}
+
+/* ============ Detalle ============ */
+
+.detail-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+}
+
+.detail-head .page-title {
+    margin-bottom: 0;
+}
+
+.detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1.75fr 1fr;
+    gap: 22px;
+    align-items: start;
+}
+
+.detail-col {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+}
+
+.info-card > .panel-head {
+    border-bottom: 1px solid #eef1f3;
+}
+
+.abogado-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: #f5f8f9;
+    border: 1px solid #e7edef;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 18px;
+}
+
+.abogado-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--subtle);
+}
+
+.abogado-nombre {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+/* ============ Notas ============ */
+
+.notas-list {
+    padding: 6px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.nota-card {
+    border: 1px solid var(--panel-line);
+    border-left: 4px solid var(--brand);
+    border-radius: 9px;
+    padding: 13px 15px;
+    background: #fcfdfd;
+}
+
+.nota-tags {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.nota-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 2px 9px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+}
+
+.nota-prior {
+    background: #fdecec;
+}
+
+.nota-texto {
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.45;
+}
+
+.nota-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 9px;
+    border-top: 1px solid #eef1f3;
+    font-size: 11.5px;
+    color: var(--subtle);
+}
+
+.empty-inline {
+    padding: 20px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--subtle);
+}
+
+/* ============ Partes procesales ============ */
+
+.data-table-partes {
+    min-width: 560px;
+}
+
+/* ============ Documentos ============ */
+
+.docs-list {
+    padding: 8px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.doc-file {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid #f0f3f4;
+}
+
+.doc-file:last-child {
+    border-bottom: none;
+}
+
+.doc-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    flex: none;
+}
+
+.doc-icon.pdf {
+    background: #fdecec;
+    color: #b0322a;
+}
+
+.doc-icon.word {
+    background: #e8f1ff;
+    color: #2b5fa5;
+}
+
+.doc-icon.excel {
+    background: #e6f5e6;
+    color: #2e7d32;
+}
+
+.doc-icon.otro {
+    background: #f5f5f5;
+    color: #616161;
+}
+
+.doc-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.doc-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+}
+
+.doc-meta {
+    font-size: 12px;
+    color: var(--subtle);
+}
+
+/* ============ Modal grande ============ */
+
+.modal-card-lg {
+    width: min(780px, 96vw);
+}
+
+.check-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 2px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.check-field input {
+    width: auto !important;
+}
+
+/* ============ Botones de accion en detalle ============ */
+
+.btn-link-danger {
+    background: none;
+    border: none;
+    color: #b0322a;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.btn-link-danger:hover {
+    background: #fdecec;
+}
+
+.btn-icon {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--subtle);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    transition: background 0.14s ease, color 0.14s ease;
+}
+
+.btn-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-icon:hover {
+    background: #f2f4f5;
+    color: var(--ink);
+}
+
+.field-help {
+    font-size: 12px;
+    color: var(--subtle);
+    margin-top: 4px;
+}
+
+/* ============ Filtros bar ============ */
+
+.exp-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.exp-filters select {
+    min-width: 150px;
+}
+
+/* ============ Responsive ============ */
+
+@media (max-width: 1024px) {
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .exp-search {
+        flex-basis: 100%;
+        max-width: none;
+    }
+
+    .detail-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

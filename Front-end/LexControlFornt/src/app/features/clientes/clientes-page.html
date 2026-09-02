@@ -1,5 +1,5 @@
 <app-page-header titulo="Clientes del Bufete" subtitulo="Gestione la base de datos de clientes y expedientes legales.">
-    <button type="button" class="btn-primary" (click)="abrirModal()">
+    <button type="button" class="btn-primary" data-testid="btn-nuevo-cliente" (click)="abrirModal()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 5v14M5 12h14"/>
@@ -9,7 +9,7 @@
 </app-page-header>
 
 @if (estadisticas(); as stats) {
-    <section class="bento-grid" aria-label="Resumen de clientes">
+    <section class="bento-grid" data-testid="bento-grid" aria-label="Resumen de clientes">
         <app-stat-card etiqueta="Total Clientes" [valor]="stats.totalClientes"
             [badge]="stats.totalClientes + ' activos'" [advertencia]="stats.totalClientes === 0" />
         <app-stat-card etiqueta="Casos Activos" [valor]="stats.totalExpedientesActivos"
@@ -21,7 +21,7 @@
     <form class="filters-bar">
         <label class="filter-field">
             <span class="filter-label">Estado:</span>
-            <select class="filter-select" [ngModel]="filtroEstado" name="filtroEstado"
+            <select class="filter-select" data-testid="filtro-estado" [ngModel]="filtroEstado" name="filtroEstado"
                 (ngModelChange)="alCambiarFiltroEstado($event)">
                 <option value="">Todos</option>
                 <option value="Activo">Activo</option>
@@ -31,7 +31,7 @@
     </form>
 
     <div class="table-scroll">
-        <table class="data-table">
+        <table class="data-table" data-testid="clientes-table">
             <thead>
                 <tr>
                     <th>ID</th>

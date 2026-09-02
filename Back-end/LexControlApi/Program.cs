@@ -102,6 +102,12 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IPerfilService, PerfilService>();
 builder.Services.AddScoped<IPermisoService, PermisoService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
+builder.Services.AddScoped<IExpedienteService, ExpedienteService>();
+builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+
+// Limite de upload: 50 MB
+builder.WebHost.ConfigureKestrel(opciones =>
+    opciones.Limits.MaxRequestBodySize = 50 * 1024 * 1024);
 
 var app = builder.Build();
 
@@ -120,6 +126,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ManejadorExcepciones>();
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors(PoliticaCors);
 app.UseAuthentication();
 app.UseAuthorization();

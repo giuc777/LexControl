@@ -6,7 +6,7 @@
     </div>
 </section>
 
-<section class="aj-grid" [class.aj-grid-uno]="!esAdmin()" aria-label="Perfil y preferencias">
+<section class="aj-grid" data-testid="ajustes-grid" [class.aj-grid-uno]="!esAdmin()" aria-label="Perfil y preferencias">
     <app-perfil-card />
     @if (esAdmin()) {
         <app-preferencias-card />

@@ -1,0 +1,81 @@
+<app-modal [titulo]="titulo()" [abierto]="abierto" (cerrado)="cerrado.emit()" ancho="min(780px, 96vw)">
+    <form class="modal-form modal-card-lg" (submit)="alEnviar($event)" novalidate>
+        <fieldset>
+            <legend>Datos del expediente</legend>
+            <div class="form-grid">
+                <div class="field">
+                    <label for="expNo">No. Expediente <span class="req">*</span></label>
+                    <input type="text" id="expNo" data-testid="exp-no" [(ngModel)]="noExpediente" name="noExpediente"
+                        maxlength="50" placeholder="CIV-2026-0001">
+                </div>
+                <div class="field">
+                    <label for="expFechaIngreso">Fecha de ingreso</label>
+                    <input type="date" id="expFechaIngreso" [(ngModel)]="fechaIngreso" name="fechaIngreso">
+                </div>
+                <div class="field">
+                    <label for="expRama">Rama <span class="req">*</span></label>
+                    <select id="expRama" data-testid="exp-rama" [(ngModel)]="ramaId" name="ramaId">
+                        <option value="0">Seleccionar</option>
+                        @for (rama of ramas; track rama.id) {
+                            <option [value]="rama.id">{{ rama.nombre }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="expEstado">Estado <span class="req">*</span></label>
+                    <select id="expEstado" data-testid="exp-estado" [(ngModel)]="estadoId" name="estadoId">
+                        @for (estado of estados; track estado.id) {
+                            <option [value]="estado.id">{{ estado.nombre }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="expClienteId">Cliente ID <span class="req">*</span></label>
+                    <input type="number" id="expClienteId" data-testid="exp-cliente" [(ngModel)]="clienteId"
+                        name="clienteId" min="1" placeholder="ID del cliente">
+                </div>
+                <div class="field">
+                    <label for="expRolProcesal">Rol procesal <span class="req">*</span></label>
+                    <select id="expRolProcesal" data-testid="exp-rol" [(ngModel)]="rolProcesalId" name="rolProcesalId">
+                        <option value="0">Seleccionar</option>
+                        @for (rol of rolesProcesales; track rol.id) {
+                            <option [value]="rol.id">{{ rol.nombre }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="expTipoProceso">Tipo de proceso</label>
+                    <input type="text" id="expTipoProceso" [(ngModel)]="tipoProceso" name="tipoProceso"
+                        maxlength="50" placeholder="Ej. Incumplimiento Contractual">
+                </div>
+                <div class="field">
+                    <label for="expJuzgado">Juzgado <span class="req">*</span></label>
+                    <select id="expJuzgado" data-testid="exp-juzgado" [(ngModel)]="juzgadoId" name="juzgadoId">
+                        <option value="0">Seleccionar</option>
+                        @for (juzgado of juzgados; track juzgado.id) {
+                            <option [value]="juzgado.id">{{ juzgado.nombre }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="field full">
+                    <label for="expDescripcion">Descripcion</label>
+                    <textarea id="expDescripcion" [(ngModel)]="descripcion" name="descripcion"
+                        rows="3" maxlength="500" placeholder="Descripcion breve del caso"></textarea>
+                </div>
+                <div class="field full">
+                    <label for="expNotasInternas">Notas internas</label>
+                    <textarea id="expNotasInternas" [(ngModel)]="notasInternas" name="notasInternas"
+                        rows="2" maxlength="1000" placeholder="Notas internas del abogado"></textarea>
+                </div>
+            </div>
+        </fieldset>
+        @if (error()) {
+            <p class="form-error" role="alert">{{ error() }}</p>
+        }
+        <footer class="modal-footer">
+            <button type="button" class="btn-secondary" (click)="cerrado.emit()">Cancelar</button>
+            <button type="submit" class="btn-primary" data-testid="btn-guardar-expediente"
+                [disabled]="guardando()">{{ textoBoton() }}</button>
+        </footer>
+    </form>
+</app-modal>

@@ -5,12 +5,12 @@
             <div class="form-grid">
                 <div class="field full">
                     <label for="cliNombreCompleto">Nombre completo <span class="req">*</span></label>
-                    <input type="text" id="cliNombreCompleto" [(ngModel)]="nombre" name="nombre"
+                    <input type="text" id="cliNombreCompleto" data-testid="cli-nombre" [(ngModel)]="nombre" name="nombre"
                         maxlength="100" placeholder="Ej. Carlos Morales Ortiz">
                 </div>
                 <div class="field">
                     <label for="cliDpi">DPI <span class="req">*</span></label>
-                    <input type="text" id="cliDpi" [(ngModel)]="dpi" name="dpi"
+                    <input type="text" id="cliDpi" data-testid="cli-dpi" [(ngModel)]="dpi" name="dpi"
                         inputmode="numeric" maxlength="13" placeholder="2983123450101">
                 </div>
                 <div class="field">
@@ -40,12 +40,12 @@
             <div class="form-grid">
                 <div class="field">
                     <label for="cliTelefonoPrincipal">Teléfono principal <span class="req">*</span></label>
-                    <input type="tel" id="cliTelefonoPrincipal" [(ngModel)]="telefonoPrincipal"
+                    <input type="tel" id="cliTelefonoPrincipal" data-testid="cli-telefono" [(ngModel)]="telefonoPrincipal"
                         name="telefonoPrincipal" placeholder="+502 5555-0123">
                 </div>
                 <div class="field">
                     <label for="cliEmailPrincipal">Email principal <span class="req">*</span></label>
-                    <input type="email" id="cliEmailPrincipal" [(ngModel)]="emailPrincipal"
+                    <input type="email" id="cliEmailPrincipal" data-testid="cli-email" [(ngModel)]="emailPrincipal"
                         name="emailPrincipal" placeholder="carlos@email.com">
                 </div>
                 <div class="field">
@@ -75,7 +75,7 @@
         }
         <footer class="modal-footer">
             <button type="button" class="btn-secondary" (click)="cerrado.emit()">Cancelar</button>
-            <button type="submit" class="btn-primary">{{ textoBoton() }}</button>
+            <button type="submit" class="btn-primary" data-testid="btn-guardar-cliente">{{ textoBoton() }}</button>
         </footer>
     </form>
 </app-modal>

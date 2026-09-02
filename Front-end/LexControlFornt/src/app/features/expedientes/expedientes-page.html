@@ -1,0 +1,110 @@
+<app-page-header titulo="Expedientes" subtitulo="Gestion de expedientes y casos legales del bufete.">
+    <div class="exp-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input type="text" placeholder="Buscar por numero de expediente..." [value]="filtroBusqueda"
+            (input)="alBuscar($any($event.target).value)" data-testid="busqueda-expediente" />
+    </div>
+    <button type="button" class="btn-primary" data-testid="btn-nuevo-expediente" (click)="abrirModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Nuevo Expediente
+    </button>
+</app-page-header>
+
+<section class="panel" aria-label="Listado de expedientes">
+    <form class="exp-filters">
+        <label class="filter-field">
+            <span class="filter-label">Rama:</span>
+            <select class="filter-select" data-testid="filtro-rama" [ngModel]="filtroRama" name="filtroRama"
+                (ngModelChange)="alCambiarFiltroRama($event)">
+                <option value="">Todas</option>
+                <option value="1">Civil</option>
+                <option value="2">Penal</option>
+                <option value="3">Familiar</option>
+                <option value="4">Municipal</option>
+                <option value="5">Laboral</option>
+                <option value="6">Constitucional</option>
+            </select>
+        </label>
+        <label class="filter-field">
+            <span class="filter-label">Estado:</span>
+            <select class="filter-select" data-testid="filtro-estado" [ngModel]="filtroEstado" name="filtroEstado"
+                (ngModelChange)="alCambiarFiltroEstado($event)">
+                <option value="">Todos</option>
+                <option value="1">Activo</option>
+                <option value="2">En Espera</option>
+                <option value="3">Cerrado</option>
+                <option value="4">Archivado</option>
+                <option value="5">Urgente</option>
+            </select>
+        </label>
+    </form>
+
+    <div class="table-scroll">
+        <table class="data-table data-table-expedientes" data-testid="expedientes-table">
+            <thead>
+                <tr>
+                    <th>No. EXPEDIENTE</th>
+                    <th>CLIENTE</th>
+                    <th>RAMA</th>
+                    <th>TIPO PROCESO</th>
+                    <th>JUZGADO</th>
+                    <th>FECHA INGRESO</th>
+                    <th>ESTADO</th>
+                    <th>ABOGADO</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (expedientes().length === 0) {
+                    <tr>
+                        <td colspan="8">
+                            <app-empty-state mensaje="No se encontraron expedientes con los filtros seleccionados." />
+                        </td>
+                    </tr>
+                }
+                @for (exp of expedientes(); track exp.id) {
+                    <tr class="row-clickable" (click)="irADetalle(exp.id)">
+                        <td class="cell-id">{{ exp.noExpediente }}</td>
+                        <td>
+                            <div class="client-info">
+                                <span class="client-name">{{ exp.cliente }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge-rama" [style.border-color]="exp.ramaColor || '#358292'"
+                                [style.color]="exp.ramaColor || '#358292'">
+                                {{ exp.rama }}
+                            </span>
+                        </td>
+                        <td>{{ exp.tipoProceso || '—' }}</td>
+                        <td>
+                            <span class="cell-truncate">{{ exp.juzgado }}</span>
+                        </td>
+                        <td>{{ formatearFecha(exp.fechaIngreso) }}</td>
+                        <td>
+                            <span class="estado-pill"
+                                [style.background]="(exp.estadoColor || '#358292') + '18'"
+                                [style.color]="exp.estadoColor || '#358292'"
+                                [style.border-color]="(exp.estadoColor || '#358292') + '40'">
+                                {{ exp.estado }}
+                            </span>
+                        </td>
+                        <td>{{ exp.abogado }}</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <app-paginacion [total]="total()" [paginaActual]="paginaActual()"
+        [tamanioPagina]="tamanioPagina" (paginar)="alPaginar($event)" />
+</section>
+
+<app-expediente-modal [abierto]="modalAbierto()" modo="nuevo"
+    (cerrado)="cerrarModal()" (guardado)="alGuardar($event)" />

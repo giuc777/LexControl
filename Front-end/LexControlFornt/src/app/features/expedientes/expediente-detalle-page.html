@@ -1,0 +1,281 @@
+@if (cargando()) {
+    <div class="empty-inline">Cargando expediente...</div>
+} @else if (expediente(); as exp) {
+    <nav class="breadcrumb" aria-label="Ruta de navegacion">
+        <a routerLink="/expedientes">Expedientes</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>{{ exp.noExpediente }}</span>
+    </nav>
+
+    <div class="detail-head">
+        <h1 class="page-title">{{ exp.noExpediente }}</h1>
+        <div class="detail-actions">
+            <span class="estado-pill"
+                [style.background]="(exp.estadoColor || '#358292') + '18'"
+                [style.color]="exp.estadoColor || '#358292'"
+                [style.border-color]="(exp.estadoColor || '#358292') + '40'">
+                {{ exp.estadoNombre }}
+            </span>
+            <button type="button" class="btn-secondary" (click)="abrirModalEditar()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                Editar Expediente
+            </button>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+
+        <!-- Columna izquierda: Info + Notas + Partes -->
+        <div class="detail-col">
+
+            <section class="info-card panel" aria-label="Informacion general">
+                <header class="panel-head">
+                    <h2 class="panel-title">Informacion General</h2>
+                </header>
+                <dl class="info-dl">
+                    <dt>Cliente</dt>
+                    <dd>{{ exp.clienteNombre }}</dd>
+                    <dt>Rama</dt>
+                    <dd>
+                        <span class="badge-rama" [style.border-color]="exp.ramaColor || '#358292'"
+                            [style.color]="exp.ramaColor || '#358292'">
+                            {{ exp.ramaNombre }}
+                        </span>
+                    </dd>
+                    <dt>Rol Procesal</dt>
+                    <dd>{{ exp.rolProcesal }}</dd>
+                    <dt>Tipo de Proceso</dt>
+                    <dd>{{ exp.tipoProceso || '—' }}</dd>
+                    <dt>Juzgado</dt>
+                    <dd>{{ exp.juzgadoNombre }}</dd>
+                    <dt>Fecha de Ingreso</dt>
+                    <dd>{{ formatearFecha(exp.fechaIngreso) }}</dd>
+                    @if (exp.descripcion) {
+                        <dt>Descripcion</dt>
+                        <dd>{{ exp.descripcion }}</dd>
+                    }
+                    @if (exp.notasInternas) {
+                        <dt>Notas Internas</dt>
+                        <dd>{{ exp.notasInternas }}</dd>
+                    }
+                </dl>
+                <div class="abogado-strip">
+                    <span class="abogado-label">ABOGADO ASIGNADO</span>
+                    <span class="abogado-nombre">{{ exp.abogadoNombre }}</span>
+                </div>
+            </section>
+
+            <section class="panel" aria-label="Notas del expediente">
+                <header class="panel-head">
+                    <h2 class="panel-title">Notas del Expediente</h2>
+                    <button type="button" class="btn-filter" (click)="abrirModalNota()">Agregar Nota</button>
+                </header>
+                @if (notas().length === 0) {
+                    <div class="empty-inline">No hay notas registradas.</div>
+                } @else {
+                    <div class="notas-list">
+                        @for (nota of notas(); track nota.id) {
+                            <div class="nota-card">
+                                <div class="nota-tags">
+                                    @if (nota.etiquetaNombre) {
+                                        <span class="nota-tag"
+                                            [style.background]="(nota.etiquetaColor || '#358292') + '18'"
+                                            [style.color]="nota.etiquetaColor || '#358292'"
+                                            [style.border-color]="(nota.etiquetaColor || '#358292') + '40'">
+                                            {{ nota.etiquetaNombre }}
+                                        </span>
+                                    }
+                                    @if (nota.prioritario) {
+                                        <span class="nota-tag nota-prior">Prioritario</span>
+                                    }
+                                </div>
+                                <p class="nota-texto">{{ nota.contenido }}</p>
+                                <div class="nota-meta">
+                                    <span>{{ nota.usuarioNombre || 'Anonimo' }}</span>
+                                    <span>{{ formatearFecha(nota.fechaCreacion) }}</span>
+                                    <button type="button" class="btn-link-danger" (click)="eliminarNota(nota)">Eliminar</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </section>
+
+            <section class="panel" aria-label="Partes procesales">
+                <header class="panel-head">
+                    <h2 class="panel-title">Partes Procesales</h2>
+                    <button type="button" class="btn-filter" (click)="abrirModalParte()">Agregar Parte</button>
+                </header>
+                @if (partes().length === 0) {
+                    <div class="empty-inline">No hay partes procesales registradas.</div>
+                } @else {
+                    <div class="table-scroll">
+                        <table class="data-table data-table-partes">
+                            <thead>
+                                <tr>
+                                    <th>ROL</th>
+                                    <th>ENTIDAD / NOMBRE</th>
+                                    <th>REPRESENTANTE</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (parte of partes(); track parte.id) {
+                                    <tr>
+                                        <td>{{ parte.tipo }}</td>
+                                        <td>
+                                            <div class="client-info">
+                                                <span class="client-name">{{ parte.nombreCompleto }}</span>
+                                            </div>
+                                        </td>
+                                        <td>{{ parte.abogadoDefensor || '—' }}</td>
+                                        <td>
+                                            <button type="button" class="btn-link-danger" (click)="eliminarParte(parte)">Eliminar</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </section>
+        </div>
+
+        <!-- Columna derecha: Documentos -->
+        <div class="detail-col">
+            <section class="panel" aria-label="Documentos adjuntos">
+                <header class="panel-head">
+                    <h2 class="panel-title">Documentos</h2>
+                    <button type="button" class="btn-filter" (click)="abrirModalUpload()">Subir Documento</button>
+                </header>
+                @if (documentos().length === 0) {
+                    <div class="empty-inline">No hay documentos adjuntos.</div>
+                } @else {
+                    <div class="docs-list">
+                        @for (doc of documentos(); track doc.id) {
+                            <div class="doc-file">
+                                <div class="doc-icon" [class]="tipoIcono(doc.tipoArchivo)">
+                                    {{ doc.tipoArchivo }}
+                                </div>
+                                <div class="doc-info">
+                                    <span class="doc-name">{{ doc.nombreArchivo }}</span>
+                                    <span class="doc-meta">
+                                        {{ formatearTamano(doc.tamano) }} &middot;
+                                        {{ formatearFecha(doc.fechaSubida) }}
+                                    </span>
+                                </div>
+                                <button type="button" class="btn-icon" title="Descargar"
+                                    (click)="descargarDocumento(doc.rutaArchivo)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                </button>
+                                <button type="button" class="btn-icon" title="Eliminar"
+                                    (click)="eliminarDocumento(doc)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            </section>
+        </div>
+    </div>
+
+    <!-- Modal: Editar Expediente -->
+    <app-expediente-modal [abierto]="modalEditarAbierto()" modo="editar" [expediente]="exp"
+        (cerrado)="cerrarModalEditar()" (guardado)="alGuardarEdicion($event)" />
+
+    <!-- Modal: Agregar Nota -->
+    <app-modal titulo="Agregar Nota" [abierto]="modalNotaAbierto()" (cerrado)="cerrarModalNota()">
+        <form class="modal-form" novalidate>
+            <div class="field full">
+                <label for="notaContenido">Contenido de la nota <span class="req">*</span></label>
+                <textarea id="notaContenido" rows="4" placeholder="Escriba la nota..." #notaInput></textarea>
+            </div>
+            <footer class="modal-footer">
+                <button type="button" class="btn-secondary" (click)="cerrarModalNota()">Cancelar</button>
+                <button type="button" class="btn-primary" (click)="alGuardarNota(notaInput.value)">Guardar Nota</button>
+            </footer>
+        </form>
+    </app-modal>
+
+    <!-- Modal: Agregar Parte Procesal -->
+    <app-modal titulo="Agregar Parte Procesal" [abierto]="modalParteAbierto()" (cerrado)="cerrarModalParte()">
+        <form class="modal-form" novalidate>
+            <div class="form-grid">
+                <div class="field">
+                    <label for="parteTipo">Tipo <span class="req">*</span></label>
+                    <select id="parteTipo" #parteTipo>
+                        <option value="Demandante">Demandante</option>
+                        <option value="Demandado">Demandado</option>
+                        <option value="Tercero Interesado">Tercero Interesado</option>
+                        <option value="Testigo">Testigo</option>
+                        <option value="Perito">Perito</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="parteNombre">Nombre completo <span class="req">*</span></label>
+                    <input type="text" id="parteNombre" #parteNombre placeholder="Nombre completo">
+                </div>
+                <div class="field">
+                    <label for="parteDpi">DPI</label>
+                    <input type="text" id="parteDpi" #parteDpi placeholder="DPI">
+                </div>
+                <div class="field">
+                    <label for="parteTelefono">Telefono</label>
+                    <input type="text" id="parteTelefono" #parteTelefono placeholder="Telefono">
+                </div>
+                <div class="field">
+                    <label for="parteAbogado">Abogado defensor</label>
+                    <input type="text" id="parteAbogado" #parteAbogado placeholder="Abogado defensor">
+                </div>
+                <div class="field">
+                    <label for="parteRol">Rol</label>
+                    <input type="text" id="parteRol" #parteRol placeholder="Rol">
+                </div>
+            </div>
+            <footer class="modal-footer">
+                <button type="button" class="btn-secondary" (click)="cerrarModalParte()">Cancelar</button>
+                <button type="button" class="btn-primary"
+                    (click)="alGuardarParte({
+                        tipo: parteTipo.value,
+                        nombreCompleto: parteNombre.value,
+                        dpi: parteDpi.value || null,
+                        telefono: parteTelefono.value || null,
+                        abogadoDefensor: parteAbogado.value || null,
+                        rol: parteRol.value || null,
+                        descripcion: null
+                    })">Guardar Parte</button>
+            </footer>
+        </form>
+    </app-modal>
+
+    <!-- Modal: Subir Documento -->
+    <app-modal titulo="Subir Documento" [abierto]="modalUploadAbierto()" (cerrado)="cerrarModalUpload()">
+        <form class="modal-form" novalidate>
+            <div class="field full">
+                <label for="uploadFile">Archivo <span class="req">*</span></label>
+                <input type="file" id="uploadFile" #fileInput
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt">
+                <p class="field-help">Tipos permitidos: PDF, Word, Excel, JPG, PNG, TXT. Maximo 50 MB.</p>
+            </div>
+            <footer class="modal-footer">
+                <button type="button" class="btn-secondary" (click)="cerrarModalUpload()">Cancelar</button>
+                <button type="button" class="btn-primary"
+                    (click)="alSubirArchivo(fileInput.files![0])">Subir</button>
+            </footer>
+        </form>
+    </app-modal>
+}

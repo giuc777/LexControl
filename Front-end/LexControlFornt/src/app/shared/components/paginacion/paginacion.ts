@@ -6,7 +6,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
     selector: 'app-paginacion',
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
-        <div class="pagination">
+        <div class="pagination" data-testid="paginacion">
             <span class="pag-info">Mostrando {{ rangoTexto() }}</span>
             <div class="pag-buttons">
                 @for (pagina of paginas(); track pagina) {

@@ -1,4 +1,4 @@
-<section class="dash-grid" aria-label="Resumen del despacho">
+<section class="dash-grid" data-testid="dashboard-stats" aria-label="Resumen del despacho">
     @for (card of estadisticas; track card.label) {
         <article class="stat-card">
             <h3 class="stat-label">{{ card.label }}</h3>
@@ -8,7 +8,7 @@
     }
 </section>
 
-<section class="agenda-card" aria-label="Agenda semanal">
+<section class="agenda-card" data-testid="agenda-semanal" aria-label="Agenda semanal">
     <header class="agenda-header">
         <div>
             <h2 class="agenda-title">Agenda Semanal</h2>

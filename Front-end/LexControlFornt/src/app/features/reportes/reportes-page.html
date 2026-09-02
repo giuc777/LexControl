@@ -9,7 +9,7 @@
 
 @if (reporteActivo() === null) {
     <!-- Grid de categorías estilo Mantenimiento -->
-    <section class="rep-cat-panels" aria-label="Tipos de reporte">
+    <section class="rep-cat-panels" data-testid="reportes-categorias" aria-label="Tipos de reporte">
         @for (r of reportes; track r.key) {
             <article class="rep-cat-panel" [style.--cat]="r.color" (click)="seleccionarReporte(r.key)" tabindex="0"
                 (keydown.enter)="seleccionarReporte(r.key)">

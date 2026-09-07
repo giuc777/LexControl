@@ -3,12 +3,15 @@ using LexControlApi.Dtos.Expedientes;
 using LexControlApi.Excepciones;
 using System.Data;
 
+using LexControlApi.Dtos.Usuarios;
+
 namespace LexControlApi.Services;
 
 /// <summary>Gestión del módulo principal de expedientes.</summary>
 public interface IExpedienteService
 {
     // ── Expediente ──────────────────────────────────────────────
+    Task<List<AbogadoDto>> ListarAbogadosAsync();
     Task<(List<ExpedienteDto> Expedientes, int Total)> ListarAsync(
         int? clienteId, int? estadoId, int? ramaId, int? usuarioId,
         DateTime? fechaInicio, DateTime? fechaFin, string? noExpediente,
@@ -43,6 +46,13 @@ public class ExpedienteService : IExpedienteService
     private readonly Data.IRepositorio _repositorio;
 
     public ExpedienteService(Data.IRepositorio repositorio) => _repositorio = repositorio;
+
+    public async Task<List<AbogadoDto>> ListarAbogadosAsync()
+    {
+        var filas = await _repositorio.ConsultarListaAsync<UsuarioFila>(
+            "SP_Usuario_Listar", new { FiltroNombre = (string?)null, Rol_ID = (int?)3, Activo = (bool?)true });
+        return filas.Select(f => new AbogadoDto { Id = f.ID, NombreCompleto = f.NombreCompleto }).ToList();
+    }
 
     // ════════════════════════════════════════════════════════════
     // EXPEDIENTE
@@ -101,7 +111,7 @@ public class ExpedienteService : IExpedienteService
                     Estado_ID = datos.EstadoId,
                     datos.Descripcion,
                     datos.NotasInternas,
-                    Usuario_ID = usuarioId
+                    Usuario_ID = datos.AbogadoId
                 },
                 "@NuevoID");
         }

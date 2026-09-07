@@ -65,7 +65,9 @@ LexControlApi/
 │   ├── Notificaciones/
 │   ├── Eventos/
 │   ├── Reportes/
-│   └── Configuracion/
+│   ├── Configuracion/
+│   └── Catalogos/
+│       └── CatalogoDtos.cs        // Todas las clases DTO: CatalogoFila, JuzgadoFila, CatalogoDto, JuzgadoDto, CatalogoCrearDto, JuzgadoCrearDto, CatalogoEstadoDto
 ├── Data/
 │   ├── IRepositorio.cs              // Interfaz de repositorio genérica
 │   ├── RepositorioSql.cs            // Implementación vía stored procedures (Dapper)
@@ -73,8 +75,7 @@ LexControlApi/
 ├── Services/
 │   ├── IAuthService.cs              // Login, generación de token
 │   ├── AuthService.cs
-│   ├── ICatalogoService.cs
-│   ├── CatalogoService.cs
+│   ├── CatalogoService.cs           // ICatalogoService + CatalogoService (CRUD genérico + Juzgado)
 │   └── IReporteService.cs
 │     └── ReporteService.cs
 ├── Filters/
@@ -310,6 +311,46 @@ Los demás (notas/documentos de cliente, audiencia, trámite, diligencia, notifi
 | GET | `/api/configuracion/perfil` | — | Perfil del usuario autenticado |
 | PUT | `/api/configuracion/perfil` | — | Actualiza nombre/email/teléfono del usuario |
 | PUT | `/api/configuracion/cambiocontrasena` | — | Cambio de contraseña |
+
+### 6.11 Mantenimiento de Catálogos (`CatalogosController`)
+
+CRUD genérico para catálogos del sistema. Solo accesible para Administrador (Rol_ID = 1).
+
+| Método | Endpoint | SP | Descripción |
+|---|---|---|---|
+| GET | `/api/catalogos/{tabla}` | `SP_Catalogo_Buscar` | Lista filas del catálogo (con filtros, paginación y Total en header) |
+| GET | `/api/catalogos/{tabla}/{id}` | `SP_Catalogo_ObtenerPorID` | Obtener fila por ID |
+| POST | `/api/catalogos/{tabla}` | `SP_Catalogo_Insertar` | Crear nueva fila (valida unicidad de Nombre) |
+| PUT | `/api/catalogos/{tabla}/{id}` | `SP_Catalogo_Actualizar` | Actualizar fila (valida unicidad de Nombre) |
+| PUT | `/api/catalogos/{tabla}/{id}/estado` | `SP_Catalogo_CambiarEstado` | Activar/desactivar fila (verifica integridad referencial antes de desactivar) |
+
+**Tablas soportadas** (whitelist): RAMA, ESTADO_EXPEDIENTE, TIPO_PROCESO, ROL_PROCESAL, TIPO_JUZGADO, ETIQUETA_NOTA.
+
+**Endpoints dedicados para Juzgado** (por complejidad con FKs):
+
+| Método | Endpoint | SP | Descripción |
+|---|---|---|---|
+| GET | `/api/catalogos/juzgados` | `SP_Juzgado_Buscar` | Lista juzgados (con Municipio/Departamento, filtros, paginación) |
+| GET | `/api/catalogos/juzgados/{id}` | `SP_Juzgado_ObtenerPorID` | Obtener juzgado por ID |
+| POST | `/api/catalogos/juzgados` | `SP_Juzgado_Insertar` | Crear juzgado (valida nombre único) |
+| PUT | `/api/catalogos/juzgados/{id}` | `SP_Juzgado_Actualizar` | Actualizar juzgado (valida nombre único) |
+| PUT | `/api/catalogos/juzgados/{id}/estado` | `SP_Juzgado_CambiarEstado` | Activar/desactivar juzgado (verifica integridad referencial) |
+
+**Contrato DTO genérico**:
+```json
+{
+  "id": 1,
+  "nombre": "Derecho Civil",
+  "valor": null,
+  "descripcion": "Rama del derecho civil",
+  "color": "#358292",
+  "orden": 1,
+  "activo": true,
+  "fechaCreacion": "2026-01-01T00:00:00"
+}
+```
+
+**SPs**: Todos están en `LexControl/ScriptsDB/sp_mantenimientos.sql`. SPs genéricos validan que la tabla esté en el whitelist para prevenir inyección SQL. Los SPs de juzgado son dedicados por la complejidad de las FKs (Tipo_Juzgado_ID, Municipio_ID).
 
 ## 7. Detalles de Implementación por Fase
 

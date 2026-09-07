@@ -30,9 +30,13 @@
                     </select>
                 </div>
                 <div class="field">
-                    <label for="expClienteId">Cliente ID <span class="req">*</span></label>
-                    <input type="number" id="expClienteId" data-testid="exp-cliente" [(ngModel)]="clienteId"
-                        name="clienteId" min="1" placeholder="ID del cliente">
+                    <label for="expCliente">Cliente <span class="req">*</span></label>
+                    <select id="expCliente" data-testid="exp-cliente" [(ngModel)]="clienteId" name="clienteId">
+                        <option value="0">Seleccionar cliente</option>
+                        @for (cliente of clientes; track cliente.id) {
+                            <option [value]="cliente.id">{{ cliente.nombreCompleto }}</option>
+                        }
+                    </select>
                 </div>
                 <div class="field">
                     <label for="expRolProcesal">Rol procesal <span class="req">*</span></label>
@@ -54,6 +58,15 @@
                         <option value="0">Seleccionar</option>
                         @for (juzgado of juzgados; track juzgado.id) {
                             <option [value]="juzgado.id">{{ juzgado.nombre }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="expAbogado">Abogado asignado <span class="req">*</span></label>
+                    <select id="expAbogado" data-testid="exp-abogado" [(ngModel)]="abogadoId" name="abogadoId">
+                        <option value="0">Seleccionar abogado</option>
+                        @for (abogado of abogados; track abogado.id) {
+                            <option [value]="abogado.id">{{ abogado.nombreCompleto }}</option>
                         }
                     </select>
                 </div>

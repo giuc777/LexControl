@@ -1,0 +1,66 @@
+<app-page-header titulo="Mantenimiento" subtitulo="Administre los valores maestros del bufete: estados, tipos, roles y juzgados.">
+    <div class="mant-header-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input type="text" placeholder="Buscar catálogo..." [value]="filtroBusqueda"
+            (input)="filtroBusqueda = $any($event.target).value"
+            data-testid="busqueda-catalogo" />
+    </div>
+</app-page-header>
+
+<section class="mant-banner" role="note">
+    <svg class="mant-banner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"/>
+    </svg>
+    <div>
+        <strong>Los cambios impactan globalmente.</strong> Al modificar, desactivar o eliminar un valor, este se
+        aplica de inmediato en expedientes, trámites, agenda y notificaciones nuevas y existentes.
+    </div>
+</section>
+
+<section class="panel" aria-label="Catálogos del sistema">
+    <header class="panel-head panel-head-wrap">
+        <div>
+            <h2 class="panel-title">Opciones de configuración</h2>
+            <p class="panel-sub">Seleccione un catálogo para administrar sus valores.</p>
+        </div>
+    </header>
+
+    <div class="cat-panels" data-testid="catalogos-grid">
+        @if (catalogosFiltrados.length === 0) {
+            <div class="mant-vacio">
+                <app-empty-state mensaje="No se encontraron catálogos con el filtro de búsqueda." />
+            </div>
+        }
+        @for (cat of catalogosFiltrados; track cat.key) {
+            <div class="cat-panel" [style.--cat]="cat.color" tabindex="0"
+                (click)="irADetalle(cat)" (keydown.enter)="irADetalle(cat)"
+                [attr.data-testid]="'catalogo-' + cat.key">
+                <div class="cat-panel-icon" [style.background]="cat.color + '18'" [style.color]="cat.color">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path [attr.d]="iconoGrid"/>
+                    </svg>
+                </div>
+                <div class="cat-panel-body">
+                    <div class="cat-panel-titulos">
+                        <h3 class="cat-panel-titulo">{{ cat.titulo }}</h3>
+                        <span class="cat-panel-tabla">{{ cat.tabla }}</span>
+                    </div>
+                    <p class="cat-panel-texto">{{ cat.texto }}</p>
+                    <span class="cat-panel-ir" [style.color]="cat.color">
+                        Administrar
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+        }
+    </div>
+</section>

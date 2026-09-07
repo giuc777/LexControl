@@ -1,0 +1,155 @@
+@if (catalogo(); as cat) {
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+        <a (click)="irAVolver()" class="breadcrumb-link">Mantenimiento</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">{{ cat.titulo }}</span>
+    </nav>
+
+    <app-page-header [titulo]="cat.titulo" [subtitulo]="cat.texto">
+        <div class="detail-actions">
+            <button type="button" class="btn-secondary" (click)="irAVolver()" data-testid="btn-volver">
+                Volver a Catálogos
+            </button>
+            <button type="button" class="btn-primary" (click)="abrirModalCrear()" data-testid="btn-nuevo-valor">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Nuevo valor
+            </button>
+        </div>
+    </app-page-header>
+
+    <section class="mant-banner" role="note">
+        <svg class="mant-banner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"/>
+        </svg>
+        <div>
+            <strong>Valores referenciados por los casos.</strong> Un valor <em>en uso</em> por expedientes, trámites,
+            agenda o notificaciones no puede desactivarse: primero deberá dejar de usarse.
+        </div>
+    </section>
+
+    <section class="panel" aria-label="Valores del catálogo">
+        <div class="filters-bar" role="search">
+            <label class="filter-field mant-grow">
+                <span class="filter-label">Buscar:</span>
+                <input type="text" class="filter-input" placeholder="Buscar por nombre, valor o descripción..."
+                    autocomplete="off" [value]="filtroBusqueda"
+                    (input)="alBuscar($any($event.target).value)"
+                    data-testid="filtro-busqueda" />
+            </label>
+            <label class="filter-field mant-check">
+                <input type="checkbox" [checked]="incluirInactivos()"
+                    (change)="toggleIncluirInactivos()" data-testid="filtro-inactivos" />
+                <span class="filter-label">Incluir inactivos</span>
+            </label>
+            <span class="filter-spacer"></span>
+        </div>
+
+        <div class="table-scroll">
+            <table class="data-table" data-testid="valores-table">
+                <thead>
+                    <tr>
+                        <th>NOMBRE</th>
+                        @if (cat.tipo === 'estandar') {
+                            <th>VALOR</th>
+                            <th>COLOR</th>
+                            <th>ORDEN</th>
+                        }
+                        @if (cat.tipo === 'juzgado') {
+                            <th>TIPO</th>
+                            <th>DIRECCIÓN</th>
+                            <th>TELÉFONO</th>
+                            <th>EMAIL</th>
+                        }
+                        <th>ESTADO</th>
+                        <th>FECHA CREACIÓN</th>
+                        <th>ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (items().length === 0) {
+                        <tr>
+                            <td [attr.colspan]="cat.tipo === 'juzgado' ? 9 : 7">
+                                <app-empty-state mensaje="No se encontraron valores en este catálogo." />
+                            </td>
+                        </tr>
+                    }
+                    @for (item of items(); track item.id) {
+                        <tr [class.fila-inactiva]="!item.activo" [attr.data-testid]="'fila-' + item.id">
+                            <td>
+                                <div class="mnt-nombre">
+                                    @if (cat.tipo === 'estandar') {
+                                        <span class="mnt-dot" [style.background]="($any(item).color || cat.color)"></span>
+                                    }
+                                    {{ item.nombre }}
+                                </div>
+                            </td>
+                            @if (cat.tipo === 'estandar') {
+                                <td>
+                                    @if ($any(item).valor) {
+                                        <span class="mnt-valor">{{ $any(item).valor }}</span>
+                                    } @else {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if ($any(item).color) {
+                                        <span class="mnt-dot" [style.background]="$any(item).color"
+                                            style="width:14px;height:14px;border-radius:4px;display:inline-block;"></span>
+                                    } @else {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                                <td>{{ $any(item).orden }}</td>
+                            }
+                            @if (cat.tipo === 'juzgado') {
+                                <td>{{ $any(item).tipoJuzgado || '—' }}</td>
+                                <td>
+                                    <span class="cell-truncate">{{ $any(item).direccion || '—' }}</span>
+                                </td>
+                                <td>{{ $any(item).telefono || '—' }}</td>
+                                <td>{{ $any(item).email || '—' }}</td>
+                            }
+                            <td>
+                                <button type="button" class="toggle" [class.activo]="item.activo"
+                                    (click)="toggleActivo(item)"
+                                    [attr.data-testid]="'toggle-' + item.id"
+                                    [attr.aria-label]="item.activo ? 'Desactivar ' + item.nombre : 'Activar ' + item.nombre">
+                                    <span class="toggle-track">
+                                        <span class="toggle-thumb"></span>
+                                    </span>
+                                    <span class="toggle-label">{{ item.activo ? 'Activo' : 'Inactivo' }}</span>
+                                </button>
+                            </td>
+                            <td>
+                                <span class="mnt-fecha">{{ formatearFecha(item.fechaCreacion) }}</span>
+                            </td>
+                            <td>
+                                <div class="mnt-acciones">
+                                    <button type="button" class="btn-icon" title="Editar"
+                                        (click)="abrirModalEditar(item)"
+                                        [attr.data-testid]="'editar-' + item.id">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <app-paginacion [total]="total()" [paginaActual]="paginaActual()"
+            [tamanioPagina]="tamanioPagina" (paginar)="alPaginar($event)" />
+    </section>
+
+    <app-mantenimiento-item-modal [abierto]="modalAbierto()" [catalogo]="cat"
+        [item]="itemEditar()" (cerrado)="cerrarModal()" (guardado)="alGuardar()" />
+}

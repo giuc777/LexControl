@@ -19,6 +19,15 @@ public class ExpedientesController : ControllerBase
 
     // ── Listado paginado ────────────────────────────────────────
 
+    /// <summary>Lista abogados activos para el selector del formulario.</summary>
+    [HttpGet("abogados")]
+    [ProducesResponseType(typeof(ApiResponse<List<AbogadoDto>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<List<AbogadoDto>>>> ListarAbogados()
+    {
+        var abogados = await _expedienteService.ListarAbogadosAsync();
+        return Ok(ApiResponse<List<AbogadoDto>>.Correcto(abogados));
+    }
+
     /// <summary>Lista expedientes con filtros y paginación.</summary>
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<List<ExpedienteDto>>), StatusCodes.Status200OK)]

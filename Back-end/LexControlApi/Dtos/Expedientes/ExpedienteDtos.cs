@@ -353,6 +353,13 @@ public class ExpedienteCrearDto
     public int AbogadoId { get; set; }
 }
 
+/// <summary>Abogado para selector del formulario de expedientes.</summary>
+public class AbogadoDto
+{
+    public int Id { get; set; }
+    public string NombreCompleto { get; set; } = string.Empty;
+}
+
 /// <summary>Datos para actualizar un expediente.</summary>
 public class ExpedienteActualizarDto
 {

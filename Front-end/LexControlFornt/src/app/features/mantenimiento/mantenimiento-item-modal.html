@@ -1,0 +1,113 @@
+@if (abierto()) {
+    <div class="modal-wrap open" role="dialog" aria-modal="true" [attr.aria-labelledby]="'modalItemTitulo'">
+        <div class="modal-backdrop" (click)="alCerrar()"></div>
+        <div class="modal-card">
+            <header class="modal-header">
+                <h2 class="modal-title" id="modalItemTitulo">{{ tituloModal }}</h2>
+                <button type="button" class="modal-close" aria-label="Cerrar" (click)="alCerrar()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </header>
+
+            <form class="modal-form" (submit)="$event.preventDefault(); alGuardar()">
+                @if (error()) {
+                    <div class="form-error" role="alert">{{ error() }}</div>
+                }
+
+                <div class="form-grid">
+                    <!-- Campo: Nombre (siempre visible) -->
+                    <div class="field full">
+                        <label for="mntNombre">Nombre <span class="req">*</span></label>
+                        <input type="text" id="mntNombre" maxlength="50" autocomplete="off"
+                            placeholder="Ej. Juicio Verbal" [(ngModel)]="nombre" name="nombre"
+                            data-testid="input-nombre" required />
+                    </div>
+
+                    @if (!esJuzgado) {
+                        <!-- Campos estándar -->
+                        <div class="field">
+                            <label for="mntValor">Valor</label>
+                            <input type="text" id="mntValor" maxlength="20" autocomplete="off"
+                                placeholder="Código abreviado" [(ngModel)]="valor" name="valor"
+                                data-testid="input-valor" />
+                        </div>
+
+                        <div class="field">
+                            <label for="mntColorInput">Color</label>
+                            <div class="mnt-color-fila">
+                                <input type="color" id="mntColorInput" [(ngModel)]="color" name="color"
+                                    data-testid="input-color" />
+                                <input type="text" id="mntColorHex" maxlength="7" autocomplete="off"
+                                    [ngModel]="color" (ngModelChange)="color = $event"
+                                    name="colorHex" placeholder="#358292" />
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label for="mntOrden">Orden</label>
+                            <input type="number" id="mntOrden" min="0" placeholder="0"
+                                [(ngModel)]="orden" name="orden" data-testid="input-orden" />
+                        </div>
+
+                        <div class="field full">
+                            <label for="mntDescripcion">Descripción</label>
+                            <textarea id="mntDescripcion" rows="3" maxlength="200"
+                                placeholder="Breve descripción del valor"
+                                [(ngModel)]="descripcion" name="descripcion"
+                                data-testid="input-descripcion"></textarea>
+                        </div>
+                    }
+
+                    @if (esJuzgado) {
+                        <!-- Campos juzgado -->
+                        <div class="field">
+                            <label for="mntTipoJuzgadoId">Tipo de juzgado <span class="req">*</span></label>
+                            <input type="number" id="mntTipoJuzgadoId" min="1"
+                                [(ngModel)]="tipoJuzgadoId" name="tipoJuzgadoId"
+                                placeholder="ID del tipo" data-testid="input-tipo-juzgado" required />
+                        </div>
+
+                        <div class="field">
+                            <label for="mntMunicipioId">Municipio <span class="req">*</span></label>
+                            <input type="number" id="mntMunicipioId" min="1"
+                                [(ngModel)]="municipioId" name="municipioId"
+                                placeholder="ID del municipio" data-testid="input-municipio" required />
+                        </div>
+
+                        <div class="field full">
+                            <label for="mntDireccion">Dirección</label>
+                            <input type="text" id="mntDireccion" maxlength="200" autocomplete="off"
+                                [(ngModel)]="direccion" name="direccion"
+                                placeholder="Dirección del juzgado" data-testid="input-direccion" />
+                        </div>
+
+                        <div class="field">
+                            <label for="mntTelefono">Teléfono</label>
+                            <input type="text" id="mntTelefono" maxlength="20" autocomplete="off"
+                                [(ngModel)]="telefono" name="telefono"
+                                placeholder="7762-0000" data-testid="input-telefono" />
+                        </div>
+
+                        <div class="field">
+                            <label for="mntEmail">Email</label>
+                            <input type="email" id="mntEmail" maxlength="100" autocomplete="off"
+                                [(ngModel)]="email" name="email"
+                                placeholder="correo@ejemplo.com" data-testid="input-email" />
+                        </div>
+                    }
+                </div>
+
+                <footer class="modal-footer">
+                    <button type="button" class="btn-link" (click)="alCerrar()">Cancelar</button>
+                    <button type="submit" class="btn-primary" [disabled]="guardando()"
+                        data-testid="btn-guardar">
+                        {{ guardando() ? 'Guardando...' : 'Guardar valor' }}
+                    </button>
+                </footer>
+            </form>
+        </div>
+    </div>
+}

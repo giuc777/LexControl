@@ -49,8 +49,11 @@ builder.Services.AddCors(opciones =>
         policy.WithOrigins(
                 "http://localhost:5173",
                 "http://localhost:4200",
+                "https://localhost:4200",
                 "http://localhost:3000",
-                "http://localhost:8080")
+                "https://localhost:3000",
+                "http://localhost:8080",
+                "https://localhost:8080")
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
@@ -104,6 +107,7 @@ builder.Services.AddScoped<IPermisoService, PermisoService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IExpedienteService, ExpedienteService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<ICatalogoService, CatalogoService>();
 
 // Limite de upload: 50 MB
 builder.WebHost.ConfigureKestrel(opciones =>

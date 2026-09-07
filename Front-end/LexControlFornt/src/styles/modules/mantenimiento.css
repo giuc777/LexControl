@@ -1,0 +1,302 @@
+/* ============ Mantenimiento ============ */
+/* Paneles de catálogos, banner de nota, toggle Activo/Inactivo y tabla. */
+
+/* ---------- Header search ---------- */
+
+.mant-header-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid var(--field-line);
+    border-radius: 8px;
+    padding: 8px 12px;
+    min-width: 260px;
+}
+
+.mant-header-search svg {
+    width: 16px;
+    height: 16px;
+    color: var(--subtle);
+    flex: 0 0 auto;
+}
+
+.mant-header-search input {
+    border: none;
+    outline: none;
+    font: 500 13.5px var(--font);
+    color: var(--ink);
+    background: transparent;
+    width: 100%;
+}
+
+.mant-header-search input::placeholder {
+    color: #a4b0b4;
+}
+
+/* ---------- Banner de nota ---------- */
+
+.mant-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #f0f7f9;
+    border: 1px solid #cfe2e8;
+    border-radius: var(--radius-card);
+    padding: 14px 16px;
+    margin-bottom: 22px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+.mant-banner svg.mant-banner-icon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    margin-top: 1px;
+    color: var(--brand);
+}
+
+.mant-banner strong {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.mant-banner em {
+    font-style: normal;
+    color: var(--brand-dark);
+    font-weight: 500;
+}
+
+/* ---------- Grid de catálogos ---------- */
+
+.cat-panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    padding: 20px;
+}
+
+.cat-panel {
+    display: flex;
+    gap: 14px;
+    background: #ffffff;
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.cat-panel:hover,
+.cat-panel:focus-visible {
+    border-color: var(--cat, var(--brand));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+    transform: translateY(-2px);
+    outline: none;
+}
+
+.cat-panel-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 auto;
+    border-radius: 11px;
+}
+
+.cat-panel-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.cat-panel-body {
+    min-width: 0;
+}
+
+.cat-panel-titulos {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.cat-panel-titulo {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+}
+
+.cat-panel-tabla {
+    font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
+    font-size: 10.5px;
+    color: var(--subtle);
+    background: #f2f5f6;
+    border: 1px solid #e6ecee;
+    border-radius: 5px;
+    padding: 2px 6px;
+    white-space: nowrap;
+}
+
+.cat-panel-texto {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.45;
+    margin: 0 0 12px;
+}
+
+.cat-panel-ir {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.cat-panel-ir svg {
+    width: 14px;
+    height: 14px;
+}
+
+.mant-vacio {
+    grid-column: 1 / -1;
+}
+
+/* ---------- Detalle: filtros y tabla ---------- */
+
+.mant-grow {
+    flex: 1 1 320px;
+}
+
+.mant-check {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.mant-check input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--brand);
+    cursor: pointer;
+}
+
+.mant-check .filter-label {
+    margin: 0;
+    cursor: pointer;
+}
+
+.filter-spacer {
+    flex: 1 1 0;
+}
+
+/* ---------- Acciones de fila ---------- */
+
+.mnt-acciones {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+/* ---------- Toggle Activo / Inactivo ---------- */
+
+.toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    padding: 4px 0;
+    cursor: pointer;
+    font: 600 12px var(--font);
+    color: var(--muted);
+}
+
+.toggle-track {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    border-radius: 999px;
+    background: #dce4e7;
+    transition: background 0.18s ease;
+    flex: 0 0 auto;
+}
+
+.toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform 0.18s ease;
+}
+
+.toggle.activo .toggle-track {
+    background: #2ecc71;
+}
+
+.toggle.activo .toggle-thumb {
+    transform: translateX(18px);
+}
+
+.toggle.activo .toggle-label {
+    color: #1e8449;
+}
+
+.toggle:hover .toggle-track {
+    filter: brightness(0.97);
+}
+
+/* ---------- Detalle: head actions ---------- */
+
+.detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ---------- Modal de mantenimiento ---------- */
+
+.mnt-color-fila {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mnt-color-fila input[type='color'] {
+    width: 44px;
+    height: 38px;
+    padding: 3px;
+    border: 1px solid var(--field-line);
+    border-radius: 8px;
+    background: #ffffff;
+    cursor: pointer;
+    flex: 0 0 auto;
+}
+
+.mnt-color-fila input[type='text'] {
+    font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
+    text-transform: uppercase;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 720px) {
+    .cat-panels {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+
+    .detail-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

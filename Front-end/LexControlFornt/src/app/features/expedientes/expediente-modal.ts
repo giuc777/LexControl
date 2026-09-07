@@ -1,8 +1,12 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { Modal } from '../../shared/components/modal/modal';
 import { ExpedienteCrearDto, ExpedienteActualizarDto, ExpedienteDetalle } from '../../core/models/expediente.model';
+import { ClientesService } from '../../core/services/clientes-service';
+import { UsuariosService } from '../../core/services/usuarios-service';
+import { ClienteLista } from '../../core/models/cliente.model';
+import { UsuarioLista } from '../../core/models/usuario.model';
 
 /* Catalogos locales para los selects del formulario. IDs basados en
    los seeds de LexControlDB.sql (secciones 9-10). */
@@ -56,6 +60,9 @@ export class ExpedienteModal implements OnChanges {
     @Output() readonly cerrado = new EventEmitter<void>();
     @Output() readonly guardado = new EventEmitter<ExpedienteCrearDto | ExpedienteActualizarDto>();
 
+    private readonly clientesService = inject(ClientesService);
+    private readonly usuariosService = inject(UsuariosService);
+
     protected readonly titulo = signal('Nuevo Expediente');
     protected readonly textoBoton = signal('Guardar expediente');
     protected readonly error = signal('');
@@ -65,6 +72,9 @@ export class ExpedienteModal implements OnChanges {
     protected readonly estados = ESTADOS;
     protected readonly rolesProcesales = ROLES_PROCESALES;
     protected readonly juzgados = JUZGADOS;
+
+    protected clientes: ClienteLista[] = [];
+    protected abogados: UsuarioLista[] = [];
 
     protected noExpediente = '';
     protected clienteId = 0;
@@ -76,11 +86,14 @@ export class ExpedienteModal implements OnChanges {
     protected estadoId = 1;
     protected descripcion = '';
     protected notasInternas = '';
+    protected abogadoId = 0;
 
     ngOnChanges(cambios: SimpleChanges): void {
         if (cambios['abierto'] && this.abierto) {
             this.error.set('');
             this.guardando.set(false);
+            this.cargarClientes();
+            this.cargarAbogados();
             if (this.modo === 'editar' && this.expediente) {
                 this.titulo.set('Editar Expediente');
                 this.textoBoton.set('Guardar cambios');
@@ -94,6 +107,7 @@ export class ExpedienteModal implements OnChanges {
                 this.estadoId = this.expediente.estadoId;
                 this.descripcion = this.expediente.descripcion ?? '';
                 this.notasInternas = this.expediente.notasInternas ?? '';
+                this.abogadoId = this.expediente.abogadoId;
             } else {
                 this.titulo.set('Nuevo Expediente');
                 this.textoBoton.set('Guardar expediente');
@@ -127,6 +141,10 @@ export class ExpedienteModal implements OnChanges {
             this.error.set('El juzgado es obligatorio.');
             return;
         }
+        if (!this.abogadoId) {
+            this.error.set('El abogado asignado es obligatorio.');
+            return;
+        }
 
         this.guardando.set(true);
 
@@ -155,10 +173,24 @@ export class ExpedienteModal implements OnChanges {
                 estadoId: this.estadoId,
                 descripcion: this.descripcion.trim() || null,
                 notasInternas: this.notasInternas.trim() || null,
-                abogadoId: 1
+                abogadoId: this.abogadoId
             };
             this.guardado.emit(datos);
         }
+    }
+
+    private cargarClientes(): void {
+        this.clientesService.listar({ pagina: 1, tamanioPagina: 500 }).subscribe({
+            next: resp => this.clientes = resp.clientes,
+            error: () => this.clientes = []
+        });
+    }
+
+    private cargarAbogados(): void {
+        this.usuariosService.listar({ rolId: 3, activo: true }).subscribe({
+            next: users => this.abogados = users,
+            error: () => this.abogados = []
+        });
     }
 
     private limpiarFormulario(): void {
@@ -172,5 +204,6 @@ export class ExpedienteModal implements OnChanges {
         this.estadoId = 1;
         this.descripcion = '';
         this.notasInternas = '';
+        this.abogadoId = 0;
     }
 }

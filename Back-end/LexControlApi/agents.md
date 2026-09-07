@@ -388,3 +388,70 @@ El SPA real debe reemplazar estos mocks con llamadas `fetch()` a los endpoints d
 - **Codificación SQL**: `Proceso_almacenados.sql` está en Windows-1252 (conservar al editar); `Reportes_almacenados.sql` y `Base_Datos.sql` están en UTF-8 con BOM.
 - **SPs faltantes**: No todos los CRUDs tienen SPs (ej. actualizar cliente, lista de audiencias). Se deben crear nuevos SPs siguiendo las convenciones de AGENTS.md.
 - **Bug en Base_Datos.sql**: El DROP DATABASE usa nombre distinto (`LexControlDB` vs `DBLexControl`). Documentado en AGENTS.md.
+
+---
+
+## 11. Validación de Archivos Subidos (Documentos)
+
+### 11.1 Tipos de archivo permitidos
+
+Solo se permiten documentos de ofimática y texto plano. **No se permiten** ejecutables, hojas de cálculo, imágenes (salvo JPEG/PNG para.documentos adjuntos) ni ningún otro tipo.
+
+| Extensión | Tipo | Magic Bytes |
+|---|---|---|
+| `.pdf` | PDF | `25 50 44 46` (%PDF) |
+| `.doc` | Word 97-2003 (OLE2) | `D0 CF 11 E0` |
+| `.docx` | Word OOXML (ZIP) | `50 4B 03 04` (PK) |
+| `.jpg` / `.jpeg` | JPEG | `FF D8 FF` |
+| `.png` | PNG | `89 50 4E 47` (‰PNG) |
+| `.txt` | Texto plano | Sin magic bytes (solo extensión) |
+
+### 11.2 Validación por Magic Bytes (File Signature Validation)
+
+El sistema implementa **validación en 3 capas** para evitar que archivos renombrados (ej. un `.exe` renombrado a `.pdf`) pasen la validación:
+
+1. **HTML** — Atributo `accept` en el input file (filtro UX, bypasseable).
+2. **Frontend TS** — Lee los primeros 8 bytes con `FileReader` y compara contra firmas conocidas antes de enviar al backend (error inmediato sin esperar upload).
+3. **Backend** — `FileStorageService.GuardarAsync()` lee los primeros 8 bytes del `IFormFile` vía `OpenReadStream()` y valida contra `MagicBytes.Validar()`. Si no coincide → `ExcepcionNegocio` con HTTP 400.
+
+### 11.3 Clase `MagicBytes` (Services/FileStorageService.cs)
+
+```csharp
+internal static class MagicBytes
+{
+    internal static bool Validar(byte[] buffer, int bytesRead, string extension)
+    {
+        if (bytesRead < 4) return false;
+        return extension.ToLowerInvariant() switch
+        {
+            ".pdf"  => buffer[0] == 0x25 && buffer[1] == 0x50 && buffer[2] == 0x44 && buffer[3] == 0x46,
+            ".doc"  => buffer[0] == 0xD0 && buffer[1] == 0xCF && buffer[2] == 0x11 && buffer[3] == 0xE0,
+            ".docx" => buffer[0] == 0x50 && buffer[1] == 0x4B && buffer[2] == 0x03 && buffer[3] == 0x04,
+            ".jpg" or ".jpeg" => bytesRead >= 3 && buffer[0] == 0xFF && buffer[1] == 0xD8 && buffer[2] == 0xFF,
+            ".png"  => buffer[0] == 0x89 && buffer[1] == 0x50 && buffer[2] == 0x4E && buffer[3] == 0x47,
+            ".txt"  => true,  // TXT no tiene magic bytes fiables
+            _       => false
+        };
+    }
+}
+```
+
+### 11.4 Flujo de validación en `GuardarAsync()`
+
+```
+1. Obtener extensión del nombre del archivo
+2. Si extension vacía → buscar en MimeToExtension por ContentType
+3. Leer primeros 8 bytes del stream del archivo
+4. Llamar MagicBytes.Validar(buffer, bytesRead, extension)
+5. Si no es válido → ExcepcionNegocio("El contenido del archivo no coincide con la extension {ext} indicada.", 400)
+6. Si es válido → proceder a escribir a disco
+```
+
+### 11.5 Mensajes de error
+
+| Capa | Mensaje |
+|---|---|
+| Backend (extensión) | `Tipo de archivo no permitido: {ext}. Tipos permitidos: .pdf, .doc, .docx, .jpg, .jpeg, .png, .txt` |
+| Backend (magic bytes) | `El contenido del archivo no coincide con la extension {ext} indicada.` |
+| Frontend (extensión) | `Tipo de archivo no permitido. Solo se aceptan PDF, Word, JPG, PNG y TXT.` |
+| Frontend (magic bytes) | `El contenido del archivo no coincide con la extension {ext} indicada.` |

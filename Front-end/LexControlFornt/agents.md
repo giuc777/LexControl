@@ -281,6 +281,34 @@ Manejo de errores uniforme: el interceptor captura 401 → logout y redirect `/l
 - `baseUrl` del API por environments (`environment.apiBaseUrl`), nunca hardcoded en servicios.
 - No incluir el token de Figma de `link-figma.txt` ni secretos en este proyecto.
 
+### 10.3.1 Validación de archivos subidos (Documentos)
+
+El módulo de expedientes permite subir documentos adjuntos. La validación de archivos se ejecuta en **3 capas**:
+
+| Capa | Ubicación | Qué valida |
+|---|---|---|
+| HTML | `expediente-detalle-page.html` | Atributo `accept` en `<input type="file">` (filtro UX) |
+| Frontend | `expediente-detalle-page.ts` | Extensión + magic bytes antes del HTTP |
+| Backend | `FileStorageService.cs` | Extensión + magic bytes antes de escribir a disco |
+
+**Tipos permitidos**: `.pdf`, `.doc`, `.docx`, `.jpg`, `.jpeg`, `.png`, `.txt`
+
+**Magic bytes validados en el frontend** (`validarMagicBytes()`):
+- PDF → `25 50 44 46` (%PDF)
+- DOC → `D0 CF 11 E0` (OLE2)
+- DOCX → `50 4B 03 04` (ZIP/PK)
+- JPEG → `FF D8 FF`
+- PNG → `89 50 4E 47` (‰PNG)
+- TXT → siempre válido (sin magic bytes fiables)
+
+**Flujo en `alSubirArchivo()`**:
+1. Validar extensión contra lista de permitidos → toast si no coincide
+2. Leer primeros 8 bytes con `FileReader.readAsArrayBuffer(archivo.slice(0, 8))`
+3. Comparar magic bytes contra firma conocida → toast si no coincide
+4. Si pasa ambas validaciones → enviar al backend via `DocumentosService.subir()`
+
+**Importante**: La validación frontend es UX (error inmediato). La validación backend es la seguridad obligatoria. Nunca confiar solo en la capa de UI.
+
 ### 10.4 HTTP y datos
 
 - Toda llamada pasa por `HttpClient` + `auth-interceptor` (Bearer automático).

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { ExpedientesService } from '../../core/services/expedientes-service';
 import { DocumentosService } from '../../core/services/documentos-service';
+import { ToastService } from '../../layout/toast/toast-service';
 import {
     DocExpediente,
     ExpedienteActualizarDto,
@@ -28,6 +29,7 @@ export class ExpedienteDetallePage implements OnInit {
     private readonly router = inject(Router);
     private readonly expedientesSvc = inject(ExpedientesService);
     private readonly documentosSvc = inject(DocumentosService);
+    private readonly toastSvc = inject(ToastService);
 
     protected readonly expediente = signal<ExpedienteDetalle | null>(null);
     protected readonly partes = signal<ParteProcesal[]>([]);
@@ -73,7 +75,7 @@ export class ExpedienteDetallePage implements OnInit {
         const t = (tipo ?? '').toUpperCase();
         if (t === 'PDF') return 'pdf';
         if (t === 'WORD' || t === 'DOC' || t === 'DOCX') return 'word';
-        if (t === 'EXCEL' || t === 'XLS' || t === 'XLSX') return 'excel';
+        if (t === 'IMAGEN' || t === 'JPG' || t === 'JPEG' || t === 'PNG') return 'imagen';
         return 'otro';
     }
 
@@ -192,12 +194,50 @@ export class ExpedienteDetallePage implements OnInit {
 
     alSubirArchivo(archivo: File): void {
         if (!archivo) return;
-        this.documentosSvc.subir(this.expedienteId, archivo, null).subscribe({
-            next: () => {
-                this.cerrarModalUpload();
-                this.cargarDocumentos();
+
+        const extension = archivo.name.substring(archivo.name.lastIndexOf('.')).toLowerCase();
+        const permitidos = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.txt'];
+        if (!permitidos.includes(extension)) {
+            this.toastSvc.mostrar('Tipo de archivo no permitido. Solo se aceptan PDF, Word, JPG, PNG y TXT.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            const buffer = new Uint8Array(reader.result as ArrayBuffer);
+            if (!this.validarMagicBytes(buffer, extension)) {
+                this.toastSvc.mostrar(`El contenido del archivo no coincide con la extension ${extension} indicada.`);
+                return;
             }
-        });
+            this.documentosSvc.subir(this.expedienteId, archivo, null).subscribe({
+                next: () => {
+                    this.cerrarModalUpload();
+                    this.cargarDocumentos();
+                }
+            });
+        };
+        reader.readAsArrayBuffer(archivo.slice(0, 8));
+    }
+
+    private validarMagicBytes(buffer: Uint8Array, extension: string): boolean {
+        if (buffer.length < 4) return false;
+        switch (extension) {
+            case '.pdf':
+                return buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46;
+            case '.doc':
+                return buffer[0] === 0xD0 && buffer[1] === 0xCF && buffer[2] === 0x11 && buffer[3] === 0xE0;
+            case '.docx':
+                return buffer[0] === 0x50 && buffer[1] === 0x4B && buffer[2] === 0x03 && buffer[3] === 0x04;
+            case '.jpg':
+            case '.jpeg':
+                return buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+            case '.png':
+                return buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+            case '.txt':
+                return true;
+            default:
+                return false;
+        }
     }
 
     // ── Carga de datos ───────────────────────────────────────

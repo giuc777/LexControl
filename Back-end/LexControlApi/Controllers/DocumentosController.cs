@@ -38,7 +38,7 @@ public class DocumentosController : ControllerBase
         if (file.Length > 50 * 1024 * 1024)
             throw new ExcepcionNegocio(-1, "El archivo excede el limite de 50 MB.", StatusCodes.Status400BadRequest);
 
-        var tiposPermitidos = new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".jpg", ".jpeg", ".png", ".txt" };
+        var tiposPermitidos = new[] { ".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png", ".txt" };
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!tiposPermitidos.Contains(extension))
             throw new ExcepcionNegocio(-1,
@@ -98,14 +98,12 @@ public class DocumentosController : ControllerBase
 
     private static string ObtenerContentType(string ruta) => Path.GetExtension(ruta).ToLowerInvariant() switch
     {
-        ".pdf" => "application/pdf",
-        ".doc" => "application/msword",
+        ".pdf"  => "application/pdf",
+        ".doc"  => "application/msword",
         ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        ".xls" => "application/vnd.ms-excel",
-        ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         ".jpg" or ".jpeg" => "image/jpeg",
-        ".png" => "image/png",
-        ".txt" => "text/plain",
-        _ => "application/octet-stream"
+        ".png"  => "image/png",
+        ".txt"  => "text/plain",
+        _       => "application/octet-stream"
     };
 }

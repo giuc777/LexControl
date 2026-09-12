@@ -17,9 +17,23 @@ public class LoginResponseDto
 {
     public string Token { get; set; } = string.Empty;
     public DateTime Expiracion { get; set; }
+    public string RefreshToken { get; set; } = string.Empty;
     public int UsuarioId { get; set; }
     public string Usuario { get; set; } = string.Empty;
     public string NombreCompleto { get; set; } = string.Empty;
     public int RolId { get; set; }
     public string Rol { get; set; } = string.Empty;
+}
+
+/// <summary>Solicitud de refresh de token.</summary>
+public class RefreshRequestDto
+{
+    [Required(ErrorMessage = "El refresh token es obligatorio.")]
+    public string RefreshToken { get; set; } = string.Empty;
+}
+
+/// <summary>Solicitud de logout.</summary>
+public class LogoutRequestDto
+{
+    public string RefreshToken { get; set; } = string.Empty;
 }

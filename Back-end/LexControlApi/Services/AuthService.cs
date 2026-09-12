@@ -7,91 +7,92 @@ namespace LexControlApi.Services;
 public interface IAuthService
 {
     /// <summary>Valida credenciales; null si son inválidas o la cuenta está bloqueada.</summary>
-    Task<LoginResponseDto?> LoginAsync(LoginRequestDto solicitud);
+    Task<LoginResponseDto?> LoginAsync(LoginRequestDto solicitud, string? userAgent, string? ipAddress);
 }
 
 public class AuthService : IAuthService
 {
     private readonly Data.IRepositorio _repositorio;
-    private readonly IConfiguration _configuracion;
-    private readonly string _secreto;
-    private readonly string _emisor;
-    private readonly string _audiencia;
-    private readonly int _minutosExpiracion;
+    private readonly IJwtService _jwtService;
+    private readonly IRefreshTokenService _refreshTokenService;
 
-    public AuthService(Data.IRepositorio repositorio, IConfiguration configuracion)
+    public AuthService(
+        Data.IRepositorio repositorio,
+        IJwtService jwtService,
+        IRefreshTokenService refreshTokenService)
     {
         _repositorio = repositorio;
-        _configuracion = configuracion;
-
-        var jwt = configuracion.GetSection("Jwt");
-        _secreto = jwt["Secret"] ?? Environment.GetEnvironmentVariable("JWT_SECRET")
-            ?? throw new InvalidOperationException("Falta la clave 'Jwt:Secret'.");
-        _emisor = jwt["Issuer"] ?? "LexControlApi";
-        _audiencia = jwt["Audience"] ?? "LexControlApp";
-        _minutosExpiracion = int.TryParse(jwt["ExpiryMinutes"], out var m) ? m : 120;
-
-        if (_secreto.Length < 32)
-            throw new InvalidOperationException("La clave 'Jwt:Secret' debe tener al menos 32 caracteres.");
+        _jwtService = jwtService;
+        _refreshTokenService = refreshTokenService;
     }
 
-    public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto solicitud)
+    public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto solicitud, string? userAgent, string? ipAddress)
     {
-        var hash = Helpers.HashHelper.Sha256Hex(solicitud.Contrasena);
+        // Paso 1: Intentar autenticar con SHA256 (legacy)
+        var hashLegacy = Helpers.HashHelper.Sha256Hex(solicitud.Contrasena);
 
         var fila = await _repositorio.ConsultarPrimeroAsync<AutenticacionFila>(
             "SP_Usuario_Autenticar",
-            new { Usuario = solicitud.Usuario, ContraseñaHash = hash });
+            new { Usuario = solicitud.Usuario, ContraseñaHash = hashLegacy });
 
-        if (fila is null)
+        if (fila is not null)
         {
-            // La cuenta puede no existir, tener hash distinto o estar bloqueada;
-            // se responde igual para no filtrar información.
-            await _repositorio.EjecutarRetornoAsync(
-                "SP_Usuario_RegistrarIntentoFallido", new { Usuario = solicitud.Usuario });
-            return null;
+            // Si el hash es legacy, migrar a BCrypt transparentemente
+            if (fila.HashLegacy)
+            {
+                var nuevoHash = Helpers.HashHelper.HashPassword(solicitud.Contrasena);
+                await _repositorio.EjecutarRetornoAsync(
+                    "SP_Usuario_ActualizarHash",
+                    new { ID = fila.ID, ContraseñaHash = nuevoHash, HashLegacy = false });
+            }
+
+            return await GenerarRespuestaAsync(fila.ID, fila.NombreCompleto, fila.Usuario, fila.Rol_ID, fila.RolNombre, userAgent, ipAddress);
         }
 
-        await _repositorio.EjecutarRetornoAsync(
-            "SP_Usuario_ActualizarAcceso", new { Usuario = fila.Usuario });
+        // Paso 2: Fallback — intentar con BCrypt
+        var candidato = await _repositorio.ConsultarPrimeroAsync<UsuarioAutenticacionFila>(
+            "SP_Usuario_ObtenerPorNombre",
+            new { Usuario = solicitud.Usuario });
 
-        return GenerarToken(fila);
+        if (candidato is not null
+            && !candidato.Bloqueado
+            && Helpers.HashHelper.EsHashBcrypt(candidato.ContraseñaHash)
+            && Helpers.HashHelper.VerifyPassword(solicitud.Contrasena, candidato.ContraseñaHash))
+        {
+            return await GenerarRespuestaAsync(candidato.ID, candidato.NombreCompleto, candidato.Usuario, candidato.Rol_ID, candidato.Rol, userAgent, ipAddress);
+        }
+
+        // Paso 3: Credenciales inválidas — registrar intento fallido
+        await _repositorio.EjecutarRetornoAsync(
+            "SP_Usuario_RegistrarIntentoFallido", new { Usuario = solicitud.Usuario });
+
+        return null;
     }
 
-    private LoginResponseDto GenerarToken(AutenticacionFila fila)
+    private async Task<LoginResponseDto> GenerarRespuestaAsync(
+        int usuarioId, string nombreCompleto, string usuario, int rolId, string rol,
+        string? userAgent, string? ipAddress)
     {
-        var expiracion = DateTime.UtcNow.AddMinutes(_minutosExpiracion);
-        var claims = new List<System.Security.Claims.Claim>
-        {
-            new(System.Security.Claims.ClaimTypes.NameIdentifier, fila.ID.ToString()),
-            new(System.Security.Claims.ClaimTypes.Name, fila.NombreCompleto),
-            new("usuario", fila.Usuario),
-            new("rol_id", fila.Rol_ID.ToString()),
-            new(System.Security.Claims.ClaimTypes.Role, fila.RolNombre)
-        };
+        // Generar access token (15 min)
+        var (token, expiracion) = _jwtService.GenerarAccessToken(usuarioId, nombreCompleto, usuario, rolId, rol);
 
-        var credenciales = new Microsoft.IdentityModel.Tokens.SigningCredentials(
-            new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-                System.Text.Encoding.UTF8.GetBytes(_secreto)),
-            Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256);
+        // Generar refresh token (7 días)
+        var refreshToken = await _refreshTokenService.CrearAsync(usuarioId, userAgent, ipAddress);
 
-        var token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
-            issuer: _emisor,
-            audience: _audiencia,
-            claims: claims,
-            notBefore: DateTime.UtcNow,
-            expires: expiracion,
-            signingCredentials: credenciales);
+        // Actualizar último acceso
+        await _repositorio.EjecutarRetornoAsync(
+            "SP_Usuario_ActualizarAcceso", new { Usuario = usuario });
 
         return new LoginResponseDto
         {
-            Token = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().WriteToken(token),
+            Token = token,
             Expiracion = expiracion,
-            UsuarioId = fila.ID,
-            Usuario = fila.Usuario,
-            NombreCompleto = fila.NombreCompleto,
-            RolId = fila.Rol_ID,
-            Rol = fila.RolNombre
+            RefreshToken = refreshToken,
+            UsuarioId = usuarioId,
+            Usuario = usuario,
+            NombreCompleto = nombreCompleto,
+            RolId = rolId,
+            Rol = rol
         };
     }
 }

@@ -12,10 +12,12 @@ export interface SesionUsuario {
     rolId: number;
     rol: string;
     token: string;
+    refreshToken: string;
     expiracion: string;   // ISO 8601 UTC (api.md §4.1)
 }
 
 const CLAVE_TOKEN = 'lexcontrol_token';
+const CLAVE_REFRESH = 'lexcontrol_refresh';
 const CLAVE_USUARIO_ID = 'lexcontrol_usuarioId';
 const CLAVE_USUARIO = 'lexcontrol_usuario';
 const CLAVE_NOMBRE = 'lexcontrol_nombre';
@@ -23,9 +25,6 @@ const CLAVE_ROL_ID = 'lexcontrol_rolId';
 const CLAVE_ROL = 'lexcontrol_rol';
 const CLAVE_EXPIRACION = 'lexcontrol_expiracion';
 
-/* Autenticación contra LexControlApi (agents.md §6.1):
-   POST /api/auth/login devuelve el JWT y los datos de la sesión;
-   el token vive solo en sessionStorage (nunca se loguea ni versiona). */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
     private readonly http = inject(HttpClient);
@@ -39,8 +38,6 @@ export class AuthService {
     readonly rolId = computed(() => this._sesion()?.rolId ?? 0);
     readonly token = computed(() => this._sesion()?.token ?? null);
 
-    /* Sincroniza el nombre mostrado en el topbar tras editar el perfil
-       (PUT /api/perfil). Actualiza señal y sessionStorage. */
     actualizarNombre(nombre: string): void {
         const sesion = this._sesion();
         if (!sesion) return;
@@ -49,8 +46,6 @@ export class AuthService {
         this._sesion.set({ ...sesion, nombre });
     }
 
-    /* Llama al backend y persiste la sesión al recibir el JWT.
-       Los errores HTTP se propagan al componente para mostrar la alerta. */
     iniciarSesion(usuario: string, contrasena: string): Observable<SesionRespuesta> {
         return this.http
             .post<RespuestaApi<SesionRespuesta>>(`${environment.apiBaseUrl}/api/auth/login`, {
@@ -69,6 +64,29 @@ export class AuthService {
             );
     }
 
+    /* Refresca el par de tokens usando el refresh token.
+       Retorna los nuevos datos de sesión o null si el refresh falló. */
+    refrescar(): Observable<SesionUsuario | null> {
+        const refresh = sessionStorage.getItem(CLAVE_REFRESH);
+        if (!refresh) return new Observable<SesionUsuario | null>(obs => { obs.next(null); obs.complete(); });
+
+        return this.http
+            .post<RespuestaApi<SesionRespuesta>>(`${environment.apiBaseUrl}/api/auth/refresh`, {
+                refreshToken: refresh
+            })
+            .pipe(
+                map(respuesta => {
+                    if (!respuesta.success) {
+                        this.cerrarSesion();
+                        return null;
+                    }
+
+                    this.guardarSesion(respuesta.data);
+                    return this._sesion();
+                })
+            );
+    }
+
     cerrarSesion(): void {
         this.limpiarStorage();
         this._sesion.set(null);
@@ -76,6 +94,7 @@ export class AuthService {
 
     private guardarSesion(datos: SesionRespuesta): void {
         sessionStorage.setItem(CLAVE_TOKEN, datos.token);
+        sessionStorage.setItem(CLAVE_REFRESH, datos.refreshToken);
         sessionStorage.setItem(CLAVE_USUARIO_ID, String(datos.usuarioId));
         sessionStorage.setItem(CLAVE_USUARIO, datos.usuario);
         sessionStorage.setItem(CLAVE_NOMBRE, datos.nombreCompleto);
@@ -90,11 +109,11 @@ export class AuthService {
             rolId: datos.rolId,
             rol: datos.rol,
             token: datos.token,
+            refreshToken: datos.refreshToken,
             expiracion: datos.expiracion
         });
     }
 
-    /* Reconstruye la sesión al cargar la app; descarta tokens vencidos. */
     private leerSesion(): SesionUsuario | null {
         const token = sessionStorage.getItem(CLAVE_TOKEN);
         if (!token) return null;
@@ -115,12 +134,14 @@ export class AuthService {
             rolId: Number(sessionStorage.getItem(CLAVE_ROL_ID)) || 0,
             rol: sessionStorage.getItem(CLAVE_ROL) || '',
             token,
+            refreshToken: sessionStorage.getItem(CLAVE_REFRESH) || '',
             expiracion
         };
     }
 
     private limpiarStorage(): void {
         sessionStorage.removeItem(CLAVE_TOKEN);
+        sessionStorage.removeItem(CLAVE_REFRESH);
         sessionStorage.removeItem(CLAVE_USUARIO_ID);
         sessionStorage.removeItem(CLAVE_USUARIO);
         sessionStorage.removeItem(CLAVE_NOMBRE);

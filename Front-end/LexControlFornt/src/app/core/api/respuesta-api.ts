@@ -6,10 +6,11 @@ export interface RespuestaApi<T> {
 }
 
 /* Carga útil de POST /api/auth/login (api.md §4.1).
-   Fechas en ISO 8601 UTC; Expiracion por defecto 120 minutos. */
+   Fechas en ISO 8601 UTC; Expiracion por defecto 15 minutos. */
 export interface SesionRespuesta {
     token: string;
     expiracion: string;
+    refreshToken: string;
     usuarioId: number;
     usuario: string;
     nombreCompleto: string;

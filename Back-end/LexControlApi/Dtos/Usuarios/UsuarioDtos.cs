@@ -27,6 +27,24 @@ public class AutenticacionFila
     public int Rol_ID { get; set; }
     public string RolNombre { get; set; } = string.Empty;
     public bool Bloqueado { get; set; }
+    public bool HashLegacy { get; set; }
+}
+
+/// <summary>Fila del SP_Usuario_ObtenerPorNombre (fallback BCrypt).</summary>
+public class UsuarioAutenticacionFila
+{
+    public int ID { get; set; }
+    public int Persona_ID { get; set; }
+    public int Rol_ID { get; set; }
+    public string Usuario { get; set; } = string.Empty;
+    public string ContraseñaHash { get; set; } = string.Empty;
+    public bool HashLegacy { get; set; }
+    public int IntentosFallidos { get; set; }
+    public bool Bloqueado { get; set; }
+    public string NombreCompleto { get; set; } = string.Empty;
+    public string? EmailPrincipal { get; set; }
+    public string? TelefonoPrincipal { get; set; }
+    public string Rol { get; set; } = string.Empty;
 }
 
 /// <summary>Usuario expuesto al frontend.</summary>

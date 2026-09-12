@@ -3,10 +3,12 @@ using LexControlApi.Middleware;
 using LexControlApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,7 +62,7 @@ builder.Services.AddCors(opciones =>
 
 // Autenticación JWT
 var seccionJwt = builder.Configuration.GetSection("Jwt");
-var secreto = seccionJwt["Secret"] ?? Environment.GetEnvironmentVariable("JWT_SECRET");
+var secreto = Environment.GetEnvironmentVariable("JWT_SECRET") ?? seccionJwt["Secret"];
 if (string.IsNullOrEmpty(secreto) || secreto.Length < 32)
     throw new InvalidOperationException("La clave 'Jwt:Secret' es obligatoria (mínimo 32 caracteres).");
 
@@ -83,6 +85,27 @@ builder.Services
     });
 builder.Services.AddAuthorization();
 
+// Rate Limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("login", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = 5;
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = 0; // Rechazar inmediatamente
+    });
+
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
+
+// JWT: configurar Issuer para validación
+builder.Services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, opciones =>
+{
+    var issuer = seccionJwt["Issuer"] ?? "lexcontrol-api";
+    opciones.TokenValidationParameters.ValidIssuer = issuer;
+});
+
 // Errores de validación de DTOs con el formato ApiResponse del API
 builder.Services.Configure<ApiBehaviorOptions>(opciones =>
     opciones.InvalidModelStateResponseFactory = contexto =>
@@ -100,6 +123,8 @@ builder.Services.Configure<ApiBehaviorOptions>(opciones =>
 // Inyección de dependencias
 builder.Services.AddSingleton<IConnectionFactory, SqlConnectionFactory>();
 builder.Services.AddScoped<IRepositorio, RepositorioSql>();
+builder.Services.AddSingleton<IJwtService, JwtService>();
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IPerfilService, PerfilService>();
@@ -132,6 +157,7 @@ app.UseMiddleware<ManejadorExcepciones>();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors(PoliticaCors);
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

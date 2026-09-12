@@ -218,11 +218,10 @@
                 <div class="field">
                     <label for="parteTipo">Tipo <span class="req">*</span></label>
                     <select id="parteTipo" #parteTipo>
-                        <option value="Demandante">Demandante</option>
-                        <option value="Demandado">Demandado</option>
-                        <option value="Tercero Interesado">Tercero Interesado</option>
-                        <option value="Testigo">Testigo</option>
-                        <option value="Perito">Perito</option>
+                        <option value="">Seleccionar</option>
+                        @for (rol of rolesProcesales; track rol.id) {
+                            <option [value]="rol.nombre">{{ rol.nombre }}</option>
+                        }
                     </select>
                 </div>
                 <div class="field">

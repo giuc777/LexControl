@@ -3,7 +3,9 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { ExpedientesService } from '../../core/services/expedientes-service';
+import { CatalogosService } from '../../core/services/catalogos-service';
 import { ExpedienteCrearDto, ExpedienteActualizarDto, ExpedienteLista } from '../../core/models/expediente.model';
+import { CatalogoItem } from '../../core/models/catalogo.model';
 import { PageHeader } from '../../shared/components/page-header/page-header';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { Paginacion } from '../../shared/components/paginacion/paginacion';
@@ -19,6 +21,7 @@ const MESES_CORTO = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Se
 })
 export class ExpedientesPage implements OnInit {
     private readonly expedientesSvc = inject(ExpedientesService);
+    private readonly catalogosSvc = inject(CatalogosService);
     private readonly router = inject(Router);
 
     protected readonly expedientes = signal<ExpedienteLista[]>([]);
@@ -27,12 +30,16 @@ export class ExpedientesPage implements OnInit {
     protected readonly cargando = signal(false);
     protected readonly modalAbierto = signal(false);
 
+    protected ramas: CatalogoItem[] = [];
+    protected estados: CatalogoItem[] = [];
+
     protected readonly tamanioPagina = 7;
     protected filtroRama = '';
     protected filtroEstado = '';
     protected filtroBusqueda = '';
 
     ngOnInit(): void {
+        this.cargarCatalogos();
         this.cargarExpedientes();
     }
 
@@ -103,6 +110,17 @@ export class ExpedientesPage implements OnInit {
                 this.cargando.set(false);
             },
             error: () => this.cargando.set(false)
+        });
+    }
+
+    private cargarCatalogos(): void {
+        this.catalogosSvc.buscarCatalogo('RAMA', { tamanoPagina: 500 }).subscribe({
+            next: resp => this.ramas = resp.items,
+            error: () => this.ramas = []
+        });
+        this.catalogosSvc.buscarCatalogo('ESTADO_EXPEDIENTE', { tamanoPagina: 500 }).subscribe({
+            next: resp => this.estados = resp.items,
+            error: () => this.estados = []
         });
     }
 }

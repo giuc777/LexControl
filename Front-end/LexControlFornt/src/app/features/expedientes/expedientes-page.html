@@ -24,12 +24,9 @@
             <select class="filter-select" data-testid="filtro-rama" [ngModel]="filtroRama" name="filtroRama"
                 (ngModelChange)="alCambiarFiltroRama($event)">
                 <option value="">Todas</option>
-                <option value="1">Civil</option>
-                <option value="2">Penal</option>
-                <option value="3">Familiar</option>
-                <option value="4">Municipal</option>
-                <option value="5">Laboral</option>
-                <option value="6">Constitucional</option>
+                @for (rama of ramas; track rama.id) {
+                    <option [value]="rama.id">{{ rama.nombre }}</option>
+                }
             </select>
         </label>
         <label class="filter-field">
@@ -37,11 +34,9 @@
             <select class="filter-select" data-testid="filtro-estado" [ngModel]="filtroEstado" name="filtroEstado"
                 (ngModelChange)="alCambiarFiltroEstado($event)">
                 <option value="">Todos</option>
-                <option value="1">Activo</option>
-                <option value="2">En Espera</option>
-                <option value="3">Cerrado</option>
-                <option value="4">Archivado</option>
-                <option value="5">Urgente</option>
+                @for (estado of estados; track estado.id) {
+                    <option [value]="estado.id">{{ estado.nombre }}</option>
+                }
             </select>
         </label>
     </form>

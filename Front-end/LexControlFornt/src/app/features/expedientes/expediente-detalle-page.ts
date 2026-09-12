@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { ExpedientesService } from '../../core/services/expedientes-service';
 import { DocumentosService } from '../../core/services/documentos-service';
+import { CatalogosService } from '../../core/services/catalogos-service';
 import { ToastService } from '../../layout/toast/toast-service';
 import {
     DocExpediente,
@@ -13,6 +14,7 @@ import {
     NotaExpediente,
     ParteProcesal
 } from '../../core/models/expediente.model';
+import { CatalogoItem } from '../../core/models/catalogo.model';
 import { Modal } from '../../shared/components/modal/modal';
 import { ExpedienteModal } from './expediente-modal';
 
@@ -29,6 +31,7 @@ export class ExpedienteDetallePage implements OnInit {
     private readonly router = inject(Router);
     private readonly expedientesSvc = inject(ExpedientesService);
     private readonly documentosSvc = inject(DocumentosService);
+    private readonly catalogosSvc = inject(CatalogosService);
     private readonly toastSvc = inject(ToastService);
 
     protected readonly expediente = signal<ExpedienteDetalle | null>(null);
@@ -36,6 +39,8 @@ export class ExpedienteDetallePage implements OnInit {
     protected readonly notas = signal<NotaExpediente[]>([]);
     protected readonly documentos = signal<DocExpediente[]>([]);
     protected readonly cargando = signal(true);
+
+    protected rolesProcesales: CatalogoItem[] = [];
 
     // Modales
     protected readonly modalNotaAbierto = signal(false);
@@ -159,6 +164,7 @@ export class ExpedienteDetallePage implements OnInit {
     // ── Partes ───────────────────────────────────────────────
 
     abrirModalParte(): void {
+        this.cargarCatalogos();
         this.modalParteAbierto.set(true);
     }
 
@@ -267,6 +273,13 @@ export class ExpedienteDetallePage implements OnInit {
     private cargarDocumentos(): void {
         this.documentosSvc.listar(this.expedienteId).subscribe({
             next: docs => this.documentos.set(docs)
+        });
+    }
+
+    private cargarCatalogos(): void {
+        this.catalogosSvc.buscarCatalogo('ROL_PROCESAL', { tamanoPagina: 500 }).subscribe({
+            next: resp => this.rolesProcesales = resp.items,
+            error: () => this.rolesProcesales = []
         });
     }
 }

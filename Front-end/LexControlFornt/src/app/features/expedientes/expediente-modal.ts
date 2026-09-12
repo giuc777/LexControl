@@ -5,46 +5,10 @@ import { Modal } from '../../shared/components/modal/modal';
 import { ExpedienteCrearDto, ExpedienteActualizarDto, ExpedienteDetalle } from '../../core/models/expediente.model';
 import { ClientesService } from '../../core/services/clientes-service';
 import { UsuariosService } from '../../core/services/usuarios-service';
+import { CatalogosService } from '../../core/services/catalogos-service';
 import { ClienteLista } from '../../core/models/cliente.model';
 import { UsuarioLista } from '../../core/models/usuario.model';
-
-/* Catalogos locales para los selects del formulario. IDs basados en
-   los seeds de LexControlDB.sql (secciones 9-10). */
-const RAMAS = [
-    { id: 1, nombre: 'Civil' },
-    { id: 2, nombre: 'Penal' },
-    { id: 3, nombre: 'Familiar' },
-    { id: 4, nombre: 'Municipal' },
-    { id: 5, nombre: 'Laboral' },
-    { id: 6, nombre: 'Constitucional' }
-];
-
-const ESTADOS = [
-    { id: 1, nombre: 'Activo' },
-    { id: 2, nombre: 'En Espera' },
-    { id: 3, nombre: 'Cerrado' },
-    { id: 4, nombre: 'Archivado' },
-    { id: 5, nombre: 'Urgente' }
-];
-
-const ROLES_PROCESALES = [
-    { id: 1, nombre: 'Demandante' },
-    { id: 2, nombre: 'Demandado' },
-    { id: 3, nombre: 'Tercero Interesado' },
-    { id: 4, nombre: 'Testigo' },
-    { id: 5, nombre: 'Perito' },
-    { id: 6, nombre: 'Ministerio Publico' },
-    { id: 7, nombre: 'Querellante' }
-];
-
-const JUZGADOS = [
-    { id: 1, nombre: 'Juzgado de Primera Instancia Civil de Solola' },
-    { id: 2, nombre: 'Juzgado de Primera Instancia Penal de Solola' },
-    { id: 3, nombre: 'Juzgado de Familia de Solola' },
-    { id: 4, nombre: 'Juzgado de Trabajo y Prevision Social de Solola' },
-    { id: 5, nombre: 'Juzgado de Paz de Santiago Atitlan' },
-    { id: 6, nombre: 'Sala de Apelaciones de Solola' }
-];
+import { CatalogoItem } from '../../core/models/catalogo.model';
 
 @Component({
     selector: 'app-expediente-modal',
@@ -62,16 +26,17 @@ export class ExpedienteModal implements OnChanges {
 
     private readonly clientesService = inject(ClientesService);
     private readonly usuariosService = inject(UsuariosService);
+    private readonly catalogosService = inject(CatalogosService);
 
     protected readonly titulo = signal('Nuevo Expediente');
     protected readonly textoBoton = signal('Guardar expediente');
     protected readonly error = signal('');
     protected readonly guardando = signal(false);
 
-    protected readonly ramas = RAMAS;
-    protected readonly estados = ESTADOS;
-    protected readonly rolesProcesales = ROLES_PROCESALES;
-    protected readonly juzgados = JUZGADOS;
+    protected ramas: CatalogoItem[] = [];
+    protected estados: CatalogoItem[] = [];
+    protected rolesProcesales: CatalogoItem[] = [];
+    protected juzgados: { id: number; nombre: string }[] = [];
 
     protected clientes: ClienteLista[] = [];
     protected abogados: UsuarioLista[] = [];
@@ -92,6 +57,7 @@ export class ExpedienteModal implements OnChanges {
         if (cambios['abierto'] && this.abierto) {
             this.error.set('');
             this.guardando.set(false);
+            this.cargarCatalogos();
             this.cargarClientes();
             this.cargarAbogados();
             if (this.modo === 'editar' && this.expediente) {
@@ -190,6 +156,25 @@ export class ExpedienteModal implements OnChanges {
         this.usuariosService.listar({ rolId: 3, activo: true }).subscribe({
             next: users => this.abogados = users,
             error: () => this.abogados = []
+        });
+    }
+
+    private cargarCatalogos(): void {
+        this.catalogosService.buscarCatalogo('RAMA', { tamanoPagina: 500 }).subscribe({
+            next: resp => this.ramas = resp.items,
+            error: () => this.ramas = []
+        });
+        this.catalogosService.buscarCatalogo('ESTADO_EXPEDIENTE', { tamanoPagina: 500 }).subscribe({
+            next: resp => this.estados = resp.items,
+            error: () => this.estados = []
+        });
+        this.catalogosService.buscarCatalogo('ROL_PROCESAL', { tamanoPagina: 500 }).subscribe({
+            next: resp => this.rolesProcesales = resp.items,
+            error: () => this.rolesProcesales = []
+        });
+        this.catalogosService.buscarJuzgados({ tamanoPagina: 500 }).subscribe({
+            next: resp => this.juzgados = resp.items.map(j => ({ id: j.id, nombre: j.nombre })),
+            error: () => this.juzgados = []
         });
     }
 

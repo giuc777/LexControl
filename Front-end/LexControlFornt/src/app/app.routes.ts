@@ -62,9 +62,19 @@ export const routes: Routes = [
                 canActivate: [moduloGuard('mantenimiento')],
                 loadComponent: () => import('./features/mantenimiento/mantenimiento-detalle-page').then(m => m.MantenimientoDetallePage)
             },
+            {
+                path: 'agenda',
+                canActivate: [moduloGuard('audiencias')],
+                loadComponent: () => import('./features/agenda/agenda-page').then(m => m.AgendaPage)
+            },
+            {
+                path: 'agenda/:id',
+                canActivate: [moduloGuard('audiencias')],
+                loadComponent: () => import('./features/agenda/agenda-detalle-page').then(m => m.AgendaDetallePage)
+            },
             /* Los demás módulos se registran con la página provisional;
                cada fase del plan reemplazará su loadComponent. */
-            ...MODULOS.filter(m => m.key !== 'dashboard' && m.key !== 'ajustes' && m.key !== 'reportes' && m.key !== 'clientes' && m.key !== 'expedientes' && m.key !== 'mantenimiento').map(m => ({
+            ...MODULOS.filter(m => m.key !== 'dashboard' && m.key !== 'ajustes' && m.key !== 'reportes' && m.key !== 'clientes' && m.key !== 'expedientes' && m.key !== 'mantenimiento' && m.key !== 'audiencias').map(m => ({
                 path: m.ruta,
                 canActivate: [moduloGuard(m.key)],
                 loadComponent: () =>

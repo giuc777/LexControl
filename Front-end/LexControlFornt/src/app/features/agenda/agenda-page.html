@@ -1,0 +1,79 @@
+<app-page-header titulo="Agenda de Audiencias" subtitulo="Gestione las audiencias judiciales del bufete.">
+    <button type="button" class="btn-primary" data-testid="btn-nueva-audiencia" (click)="abrirModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Nueva Audiencia
+    </button>
+</app-page-header>
+
+<section class="agenda-layout" data-testid="calendario">
+    <div class="panel calendario-panel">
+        <div class="calendario-header">
+            <button type="button" class="btn-icon" data-testid="btn-mes-anterior" (click)="mesAnterior()"
+                aria-label="Mes anterior">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </button>
+            <h2 class="calendario-titulo">{{ nombreMes() }}</h2>
+            <button type="button" class="btn-icon" data-testid="btn-mes-siguiente" (click)="mesSiguiente()"
+                aria-label="Mes siguiente">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="calendario-grid">
+            @for (dia of DIAS_SEMANA; track dia) {
+                <div class="calendario-dia-header">{{ dia }}</div>
+            }
+            @for (d of diasCalendario(); track $index) {
+                <div class="calendario-dia" [class.vacio]="d.vacio" [class.hoy]="d.esHoy"
+                    [class.seleccionado]="d.numero === diaSeleccionado() && !d.vacio"
+                    (click)="seleccionarDia(d.numero)" [attr.data-testid]="d.vacio ? null : 'dia-' + d.numero">
+                    @if (!d.vacio) {
+                        <span>{{ d.numero }}</span>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="panel eventos-panel" data-testid="eventos-dia">
+        <h3 class="eventos-titulo">Eventos del día</h3>
+
+        @if (eventosDelDia().length === 0) {
+            <app-empty-state mensaje="No hay audiencias programadas para este día." />
+        }
+
+        @for (evento of eventosDelDia(); track evento.id) {
+            <div class="evento-card row-clickable" (click)="irADetalle(evento.id)"
+                [attr.data-testid]="'evento-' + evento.id">
+                <div class="evento-hora">
+                    <span class="hora-texto">{{ formatearHora(evento.horaInicio) }}</span>
+                </div>
+                <div class="evento-info">
+                    <span class="evento-tipo">{{ evento.tipo }}</span>
+                    <span class="evento-expediente">{{ evento.noExpediente }}</span>
+                    <span class="evento-juzgado">{{ evento.juzgado }}</span>
+                    @if (evento.sala) {
+                        <span class="evento-sala">Sala: {{ evento.sala }}</span>
+                    }
+                </div>
+                <div class="evento-estado">
+                    <span class="pill" [style.background]="colorEstado(evento.estado)"
+                        [style.color]="'white'">
+                        {{ evento.estado }}
+                    </span>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+@if (modalAbierto()) {
+    <app-audiencia-modal (cerrar)="cerrarModal()" (creado)="alCrearAudiencia()" />
+}

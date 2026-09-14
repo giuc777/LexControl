@@ -1,0 +1,97 @@
+<div class="modal-overlay" (click)="alCerrar()" data-testid="modal-audiencia">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Nueva Audiencia</h3>
+            <button type="button" class="btn-icon" (click)="alCerrar()" aria-label="Cerrar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="form-grid">
+                <label class="form-field form-field-full">
+                    <span class="form-label">Expediente ID *</span>
+                    <input type="number" class="form-input" [(ngModel)]="formulario.expedienteId"
+                        data-testid="input-expediente-id" required />
+                </label>
+
+                <label class="form-field">
+                    <span class="form-label">Tipo de Audiencia *</span>
+                    <select class="form-input" [(ngModel)]="formulario.tipoId"
+                        data-testid="select-tipo" required>
+                        <option value="0" disabled>Seleccionar...</option>
+                        @for (tipo of tipos(); track tipo.id) {
+                            <option [value]="tipo.id">{{ tipo.nombre }}</option>
+                        }
+                    </select>
+                </label>
+
+                <label class="form-field">
+                    <span class="form-label">Estado *</span>
+                    <select class="form-input" [(ngModel)]="formulario.estadoId"
+                        data-testid="select-estado" required>
+                        <option value="0" disabled>Seleccionar...</option>
+                        @for (estado of estados(); track estado.id) {
+                            <option [value]="estado.id">{{ estado.nombre }}</option>
+                        }
+                    </select>
+                </label>
+
+                <label class="form-field">
+                    <span class="form-label">Fecha *</span>
+                    <input type="date" class="form-input" [(ngModel)]="formulario.fecha"
+                        data-testid="input-fecha" required />
+                </label>
+
+                <label class="form-field">
+                    <span class="form-label">Hora Inicio *</span>
+                    <input type="time" class="form-input" [(ngModel)]="formulario.horaInicio"
+                        data-testid="input-hora-inicio" required />
+                </label>
+
+                <label class="form-field">
+                    <span class="form-label">Hora Fin</span>
+                    <input type="time" class="form-input" [(ngModel)]="formulario.horaFin"
+                        data-testid="input-hora-fin" />
+                </label>
+
+                <label class="form-field">
+                    <span class="form-label">Juzgado *</span>
+                    <select class="form-input" [(ngModel)]="formulario.juzgadoId"
+                        data-testid="select-juzgado" required>
+                        <option value="0" disabled>Seleccionar...</option>
+                        @for (juzgado of juzgados(); track juzgado.id) {
+                            <option [value]="juzgado.id">{{ juzgado.nombre }}</option>
+                        }
+                    </select>
+                </label>
+
+                <label class="form-field">
+                    <span class="form-label">Sala</span>
+                    <input type="text" class="form-input" [(ngModel)]="formulario.sala"
+                        data-testid="input-sala" placeholder="Ej: Sala 1" />
+                </label>
+
+                <label class="form-field form-field-full">
+                    <span class="form-label">Notas</span>
+                    <textarea class="form-input form-textarea" [(ngModel)]="formulario.notas"
+                        data-testid="input-notas" rows="3"></textarea>
+                </label>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" (click)="alCerrar()">Cancelar</button>
+            <button type="button" class="btn-primary" (click)="alEnviar()"
+                [disabled]="guardando()" data-testid="btn-guardar-audiencia">
+                @if (guardando()) {
+                    Guardando...
+                } @else {
+                    Guardar Audiencia
+                }
+            </button>
+        </div>
+    </div>
+</div>

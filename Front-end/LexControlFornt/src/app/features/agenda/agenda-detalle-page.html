@@ -1,0 +1,156 @@
+@if (audiencia(); as aud) {
+    <app-page-header [titulo]="'Audiencia — ' + aud.tipo"
+        [subtitulo]="'Expediente ' + aud.noExpediente">
+        <button type="button" class="btn-secondary" data-testid="btn-volver" (click)="irAVolver()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Volver
+        </button>
+    </app-page-header>
+
+    <section class="detalle-layout">
+        <div class="panel detalle-info">
+            <div class="detalle-grid">
+                <div class="detalle-campo">
+                    <span class="detalle-label">Expediente</span>
+                    <span class="detalle-valor" data-testid="audiencia-expediente">{{ aud.noExpediente }}</span>
+                </div>
+                <div class="detalle-campo">
+                    <span class="detalle-label">Cliente</span>
+                    <span class="detalle-valor">{{ aud.cliente || '—' }}</span>
+                </div>
+                <div class="detalle-campo">
+                    <span class="detalle-label">Tipo</span>
+                    <span class="detalle-valor" data-testid="audiencia-tipo">{{ aud.tipo }}</span>
+                </div>
+                <div class="detalle-campo">
+                    <span class="detalle-label">Estado</span>
+                    <span class="pill pill-activo">{{ aud.estado }}</span>
+                </div>
+                <div class="detalle-campo">
+                    <span class="detalle-label">Fecha</span>
+                    <span class="detalle-valor" data-testid="audiencia-fecha">{{ aud.fecha }}</span>
+                </div>
+                <div class="detalle-campo">
+                    <span class="detalle-label">Hora Inicio</span>
+                    <span class="detalle-valor">{{ aud.horaInicio }}</span>
+                </div>
+                @if (aud.horaFin) {
+                    <div class="detalle-campo">
+                        <span class="detalle-label">Hora Fin</span>
+                        <span class="detalle-valor">{{ aud.horaFin }}</span>
+                    </div>
+                }
+                <div class="detalle-campo">
+                    <span class="detalle-label">Juzgado</span>
+                    <span class="detalle-valor">{{ aud.juzgado }}</span>
+                </div>
+                @if (aud.sala) {
+                    <div class="detalle-campo">
+                        <span class="detalle-label">Sala</span>
+                        <span class="detalle-valor">{{ aud.sala }}</span>
+                    </div>
+                }
+                @if (aud.usuarioCreacion) {
+                    <div class="detalle-campo">
+                        <span class="detalle-label">Creado por</span>
+                        <span class="detalle-valor">{{ aud.usuarioCreacion }}</span>
+                    </div>
+                }
+                @if (aud.fechaCreacion) {
+                    <div class="detalle-campo">
+                        <span class="detalle-label">Fecha de Creación</span>
+                        <span class="detalle-valor">{{ aud.fechaCreacion }}</span>
+                    </div>
+                }
+            </div>
+
+            @if (aud.notas) {
+                <div class="detalle-notas">
+                    <span class="detalle-label">Notas</span>
+                    <p>{{ aud.notas }}</p>
+                </div>
+            }
+        </div>
+
+        @if (aud.resultado) {
+            <div class="panel resultado-panel">
+                <h3>Resultado</h3>
+                <div class="detalle-grid">
+                    <div class="detalle-campo">
+                        <span class="detalle-label">Resultado</span>
+                        <span class="detalle-valor">{{ aud.resultado }}</span>
+                    </div>
+                    @if (aud.descripcionResultado) {
+                        <div class="detalle-campo">
+                            <span class="detalle-label">Descripción</span>
+                            <span class="detalle-valor">{{ aud.descripcionResultado }}</span>
+                        </div>
+                    }
+                    @if (aud.proximaActuacion) {
+                        <div class="detalle-campo">
+                            <span class="detalle-label">Próxima Actuación</span>
+                            <span class="detalle-valor">{{ aud.proximaActuacion }}</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (esPendiente() && !registrandoResultado()) {
+            <div class="panel">
+                <button type="button" class="btn-primary" data-testid="btn-registrar-resultado"
+                    (click)="abrirRegistroResultado()">
+                    Registrar Resultado
+                </button>
+            </div>
+        }
+
+        @if (registrandoResultado()) {
+            <div class="panel resultado-form">
+                <h3>Registrar Resultado</h3>
+                <div class="form-grid">
+                    <label class="form-field">
+                        <span class="form-label">Resultado *</span>
+                        <select class="form-input" [(ngModel)]="resultadoSeleccionado"
+                            data-testid="select-resultado" required>
+                            <option value="0" disabled>Seleccionar resultado...</option>
+                            <option value="1">Favorable</option>
+                            <option value="2">Desfavorable</option>
+                            <option value="3">Parcial</option>
+                            <option value="4">Sin Resolución</option>
+                        </select>
+                    </label>
+
+                    <label class="form-field form-field-full">
+                        <span class="form-label">Descripción del Resultado *</span>
+                        <textarea class="form-input form-textarea" [(ngModel)]="descripcionResultado"
+                            data-testid="input-observaciones" rows="3"
+                            placeholder="Describa el resultado de la audiencia..."></textarea>
+                    </label>
+
+                    <label class="form-field form-field-full">
+                        <span class="form-label">Próxima Actuación</span>
+                        <input type="text" class="form-input" [(ngModel)]="proximaActuacion"
+                            data-testid="input-proxima-actuacion"
+                            placeholder="Ej: Audiencia de pruebas para el 15/10/2026" />
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" (click)="cancelarResultado()">Cancelar</button>
+                    <button type="button" class="btn-primary" data-testid="btn-guardar-resultado"
+                        (click)="guardarResultado()">
+                        Guardar Resultado
+                    </button>
+                </div>
+            </div>
+        }
+    </section>
+} @else if (cargando()) {
+    <div class="panel loading-state">
+        <p>Cargando audiencia...</p>
+    </div>
+}

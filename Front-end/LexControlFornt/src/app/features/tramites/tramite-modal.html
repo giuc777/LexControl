@@ -88,8 +88,8 @@
         </div>
 
         <div class="modal-footer">
-            <button class="btn btn-secondary" (click)="onCerrar()" [disabled]="guardando()">Cancelar</button>
-            <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando()">
+            <button class="btn-secondary" (click)="onCerrar()" [disabled]="guardando()">Cancelar</button>
+            <button class="btn-primary" (click)="guardar()" [disabled]="guardando()">
                 @if (guardando()) { Guardando... } @else { Crear Trámite }
             </button>
         </div>

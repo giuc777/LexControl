@@ -1,4 +1,12 @@
-<app-page-header titulo="Trámites" subtitulo="Gestión de trámites judiciales" />
+<app-page-header titulo="Trámites" subtitulo="Gestión de trámites judiciales">
+    <button type="button" class="btn-primary" (click)="abrirModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Nuevo Trámite
+    </button>
+</app-page-header>
 
 <div class="tramites-toolbar">
     <div class="filtros-grid">
@@ -37,11 +45,10 @@
                    (ngModelChange)="filtroFechaFin.set($event)" />
         </div>
         <div class="filtro-acciones">
-            <button class="btn btn-primary" (click)="cargarTramites()">Buscar</button>
-            <button class="btn btn-secondary" (click)="limpiarFiltros()">Limpiar</button>
+            <button class="btn-primary" (click)="cargarTramites()">Buscar</button>
+            <button class="btn-secondary" (click)="limpiarFiltros()">Limpiar</button>
         </div>
     </div>
-    <button class="btn btn-success" (click)="abrirModal()">+ Nuevo Trámite</button>
 </div>
 
 @if (cargando()) {

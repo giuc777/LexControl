@@ -87,7 +87,7 @@
 
     <div class="detalle-acciones">
         @if (!esResuelto()) {
-            <button class="btn btn-primary" (click)="toggleFormEstado()">
+            <button class="btn-primary" (click)="toggleFormEstado()">
                 Cambiar Estado
             </button>
         }
@@ -121,8 +121,8 @@
                               placeholder="Describe el resultado del trámite..."></textarea>
                 </div>
                 <div class="form-acciones">
-                    <button class="btn btn-secondary" (click)="toggleFormEstado()">Cancelar</button>
-                    <button class="btn btn-primary" (click)="guardarEstado()">Guardar</button>
+                    <button class="btn-secondary" (click)="toggleFormEstado()">Cancelar</button>
+                    <button class="btn-primary" (click)="guardarEstado()">Guardar</button>
                 </div>
             </div>
         </div>

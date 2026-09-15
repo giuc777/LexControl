@@ -110,14 +110,15 @@ builder.Services.AddScoped<ITramiteService, TramiteService>();
 
 | Archivo | Descripción |
 |---|---|
-| `features/tramites/tramites-page.ts` + `.html` | Lista con filtros (estado, tipo, fechas), tabla navegable |
+| `features/tramites/tramites-page.ts` + `.html` | Lista con filtros (estado, tipo, fechas), tabla navegable. Botón "Nuevo Trámite" en `<app-page-header>` con `class="btn-primary"` |
 | `features/tramites/tramite-detalle-page.ts` + `.html` | Detalle completo con panel de resolución y cambio de estado |
-| `features/tramites/tramite-modal.ts` + `.html` | Modal de creación con catálogos dinámicos |
+| `features/tramites/tramite-modal.ts` + `.html` | Modal de creación con catálogos dinámicos (expedientes, tipos, estados) |
 
 ### 4.4 Estilos
 
 **Archivo:** `Front-end/LexControlFornt/src/styles/modules/tramites.css`
 
+- Reutiliza primitivas de `clientes.css` (page-header, btn-primary, btn-secondary, modal, field, pills)
 - Toolbar de filtros con grid responsive
 - Tabla de datos con hover y pills de estado
 - Detalle con grid de campos, secciones y panel de resolución
@@ -194,5 +195,6 @@ Content-Type: application/json
 - [x] Frontend muestra lista con filtros reales
 - [x] Modal de crear trámite funciona con catálogos dinámicos
 - [x] Cambiar estado funciona desde el detalle
+- [x] Botones siguen patrón del prototipo (`btn-primary`, `btn-secondary` en `page-header`)
 - [x] `dotnet build` exitoso (0 errores)
 - [x] `npx ng build` exitoso (0 errores)

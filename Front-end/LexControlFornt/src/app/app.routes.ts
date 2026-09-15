@@ -82,6 +82,16 @@ export const routes: Routes = [
                 canActivate: [moduloGuard('tramites')],
                 loadComponent: () => import('./features/tramites/tramite-detalle-page').then(m => m.TramiteDetallePage)
             },
+            {
+                path: 'diligencias',
+                canActivate: [moduloGuard('audiencias')],
+                loadComponent: () => import('./features/diligencias/diligencias-page').then(m => m.DiligenciasPage)
+            },
+            {
+                path: 'diligencias/:id',
+                canActivate: [moduloGuard('audiencias')],
+                loadComponent: () => import('./features/diligencias/diligencia-detalle-page').then(m => m.DiligenciaDetallePage)
+            },
             /* Los demás módulos se registran con la página provisional;
                cada fase del plan reemplazará su loadComponent. */
             ...MODULOS.filter(m => m.key !== 'dashboard' && m.key !== 'ajustes' && m.key !== 'reportes' && m.key !== 'clientes' && m.key !== 'expedientes' && m.key !== 'mantenimiento' && m.key !== 'audiencias' && m.key !== 'tramites').map(m => ({

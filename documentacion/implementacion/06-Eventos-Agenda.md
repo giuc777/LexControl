@@ -1,14 +1,29 @@
 # Módulo 06 — Eventos / Agenda
 
-> **Módulo completo:** SPs + Backend + Frontend + Pruebas + Playwright
 > **Estado:** SPs base existen. Faltan controller, service, frontend.
-> **Ruta frontend:** Conecta con Dashboard y Agenda
+> **Ruta frontend:** Se integra en Dashboard y Agenda (sin páginas propias)
+> **Orden de implementación:** FASE 1 (antes de Diligencias e Histórico Legal)
 
 ---
 
 ## 1. Descripción
 
-Gestión de eventos de calendario (audiencias, plazos, diligencias). Alimenta el calendario de Agenda y la agenda semanal del Dashboard.
+Backend de eventos de calendario (audiencias, plazos, diligencias, citas). Alimenta el calendario de Agenda y la agenda semanal del Dashboard. **No tiene páginas propias** — se integra en los componentes existentes.
+
+**Relación con Diligencias (Módulo 04):**
+- Las diligencias son tareas del abogado (asesorías, visitas, etc.)
+- Cuando una diligencia tiene fecha, se puede mostrar en el calendario de Agenda
+- Opción recomendada: consultar DILIGENCIA directamente desde la Agenda (sin crear EVENTO_BASE duplicado)
+
+**Fases de implementación:**
+
+| # | Fase | Descripción |
+|---|------|-------------|
+| 1 | **Eventos Backend** | Crear Controller + Service con los 3 SPs existentes |
+| 2 | **Agenda Mejorada** | Mostrar audiencias + eventos + diligencias en el calendario |
+| 3 | **Diligencias CRUD** | Módulo `/diligencias` completo |
+| 4 | **Histórico Legal** | Módulo `/historico` (expedientes Cerrados/Archivados) |
+| 5 | **Dashboard** | Conectar Dashboard a datos reales |
 
 **SPs existentes:**
 - ✅ `SP_EventoBase_Insertar` (LexControlDB.sql)

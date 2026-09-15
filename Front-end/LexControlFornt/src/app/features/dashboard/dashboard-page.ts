@@ -1,5 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+
+import { EventosService } from '../../core/services/eventos-service';
+import { Evento } from '../../core/models/evento.model';
 
 interface StatCard {
     label: string;
@@ -30,42 +33,12 @@ interface EventoVisual extends EventoAgenda {
 }
 
 /* Réplica de Pototipo/dashboard.html + dashboard.js.
-   MOCK: las estadísticas son semillas del prototipo; la agenda semanal se
-   dibuja vacía pendiente de conectar /api/eventos y /api/reportes (fase 2). */
+   Conectado a /api/eventos para mostrar la agenda semanal real. */
 const ESTADISTICAS_SEED: readonly StatCard[] = [
     { label: 'Expedientes Activos', valor: 8, detalle: '+2 este mes', tono: '' },
     { label: 'Audiencias Próximas', valor: 3, detalle: 'Próxima: Mañana', tono: '' },
     { label: 'Trámites Pendientes', valor: 5, detalle: '3 críticos', tono: 'warn' },
     { label: 'Notificaciones OJ', valor: 2, detalle: 'Urgente', tono: 'danger' }
-];
-
-const EVENTOS_SEED: readonly EventoAgenda[] = [
-    {
-        id: 1,
-        titulo: 'Caso C-2025-0012 · Laboral',
-        tipoEvento: 'Audiencia',
-        dia: 0,
-        horaInicio: '08:00',
-        horaFin: '09:00',
-        ubicacion: 'Sala 4, Torre de Justicia',
-        noExpediente: 'C-2025-0012',
-        cliente: 'Carlos Morales Ortiz',
-        prioridad: 1,
-        colorEvento: '#B2845A'
-    },
-    {
-        id: 2,
-        titulo: 'Reunión Clientes',
-        tipoEvento: 'Cita',
-        dia: 2,
-        horaInicio: '10:00',
-        horaFin: '11:30',
-        ubicacion: 'Oficina - Panajachel',
-        noExpediente: null,
-        cliente: null,
-        prioridad: 0,
-        colorEvento: null
-    }
 ];
 
 const DIAS_CORTOS = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
@@ -78,10 +51,12 @@ const HORAS = 5;
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './dashboard-page.html'
 })
-export class DashboardPage {
+export class DashboardPage implements OnInit {
     private readonly router = inject(Router);
+    private readonly eventosSvc = inject(EventosService);
 
     readonly estadisticas = ESTADISTICAS_SEED;
+    private readonly eventosRaw = signal<Evento[]>([]);
 
     private readonly hoy = new Date();
     private readonly lunes = this.obtenerLunes(this.hoy);
@@ -102,32 +77,52 @@ export class DashboardPage {
     readonly rangoAgenda = computed(() => this.formatoRango(this.diasSemana));
 
     /* Eventos posicionados una sola vez (misma fórmula de dashboard.js). */
-    private readonly eventosVisuales: readonly EventoVisual[] = EVENTOS_SEED.map(evento => {
-        const inicio = this.horaEnMinutos(evento.horaInicio);
-        const fin = this.horaEnMinutos(evento.horaFin);
-        const rangoTotal = HORAS * 60;
+    private readonly eventosVisuales = computed<readonly EventoVisual[]>(() => {
+        return this.eventosRaw().map(evento => {
+            const inicio = this.horaEnMinutos(evento.horaInicio);
+            const fin = evento.horaFin ? this.horaEnMinutos(evento.horaFin) : inicio + 60;
+            const rangoTotal = HORAS * 60;
+            const fechaEvento = new Date(evento.fecha);
+            const diaSemana = (fechaEvento.getDay() + 6) % 7;
 
-        let alto = ((fin - inicio) / rangoTotal) * 100;
-        if (alto < 10) alto = 10;
+            let alto = ((fin - inicio) / rangoTotal) * 100;
+            if (alto < 10) alto = 10;
 
-        return {
-            ...evento,
-            arriba: Math.max(((inicio - HORA_INICIO * 60) / rangoTotal) * 100, 0),
-            alto,
-            outline: !evento.colorEvento
-        };
+            return {
+                id: evento.id,
+                titulo: evento.titulo,
+                tipoEvento: evento.tipoEvento,
+                dia: diaSemana,
+                horaInicio: evento.horaInicio,
+                horaFin: evento.horaFin ?? `${String(inicio + 60).padStart(2, '0')}:00`,
+                ubicacion: evento.ubicacion ?? '',
+                noExpediente: evento.noExpediente,
+                cliente: evento.cliente,
+                prioridad: evento.prioridad,
+                colorEvento: evento.colorEvento,
+                arriba: Math.max(((inicio - HORA_INICIO * 60) / rangoTotal) * 100, 0),
+                alto,
+                outline: !evento.colorEvento
+            };
+        });
     });
 
+    ngOnInit(): void {
+        const fechaStr = this.formatoFechaISO(this.lunes);
+        this.eventosSvc.obtenerDelDia(fechaStr).subscribe({
+            next: (datos) => { this.eventosRaw.set(datos); },
+            error: () => { this.eventosRaw.set([]); }
+        });
+    }
+
     eventosDeDia(dia: number): readonly EventoVisual[] {
-        return this.eventosVisuales.filter(evento => evento.dia === dia);
+        return this.eventosVisuales().filter(evento => evento.dia === dia);
     }
 
     irAExpedientes(): void {
         this.router.navigateByUrl('/expedientes');
     }
 
-    /* El prototipo navega a agenda-detalle.html?id=N; la ruta de detalle
-       llega en fase 5, por ahora se lleva al módulo de Agenda. */
     verEvento(_evento: EventoVisual): void {
         this.router.navigateByUrl('/agenda');
     }
@@ -159,5 +154,12 @@ export class DashboardPage {
             return `${MESES[primero.getMonth()]} ${primero.getDate()} - ${ultimo.getDate()}, ${ultimo.getFullYear()}`;
         }
         return `${MESES[primero.getMonth()]} ${primero.getDate()} - ${MESES[ultimo.getMonth()]} ${ultimo.getDate()}, ${ultimo.getFullYear()}`;
+    }
+
+    private formatoFechaISO(fecha: Date): string {
+        const anio = fecha.getFullYear();
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const dia = String(fecha.getDate()).padStart(2, '0');
+        return `${anio}-${mes}-${dia}`;
     }
 }

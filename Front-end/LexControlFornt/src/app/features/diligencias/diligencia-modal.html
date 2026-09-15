@@ -1,0 +1,110 @@
+<div class="modal-overlay" (click)="onCerrar()">
+    <div class="modal-contenido modal-amplio" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Nueva Diligencia</h2>
+            <button class="btn-cerrar" (click)="onCerrar()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="resumen-audiencia">
+                <h4>Datos de la Diligencia</h4>
+            </div>
+
+            <fieldset class="fieldset-form">
+                <legend>Informacion General</legend>
+                <div class="form-grid">
+                    <div class="form-grupo">
+                        <label>Titulo <span class="obligatorio">*</span></label>
+                        <input type="text" class="form-control"
+                               [ngModel]="titulo()"
+                               (ngModelChange)="titulo.set($event)"
+                               placeholder="Ej: Asesoria con cliente" />
+                    </div>
+                    <div class="form-grupo">
+                        <label>Tipo <span class="obligatorio">*</span></label>
+                        <select class="form-control"
+                                [ngModel]="tipoId()"
+                                (ngModelChange)="tipoId.set(+$event)">
+                            <option [value]="0">Seleccione tipo</option>
+                            @for (t of tiposDiligencia(); track t.id) {
+                                <option [value]="t.id">{{ t.nombre }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-grupo">
+                        <label>Expediente</label>
+                        <select class="form-control"
+                                [ngModel]="expedienteId()"
+                                (ngModelChange)="expedienteId.set($event ? +$event : null)">
+                            <option [ngValue]="null">Sin expediente</option>
+                            @for (e of expedientes; track e.id) {
+                                <option [value]="e.id">{{ e.noExpediente }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-grupo">
+                        <label>Fecha <span class="obligatorio">*</span></label>
+                        <input type="date" class="form-control"
+                               [ngModel]="fecha()"
+                               (ngModelChange)="fecha.set($event)" />
+                    </div>
+                    <div class="form-grupo">
+                        <label>Hora de Inicio</label>
+                        <input type="time" class="form-control"
+                               [ngModel]="horaInicio()"
+                               (ngModelChange)="horaInicio.set($event)" />
+                    </div>
+                    <div class="form-grupo">
+                        <label>Estado <span class="obligatorio">*</span></label>
+                        <select class="form-control"
+                                [ngModel]="estadoId()"
+                                (ngModelChange)="estadoId.set(+$event)">
+                            @for (e of estadosDiligencia(); track e.id) {
+                                <option [value]="e.id">{{ e.nombre }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-grupo">
+                        <label>Ubicacion</label>
+                        <input type="text" class="form-control"
+                               [ngModel]="ubicacion()"
+                               (ngModelChange)="ubicacion.set($event)"
+                               placeholder="Ej: Oficina, Juzgado" />
+                    </div>
+                    <div class="form-grupo">
+                        <label>Oficina</label>
+                        <input type="text" class="form-control"
+                               [ngModel]="oficina()"
+                               (ngModelChange)="oficina.set($event)"
+                               placeholder="Ej: Sala 3" />
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="fieldset-form">
+                <legend>Detalles Adicionales</legend>
+                <div class="form-grupo form-grupo-full">
+                    <label>Descripcion</label>
+                    <textarea class="form-control" rows="3"
+                              [ngModel]="descripcion()"
+                              (ngModelChange)="descripcion.set($event)"
+                              placeholder="Descripcion de la diligencia..."></textarea>
+                </div>
+                <div class="form-grupo form-grupo-full">
+                    <label>Notas</label>
+                    <textarea class="form-control" rows="2"
+                              [ngModel]="notas()"
+                              (ngModelChange)="notas.set($event)"
+                              placeholder="Notas internas..."></textarea>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="onCerrar()" [disabled]="guardando()">Cancelar</button>
+            <button class="btn-primary" (click)="guardar()" [disabled]="guardando()">
+                @if (guardando()) { Guardando... } @else { Crear Diligencia }
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,114 @@
+<app-page-header
+    [titulo]="diligencia()?.titulo ?? 'Diligencia'"
+    [subtitulo]="'Detalle de la tarea del abogado'"
+    (volver)="irAVolver()" />
+
+@if (cargando()) {
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Cargando diligencia...</p>
+    </div>
+} @else if (!diligencia()) {
+    <app-empty-state
+        icono="alert-triangle"
+        titulo="Diligencia no encontrada"
+        mensaje="La diligencia solicitada no existe o fue cancelada." />
+} @else {
+    <div class="detalle-resumen">
+        <div class="resumen-titulo">
+            <h2>{{ diligencia()?.titulo }}</h2>
+            <span class="pill-tipo" [style.background-color]="diligencia()?.tipoColor ?? '#6c757d'">
+                {{ diligencia()?.tipo }}
+            </span>
+            <span class="pill-estado" [style.background-color]="colorEstado(diligencia()!.estado)">
+                {{ diligencia()?.estado }}
+            </span>
+        </div>
+    </div>
+
+    <div class="detalle-grid">
+        <div class="detalle-campo">
+            <label class="detalle-label">Fecha</label>
+            <div class="detalle-valor-destacado">{{ diligencia()?.fecha }}</div>
+        </div>
+        <div class="detalle-campo">
+            <label class="detalle-label">Hora</label>
+            <div class="detalle-valor">{{ diligencia()?.horaInicio ?? 'Dia completo' }}</div>
+        </div>
+        <div class="detalle-campo">
+            <label class="detalle-label">Ubicacion</label>
+            <div class="detalle-valor">{{ diligencia()?.ubicacion ?? '—' }}</div>
+        </div>
+        <div class="detalle-campo">
+            <label class="detalle-label">Oficina</label>
+            <div class="detalle-valor">{{ diligencia()?.oficina ?? '—' }}</div>
+        </div>
+        <div class="detalle-campo">
+            <label class="detalle-label">Expediente</label>
+            <div class="detalle-valor">{{ diligencia()?.noExpediente ?? '—' }}</div>
+        </div>
+        <div class="detalle-campo">
+            <label class="detalle-label">Cliente</label>
+            <div class="detalle-valor">{{ diligencia()?.cliente ?? '—' }}</div>
+        </div>
+        <div class="detalle-campo">
+            <label class="detalle-label">Abogado</label>
+            <div class="detalle-valor">{{ diligencia()?.abogado ?? '—' }}</div>
+        </div>
+        <div class="detalle-campo">
+            <label class="detalle-label">Tiempo Dedicado</label>
+            <div class="detalle-valor">{{ diligencia()?.tiempoDedicado ?? '—' }}</div>
+        </div>
+    </div>
+
+    @if (diligencia()?.descripcion) {
+        <div class="detalle-seccion">
+            <h3>Descripcion</h3>
+            <p class="detalle-texto">{{ diligencia()?.descripcion }}</p>
+        </div>
+    }
+
+    @if (diligencia()?.notas) {
+        <div class="detalle-seccion">
+            <h3>Notas</h3>
+            <p class="detalle-texto">{{ diligencia()?.notas }}</p>
+        </div>
+    }
+
+    <div class="detalle-acciones">
+        @if (!esCancelada()) {
+            <button class="btn-primary" (click)="toggleFormEstado()">
+                Cambiar Estado
+            </button>
+            <button class="btn-secondary" (click)="eliminar()">
+                Cancelar Diligencia
+            </button>
+        }
+    </div>
+
+    @if (mostrarFormEstado()) {
+        <div class="modal-overlay" (click)="toggleFormEstado()">
+            <div class="modal-contenido" (click)="$event.stopPropagation()">
+                <h3>Cambiar Estado de la Diligencia</h3>
+                <div class="form-grupo">
+                    <label>Nuevo Estado</label>
+                    <select class="form-control"
+                            [ngModel]="nuevoEstadoId()"
+                            (ngModelChange)="nuevoEstadoId.set(+$event)">
+                        @for (e of estadosDiligencia(); track e.id) {
+                            <option [value]="e.id">{{ e.nombre }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-acciones">
+                    <button class="btn-secondary" (click)="toggleFormEstado()">Cancelar</button>
+                    <button class="btn-primary" (click)="guardarEstado()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="detalle-meta">
+        <span>Creado: {{ diligencia()?.fechaCreacion }}</span>
+    </div>
+}

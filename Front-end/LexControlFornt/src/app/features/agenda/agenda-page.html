@@ -1,5 +1,13 @@
-<app-page-header titulo="Agenda de Audiencias" subtitulo="Gestione las audiencias judiciales del bufete.">
-    <button type="button" class="btn-primary" data-testid="btn-nueva-audiencia" (click)="abrirModal()">
+<app-page-header titulo="Agenda" subtitulo="Gestione audiencias, diligencias y eventos del bufete.">
+    <button type="button" class="btn-secondary" data-testid="btn-nueva-diligencia" (click)="abrirModalDiligencia()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+            <rect x="9" y="3" width="6" height="4" rx="1"/>
+        </svg>
+        Nueva Diligencia
+    </button>
+    <button type="button" class="btn-primary" data-testid="btn-nueva-audiencia" (click)="abrirModalAudiencia()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 5v14M5 12h14"/>
@@ -46,11 +54,11 @@
         <h3 class="eventos-titulo">Eventos del día</h3>
 
         @if (eventosDelDia().length === 0) {
-            <app-empty-state mensaje="No hay audiencias programadas para este día." />
+            <app-empty-state mensaje="No hay eventos, audiencias ni diligencias para este día." />
         }
 
-        @for (evento of eventosDelDia(); track evento.id) {
-            <div class="evento-card row-clickable" (click)="irADetalle(evento.id)"
+        @for (evento of eventosDelDia(); track evento.id + '-' + evento.esAudiencia + '-' + evento.esDiligencia) {
+            <div class="evento-card row-clickable" (click)="irADetalle(evento)"
                 [attr.data-testid]="'evento-' + evento.id">
                 <div class="evento-hora">
                     <span class="hora-texto">{{ formatearHora(evento.horaInicio) }}</span>
@@ -64,6 +72,10 @@
                     }
                 </div>
                 <div class="evento-estado">
+                    <span class="pill pill-tipo" [style.background]="evento.colorTipo"
+                        [style.color]="'white'">
+                        {{ evento.tipo }}
+                    </span>
                     <span class="pill" [style.background]="colorEstado(evento.estado)"
                         [style.color]="'white'">
                         {{ evento.estado }}
@@ -74,6 +86,14 @@
     </div>
 </section>
 
-@if (modalAbierto()) {
-    <app-audiencia-modal (cerrar)="cerrarModal()" (creado)="alCrearAudiencia()" />
+@if (modalAudienciaAbierto()) {
+    <app-audiencia-modal (cerrar)="cerrarModalAudiencia()" (creado)="alCrearAudiencia()" />
+}
+
+@if (modalDiligenciaAbierto()) {
+    <app-diligencia-modal
+        [expedientes]="expedientes()"
+        [fechaInicial]="fechaSeleccionada()"
+        (cerrar)="cerrarModalDiligencia()"
+        (alCrear)="alCrearDiligencia()" />
 }

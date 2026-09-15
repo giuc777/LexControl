@@ -1,0 +1,426 @@
+/* Estilos del modulo Diligencias (Tareas del Abogado).
+   Toolbar, tabla, pills, detalle — reutiliza primitivas de otros modulos. */
+
+/* ============ Toolbar de filtros ============ */
+
+.diligencias-toolbar {
+    background: var(--surface, #fff);
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-card);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+
+.filtros-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.filtro-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 150px;
+}
+
+.filtro-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.filtro-select,
+.filtro-input {
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--field-line);
+    border-radius: var(--radius-field);
+    font-size: 14px;
+    color: var(--ink);
+    background: #fff;
+}
+
+.filtro-acciones {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+/* ============ Tabla de datos ============ */
+
+.tabla-contenedor {
+    background: var(--surface, #fff);
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-card);
+    overflow-x: auto;
+}
+
+.tabla-datos {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.tabla-datos th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 2px solid var(--panel-line);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.tabla-datos td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--panel-line);
+    color: var(--ink);
+}
+
+.fila-clickeable {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.fila-clickeable:hover {
+    background: var(--hover, #f5f7f9);
+}
+
+.celda-titulo {
+    font-weight: 600;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ============ Pills ============ */
+
+.pill-estado {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.pill-tipo {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: #fff;
+}
+
+/* ============ Detalle: Resumen ============ */
+
+.detalle-resumen {
+    background: var(--surface, #fff);
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-card);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+}
+
+.resumen-titulo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.resumen-titulo h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+/* ============ Detalle: Grid de campos ============ */
+
+.detalle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-card);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+}
+
+.detalle-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detalle-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.detalle-valor {
+    font-size: 14px;
+    color: var(--ink);
+}
+
+.detalle-valor-destacado {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+/* ============ Detalle: Secciones ============ */
+
+.detalle-seccion {
+    background: var(--surface, #fff);
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-card);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+}
+
+.detalle-seccion h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.detalle-texto {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink);
+}
+
+/* ============ Acciones del detalle ============ */
+
+.detalle-acciones {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+/* ============ Meta del detalle ============ */
+
+.detalle-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--subtle);
+    padding: 12px 0;
+}
+
+/* ============ Modal ============ */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-contenido {
+    background: #fff;
+    border-radius: var(--radius-card);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modal-amplio {
+    max-width: 700px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--panel-line);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.btn-cerrar {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.modal-body {
+    padding: 20px 24px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--panel-line);
+}
+
+.resumen-audiencia {
+    margin-bottom: 16px;
+}
+
+.resumen-audiencia h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.fieldset-form {
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-field);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.fieldset-form legend {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    padding: 0 8px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-grupo label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.form-grupo-full {
+    grid-column: 1 / -1;
+}
+
+.obligatorio {
+    color: #e74c3c;
+}
+
+.form-control {
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--field-line);
+    border-radius: var(--radius-field);
+    font-size: 14px;
+    color: var(--ink);
+    background: #fff;
+}
+
+textarea.form-control {
+    height: auto;
+    padding: 8px 10px;
+    resize: vertical;
+}
+
+.form-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+/* ============ Loading spinner ============ */
+
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 16px;
+}
+
+.spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--panel-line);
+    border-top-color: var(--brand);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-spinner p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+/* ============ Responsive ============ */
+
+@media (max-width: 768px) {
+    .filtros-grid {
+        flex-direction: column;
+    }
+
+    .filtro-grupo {
+        min-width: 100%;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detalle-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .modal-contenido {
+        width: 95%;
+    }
+
+    .resumen-titulo {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

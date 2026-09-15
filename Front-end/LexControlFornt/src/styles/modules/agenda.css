@@ -1,5 +1,6 @@
 /* Estilos del módulo Agenda / Audiencias.
-   Calendario mensual, lista de eventos del día, detalle de audiencia. */
+   Calendario mensual, lista de eventos del día, detalle de audiencia.
+   Reutiliza primitivas de clientes.css (modal, field, form-grid, pills, btn). */
 
 /* ============ Layout principal ============ */
 
@@ -165,13 +166,68 @@
     gap: 20px;
 }
 
-.detalle-info {
+.detalle-resumen {
     padding: 24px;
+}
+
+.resumen-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.resumen-tipo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pill-tipo {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: #fff;
+}
+
+.pill-estado {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    color: #fff;
+}
+
+.btn-registrar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    background: var(--brand);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.btn-registrar:hover {
+    background: var(--brand-dark);
+}
+
+.btn-registrar svg {
+    width: 16px;
+    height: 16px;
 }
 
 .detalle-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 16px;
 }
 
@@ -179,6 +235,10 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+
+.detalle-campo-full {
+    grid-column: 1 / -1;
 }
 
 .detalle-label {
@@ -192,6 +252,13 @@
 .detalle-valor {
     font-size: 14px;
     color: var(--ink);
+    line-height: 1.5;
+}
+
+.detalle-valor-destacado {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--deep);
 }
 
 .detalle-notas {
@@ -207,80 +274,139 @@
     margin-top: 6px;
 }
 
-/* ============ Formulario de resultado ============ */
+/* ============ Metadata (creado por, fecha creación) ============ */
+
+.detalle-meta {
+    padding: 16px 24px;
+}
+
+.meta-grid {
+    display: flex;
+    gap: 32px;
+}
+
+/* ============ Resultado registrado ============ */
 
 .resultado-panel {
-    padding: 20px;
+    padding: 24px;
+    border-left: 4px solid var(--brand);
 }
 
-.resultado-panel h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--ink);
-    margin-bottom: 16px;
-}
-
-.resultado-form {
-    padding: 20px;
-}
-
-.resultado-form h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--ink);
-    margin-bottom: 16px;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
-.form-field-full {
-    grid-column: 1 / -1;
-}
-
-.form-actions {
+.resultado-header {
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
     gap: 10px;
-    margin-top: 16px;
+    margin-bottom: 16px;
 }
 
-.loading-state {
-    padding: 40px;
-    text-align: center;
+.resultado-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+}
+
+.resultado-icono {
+    width: 22px;
+    height: 22px;
+    color: var(--brand);
+}
+
+.detalle-valor-resultado {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--brand);
+}
+
+.detalle-valor-proxima {
+    font-size: 13.5px;
+    color: var(--deep);
+    font-weight: 500;
+    background: rgba(6, 101, 117, 0.06);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 2px;
+}
+
+/* ============ Modal de resultado ============ */
+
+.resumen-audiencia {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    padding: 14px;
+    background: #f8f9fb;
+    border-radius: 8px;
+    border: 1px solid var(--panel-line);
+    margin-top: 8px;
+}
+
+.resumen-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.resumen-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     color: var(--subtle);
 }
 
-/* ============ Pills de estado ============ */
-
-.pill {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
+.resumen-valor {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
 }
 
-.pill-activo {
-    background: #d4edda;
-    color: #155724;
+.field-help {
+    display: block;
+    font-size: 11.5px;
+    color: var(--subtle);
+    margin-top: 4px;
 }
 
-.pill-tramite {
-    background: #fff3cd;
-    color: #856404;
+/* ============ Loading ============ */
+
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 60px 40px;
+    color: var(--subtle);
+    font-size: 14px;
 }
 
-.pill-finalizado {
-    background: #cce5ff;
-    color: #004085;
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--panel-line);
+    border-top-color: var(--brand);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
 
-.pill-total {
-    background: #e2e3e5;
-    color: #383d41;
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============ Responsive ============ */
+
+@media (max-width: 640px) {
+    .resumen-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .meta-grid {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .resumen-audiencia {
+        grid-template-columns: 1fr 1fr;
+    }
 }

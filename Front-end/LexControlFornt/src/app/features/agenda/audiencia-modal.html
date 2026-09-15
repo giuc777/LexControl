@@ -1,97 +1,105 @@
-<div class="modal-overlay" (click)="alCerrar()" data-testid="modal-audiencia">
-    <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3>Nueva Audiencia</h3>
-            <button type="button" class="btn-icon" (click)="alCerrar()" aria-label="Cerrar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-
-        <div class="modal-body">
+<app-modal titulo="Nueva Audiencia" [abierto]="true" (cerrado)="alCerrar()">
+    <form class="modal-form" (submit)="alEnviar($event)" novalidate>
+        <fieldset>
+            <legend>Datos de la audiencia</legend>
             <div class="form-grid">
-                <label class="form-field form-field-full">
-                    <span class="form-label">Expediente ID *</span>
-                    <input type="number" class="form-input" [(ngModel)]="formulario.expedienteId"
-                        data-testid="input-expediente-id" required />
-                </label>
-
-                <label class="form-field">
-                    <span class="form-label">Tipo de Audiencia *</span>
-                    <select class="form-input" [(ngModel)]="formulario.tipoId"
-                        data-testid="select-tipo" required>
+                <div class="field full">
+                    <label for="audExpedienteId">Expediente <span class="req">*</span></label>
+                    <select id="audExpedienteId" data-testid="select-expediente"
+                        [(ngModel)]="expedienteId" name="expedienteId">
+                        <option value="0" disabled>Seleccionar expediente...</option>
+                        @for (exp of expedientes(); track exp.id) {
+                            <option [value]="exp.id">{{ exp.noExpediente }} — {{ exp.cliente }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="audTipo">Tipo de audiencia <span class="req">*</span></label>
+                    <select id="audTipo" data-testid="select-tipo"
+                        [(ngModel)]="tipoId" name="tipoId">
                         <option value="0" disabled>Seleccionar...</option>
                         @for (tipo of tipos(); track tipo.id) {
                             <option [value]="tipo.id">{{ tipo.nombre }}</option>
                         }
                     </select>
-                </label>
-
-                <label class="form-field">
-                    <span class="form-label">Estado *</span>
-                    <select class="form-input" [(ngModel)]="formulario.estadoId"
-                        data-testid="select-estado" required>
+                </div>
+                <div class="field">
+                    <label for="audEstado">Estado <span class="req">*</span></label>
+                    <select id="audEstado" data-testid="select-estado"
+                        [(ngModel)]="estadoId" name="estadoId">
                         <option value="0" disabled>Seleccionar...</option>
                         @for (estado of estados(); track estado.id) {
                             <option [value]="estado.id">{{ estado.nombre }}</option>
                         }
                     </select>
-                </label>
-
-                <label class="form-field">
-                    <span class="form-label">Fecha *</span>
-                    <input type="date" class="form-input" [(ngModel)]="formulario.fecha"
-                        data-testid="input-fecha" required />
-                </label>
-
-                <label class="form-field">
-                    <span class="form-label">Hora Inicio *</span>
-                    <input type="time" class="form-input" [(ngModel)]="formulario.horaInicio"
-                        data-testid="input-hora-inicio" required />
-                </label>
-
-                <label class="form-field">
-                    <span class="form-label">Hora Fin</span>
-                    <input type="time" class="form-input" [(ngModel)]="formulario.horaFin"
-                        data-testid="input-hora-fin" />
-                </label>
-
-                <label class="form-field">
-                    <span class="form-label">Juzgado *</span>
-                    <select class="form-input" [(ngModel)]="formulario.juzgadoId"
-                        data-testid="select-juzgado" required>
+                </div>
+                <div class="field">
+                    <label for="audJuzgado">Juzgado <span class="req">*</span></label>
+                    <select id="audJuzgado" data-testid="select-juzgado"
+                        [(ngModel)]="juzgadoId" name="juzgadoId">
                         <option value="0" disabled>Seleccionar...</option>
                         @for (juzgado of juzgados(); track juzgado.id) {
                             <option [value]="juzgado.id">{{ juzgado.nombre }}</option>
                         }
                     </select>
-                </label>
-
-                <label class="form-field">
-                    <span class="form-label">Sala</span>
-                    <input type="text" class="form-input" [(ngModel)]="formulario.sala"
-                        data-testid="input-sala" placeholder="Ej: Sala 1" />
-                </label>
-
-                <label class="form-field form-field-full">
-                    <span class="form-label">Notas</span>
-                    <textarea class="form-input form-textarea" [(ngModel)]="formulario.notas"
-                        data-testid="input-notas" rows="3"></textarea>
-                </label>
+                </div>
+                <div class="field">
+                    <label for="audSala">Sala</label>
+                    <input type="text" id="audSala" data-testid="input-sala"
+                        [(ngModel)]="sala" name="sala"
+                        maxlength="50" placeholder="Ej: Sala 1">
+                </div>
             </div>
-        </div>
+        </fieldset>
 
-        <div class="modal-footer">
+        <fieldset>
+            <legend>Fecha y hora</legend>
+            <div class="form-grid">
+                <div class="field">
+                    <label for="audFecha">Fecha <span class="req">*</span></label>
+                    <input type="date" id="audFecha" data-testid="input-fecha"
+                        [(ngModel)]="fecha" name="fecha">
+                </div>
+                <div class="field">
+                    <label for="audHoraInicio">Hora inicio <span class="req">*</span></label>
+                    <input type="time" id="audHoraInicio" data-testid="input-hora-inicio"
+                        [(ngModel)]="horaInicio" name="horaInicio">
+                </div>
+                <div class="field">
+                    <label for="audHoraFin">Hora fin</label>
+                    <input type="time" id="audHoraFin" data-testid="input-hora-fin"
+                        [(ngModel)]="horaFin" name="horaFin">
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Observaciones</legend>
+            <div class="form-grid">
+                <div class="field full">
+                    <label for="audNotas">Notas</label>
+                    <textarea id="audNotas" data-testid="input-notas"
+                        [(ngModel)]="notas" name="notas"
+                        rows="3" maxlength="500"
+                        placeholder="Detalles adicionales de la audiencia..."></textarea>
+                </div>
+            </div>
+        </fieldset>
+
+        @if (error()) {
+            <p class="form-error" role="alert">{{ error() }}</p>
+        }
+
+        <footer class="modal-footer">
             <button type="button" class="btn-secondary" (click)="alCerrar()">Cancelar</button>
-            <button type="button" class="btn-primary" (click)="alEnviar()"
-                [disabled]="guardando()" data-testid="btn-guardar-audiencia">
+            <button type="submit" class="btn-primary" data-testid="btn-guardar-audiencia"
+                [disabled]="guardando()">
                 @if (guardando()) {
                     Guardando...
                 } @else {
                     Guardar Audiencia
                 }
             </button>
-        </div>
-    </div>
-</div>
+        </footer>
+    </form>
+</app-modal>

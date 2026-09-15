@@ -11,7 +11,29 @@
     </app-page-header>
 
     <section class="detalle-layout">
-        <div class="panel detalle-info">
+        <!-- Tarjeta principal con resumen -->
+        <div class="panel detalle-resumen">
+            <div class="resumen-header">
+                <div class="resumen-tipo">
+                    <span class="pill pill-tipo" [style.background]="colorEstado(aud.estado)">
+                        {{ aud.tipo }}
+                    </span>
+                    <span class="pill pill-estado" [style.background]="colorEstado(aud.estado)">
+                        {{ aud.estado }}
+                    </span>
+                </div>
+                @if (esPendiente()) {
+                    <button type="button" class="btn-primary btn-registrar" data-testid="btn-registrar-resultado"
+                        (click)="abrirModalResultado()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                        </svg>
+                        Registrar Resultado
+                    </button>
+                }
+            </div>
+
             <div class="detalle-grid">
                 <div class="detalle-campo">
                     <span class="detalle-label">Expediente</span>
@@ -22,20 +44,12 @@
                     <span class="detalle-valor">{{ aud.cliente || '—' }}</span>
                 </div>
                 <div class="detalle-campo">
-                    <span class="detalle-label">Tipo</span>
-                    <span class="detalle-valor" data-testid="audiencia-tipo">{{ aud.tipo }}</span>
-                </div>
-                <div class="detalle-campo">
-                    <span class="detalle-label">Estado</span>
-                    <span class="pill pill-activo">{{ aud.estado }}</span>
-                </div>
-                <div class="detalle-campo">
                     <span class="detalle-label">Fecha</span>
-                    <span class="detalle-valor" data-testid="audiencia-fecha">{{ aud.fecha }}</span>
+                    <span class="detalle-valor detalle-valor-destacado" data-testid="audiencia-fecha">{{ aud.fecha }}</span>
                 </div>
                 <div class="detalle-campo">
                     <span class="detalle-label">Hora Inicio</span>
-                    <span class="detalle-valor">{{ aud.horaInicio }}</span>
+                    <span class="detalle-valor detalle-valor-destacado">{{ aud.horaInicio }}</span>
                 </div>
                 @if (aud.horaFin) {
                     <div class="detalle-campo">
@@ -53,18 +67,6 @@
                         <span class="detalle-valor">{{ aud.sala }}</span>
                     </div>
                 }
-                @if (aud.usuarioCreacion) {
-                    <div class="detalle-campo">
-                        <span class="detalle-label">Creado por</span>
-                        <span class="detalle-valor">{{ aud.usuarioCreacion }}</span>
-                    </div>
-                }
-                @if (aud.fechaCreacion) {
-                    <div class="detalle-campo">
-                        <span class="detalle-label">Fecha de Creación</span>
-                        <span class="detalle-valor">{{ aud.fechaCreacion }}</span>
-                    </div>
-                }
             </div>
 
             @if (aud.notas) {
@@ -75,82 +77,66 @@
             }
         </div>
 
+        <!-- Información de creación -->
+        @if (aud.usuarioCreacion || aud.fechaCreacion) {
+            <div class="panel detalle-meta">
+                <div class="meta-grid">
+                    @if (aud.usuarioCreacion) {
+                        <div class="detalle-campo">
+                            <span class="detalle-label">Creado por</span>
+                            <span class="detalle-valor">{{ aud.usuarioCreacion }}</span>
+                        </div>
+                    }
+                    @if (aud.fechaCreacion) {
+                        <div class="detalle-campo">
+                            <span class="detalle-label">Fecha de Creación</span>
+                            <span class="detalle-valor">{{ aud.fechaCreacion }}</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Resultado registrado -->
         @if (aud.resultado) {
             <div class="panel resultado-panel">
-                <h3>Resultado</h3>
+                <div class="resultado-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="resultado-icono">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    <h3>Resultado de la Audiencia</h3>
+                </div>
                 <div class="detalle-grid">
                     <div class="detalle-campo">
                         <span class="detalle-label">Resultado</span>
-                        <span class="detalle-valor">{{ aud.resultado }}</span>
+                        <span class="detalle-valor detalle-valor-resultado">{{ aud.resultado }}</span>
                     </div>
                     @if (aud.descripcionResultado) {
-                        <div class="detalle-campo">
+                        <div class="detalle-campo detalle-campo-full">
                             <span class="detalle-label">Descripción</span>
-                            <span class="detalle-valor">{{ aud.descripcionResultado }}</span>
+                            <p class="detalle-valor">{{ aud.descripcionResultado }}</p>
                         </div>
                     }
                     @if (aud.proximaActuacion) {
-                        <div class="detalle-campo">
+                        <div class="detalle-campo detalle-campo-full">
                             <span class="detalle-label">Próxima Actuación</span>
-                            <span class="detalle-valor">{{ aud.proximaActuacion }}</span>
+                            <p class="detalle-valor detalle-valor-proxima">{{ aud.proximaActuacion }}</p>
                         </div>
                     }
-                </div>
-            </div>
-        }
-
-        @if (esPendiente() && !registrandoResultado()) {
-            <div class="panel">
-                <button type="button" class="btn-primary" data-testid="btn-registrar-resultado"
-                    (click)="abrirRegistroResultado()">
-                    Registrar Resultado
-                </button>
-            </div>
-        }
-
-        @if (registrandoResultado()) {
-            <div class="panel resultado-form">
-                <h3>Registrar Resultado</h3>
-                <div class="form-grid">
-                    <label class="form-field">
-                        <span class="form-label">Resultado *</span>
-                        <select class="form-input" [(ngModel)]="resultadoSeleccionado"
-                            data-testid="select-resultado" required>
-                            <option value="0" disabled>Seleccionar resultado...</option>
-                            <option value="1">Favorable</option>
-                            <option value="2">Desfavorable</option>
-                            <option value="3">Parcial</option>
-                            <option value="4">Sin Resolución</option>
-                        </select>
-                    </label>
-
-                    <label class="form-field form-field-full">
-                        <span class="form-label">Descripción del Resultado *</span>
-                        <textarea class="form-input form-textarea" [(ngModel)]="descripcionResultado"
-                            data-testid="input-observaciones" rows="3"
-                            placeholder="Describa el resultado de la audiencia..."></textarea>
-                    </label>
-
-                    <label class="form-field form-field-full">
-                        <span class="form-label">Próxima Actuación</span>
-                        <input type="text" class="form-input" [(ngModel)]="proximaActuacion"
-                            data-testid="input-proxima-actuacion"
-                            placeholder="Ej: Audiencia de pruebas para el 15/10/2026" />
-                    </label>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" (click)="cancelarResultado()">Cancelar</button>
-                    <button type="button" class="btn-primary" data-testid="btn-guardar-resultado"
-                        (click)="guardarResultado()">
-                        Guardar Resultado
-                    </button>
                 </div>
             </div>
         }
     </section>
+
+    @if (modalAbierto()) {
+        <app-resultado-modal [audiencia]="aud"
+            (cerrar)="cerrarModal()" (registrado)="alRegistrarResultado()" />
+    }
 } @else if (cargando()) {
     <div class="panel loading-state">
+        <div class="loading-spinner"></div>
         <p>Cargando audiencia...</p>
     </div>
 }

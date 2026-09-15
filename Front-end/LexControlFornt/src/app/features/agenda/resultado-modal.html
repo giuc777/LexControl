@@ -1,0 +1,83 @@
+<app-modal titulo="Registrar Resultado" [abierto]="true" (cerrado)="alCerrar()">
+    <form class="modal-form" (submit)="alEnviar($event)" novalidate>
+
+        <fieldset>
+            <legend>Información de la audiencia</legend>
+            <div class="resumen-audiencia">
+                <div class="resumen-item">
+                    <span class="resumen-label">Expediente</span>
+                    <span class="resumen-valor">{{ audiencia().noExpediente }}</span>
+                </div>
+                <div class="resumen-item">
+                    <span class="resumen-label">Cliente</span>
+                    <span class="resumen-valor">{{ audiencia().cliente || '—' }}</span>
+                </div>
+                <div class="resumen-item">
+                    <span class="resumen-label">Fecha</span>
+                    <span class="resumen-valor">{{ audiencia().fecha }}</span>
+                </div>
+                <div class="resumen-item">
+                    <span class="resumen-label">Hora</span>
+                    <span class="resumen-valor">{{ audiencia().horaInicio }}</span>
+                </div>
+                <div class="resumen-item">
+                    <span class="resumen-label">Tipo</span>
+                    <span class="resumen-valor">{{ audiencia().tipo }}</span>
+                </div>
+                <div class="resumen-item">
+                    <span class="resumen-label">Juzgado</span>
+                    <span class="resumen-valor">{{ audiencia().juzgado }}</span>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Resultado de la audiencia</legend>
+            <div class="form-grid">
+                <div class="field full">
+                    <label for="resResultado">Resultado <span class="req">*</span></label>
+                    <select id="resResultado" data-testid="select-resultado"
+                        [(ngModel)]="resultadoSeleccionado" name="resultadoId" required>
+                        <option value="0" disabled>Seleccionar resultado...</option>
+                        @for (res of resultados(); track res.id) {
+                            <option [value]="res.id">{{ res.nombre }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="field full">
+                    <label for="resDescripcion">Descripción del resultado <span class="req">*</span></label>
+                    <textarea id="resDescripcion" data-testid="input-descripcion"
+                        [(ngModel)]="descripcionResultado" name="descripcionResultado"
+                        rows="4" maxlength="1000" required
+                        placeholder="Describa el resultado de la audiencia, conclusiones, decisiones tomadas..."></textarea>
+                </div>
+
+                <div class="field full">
+                    <label for="resProxima">Próxima actuación</label>
+                    <input type="text" id="resProxima" data-testid="input-proxima-actuacion"
+                        [(ngModel)]="proximaActuacion" name="proximaActuacion"
+                        maxlength="200"
+                        placeholder="Ej: Audiencia de pruebas para el 15/10/2026" />
+                    <span class="field-help">Opcional. Indique la siguiente acción programada.</span>
+                </div>
+            </div>
+        </fieldset>
+
+        @if (error()) {
+            <p class="form-error" role="alert">{{ error() }}</p>
+        }
+
+        <footer class="modal-footer">
+            <button type="button" class="btn-secondary" (click)="alCerrar()">Cancelar</button>
+            <button type="submit" class="btn-primary" data-testid="btn-guardar-resultado"
+                [disabled]="guardando()">
+                @if (guardando()) {
+                    Registrando...
+                } @else {
+                    Registrar Resultado
+                }
+            </button>
+        </footer>
+    </form>
+</app-modal>

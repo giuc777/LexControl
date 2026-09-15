@@ -1,10 +1,2 @@
-Msg 130, Level 15, State 1, Procedure SP_Reporte_NotificacionesOJ, Line 70 [Batch Start Line 2406]
-Cannot perform an aggregate function on an expression containing an aggregate or a subquery.
-Msg 130, Level 15, State 1, Procedure SP_Reporte_NotificacionesOJ, Line 71 [Batch Start Line 2406]
-Cannot perform an aggregate function on an expression containing an aggregate or a subquery.
-Msg 130, Level 15, State 1, Procedure SP_Reporte_Diligencias, Line 16 [Batch Start Line 2512]
-Cannot perform an aggregate function on an expression containing an aggregate or a subquery.
-Msg 130, Level 15, State 1, Procedure SP_Reporte_Diligencias, Line 17 [Batch Start Line 2512]
-Cannot perform an aggregate function on an expression containing an aggregate or a subquery.
-Msg 130, Level 15, State 1, Procedure SP_Reporte_EventosAgendaMes, Line 21 [Batch Start Line 2599]
-Cannot perform an aggregate function on an expression containing an aggregate or a subquery.
+Errores de SPs de reportes corregidos en 10-Reportes-FixSubquery.sql
+(SPs corregidos: SP_Reporte_NotificacionesOJ, SP_Reporte_Diligencias, SP_Reporte_EventosAgendaMes)

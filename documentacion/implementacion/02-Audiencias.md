@@ -1,14 +1,15 @@
 # Módulo 02 — Audiencias (Agenda)
 
-> **Estado:** ✅ COMPLETADO — SPs + Backend + Frontend
+> **Estado:** ✅ COMPLETADO — SPs + Backend + Frontend + Correcciones
 > **Ruta frontend:** `/agenda` (calendario), `/agenda/:id` (detalle)
 > **Fecha implementación:** 14 Sep 2026
+> **Última actualización:** 15 Sep 2026 (correcciones + modal de resultado)
 
 ---
 
 ## 1. Descripción
 
-Gestión de audiencias judiciales. Calendario mensual navegable con eventos posicionados por día, registro de resultados y detalle completo.
+Gestión de audiencias judiciales. Calendario mensual navegable con eventos posicionados por día, registro de resultados en modal y detalle completo.
 
 ---
 
@@ -113,7 +114,8 @@ builder.Services.AddScoped<IAudienciaService, AudienciaService>();
 |---|---|
 | `features/agenda/agenda-page.ts` + `.html` | Calendario mensual navegable + lista de eventos del día |
 | `features/agenda/audiencia-modal.ts` + `.html` | Modal de creación con catálogos dinámicos (TIPO_AUDIENCIA, ESTADO_AUDIENCIA, JUZGADO) |
-| `features/agenda/agenda-detalle-page.ts` + `.html` | Detalle de audiencia + formulario de registro de resultado |
+| `features/agenda/agenda-detalle-page.ts` + `.html` | Detalle de audiencia con botón de registro de resultado |
+| `features/agenda/resultado-modal.ts` + `.html` | **[NUEVO]** Modal de registro de resultado con resumen de audiencia + formulario |
 
 ### 4.4 Estilos
 
@@ -121,8 +123,12 @@ builder.Services.AddScoped<IAudienciaService, AudienciaService>();
 
 - Calendario grid 7 columnas con navegación mes anterior/siguiente
 - Eventos del día con cards y pills de estado
-- Detalle de audiencia con grid de campos
-- Formulario de registro de resultado
+- Detalle de audiencia con grid de campos, resumen y pills de tipo/estado
+- Botón "Registrar Resultado" con icono SVG
+- Panel de resultado registrado con borde lateral y icono de check
+- Modal de resultado con resumen de audiencia (fondo gris) y formulario
+- Loading spinner animado
+- Responsive mobile (≤640px)
 
 ### 4.5 Rutas
 
@@ -196,3 +202,87 @@ Authorization: Bearer <token>
 - [x] Registrar resultado cambia estado a "Realizada"
 - [x] `dotnet build` exitoso (0 errores)
 - [x] `npx ng build` exitoso (0 errores)
+- [x] **[NUEVO]** Restricción unique en tabla AUDIENCIA previene duplicados
+- [x] **[NUEVO]** Modal de registro de resultado con diseño completo
+- [x] **[NUEVO]** SPs de reportes corregidos (subqueries → variables)
+- [x] **[NUEVO]** Fix error CS1503 en AudienciaDtos.cs (ToString en string)
+
+---
+
+## 7. Correcciones y Mejoras (15 Sep 2026)
+
+### 7.1 Restricción Única en AUDIENCIA
+
+**Archivo:** `ScriptsDB/08-Audiencias-UniqueConstraint.sql`
+
+```sql
+ALTER TABLE AUDIENCIA
+ADD CONSTRAINT UQ_AUDIENCIA_EXPEDIENTE_FECHA_HORA
+UNIQUE (Expediente_ID, Fecha, HoraInicio);
+```
+
+Previene que se registren dos audiencias para el mismo expediente en la misma fecha y hora.
+
+### 7.2 Datos Seed de Audiencias
+
+**Archivo:** `ScriptsDB/09-Audiencias-SeedData.sql`
+
+Script de prueba que inserta:
+- 4 personas (clientes de prueba)
+- 4 clientes vinculados a las personas
+- 5 expedientes (Civil, Familiar, Laboral, Penal)
+- 8 audiencias distribuidas en septiembre 2026
+
+Solo se ejecuta si la tabla AUDIENCIA está vacía.
+
+### 7.3 Corrección de SPs de Reportes
+
+**Archivo:** `ScriptsDB/10-Reportes-FixSubquery.sql`
+
+Corrección de 3 SPs que usaban subqueries dentro de `SUM(CASE WHEN ...)`:
+- `SP_Reporte_NotificacionesOJ` — Líneas 70-71
+- `SP_Reporte_Diligencias` — Líneas 16-17
+- `SP_Reporte_EventosAgendaMes` — Línea 21
+
+**Solución:** Declarar variables para los IDs antes de usar en agregaciones:
+```sql
+DECLARE @EstadoAtendida INT = (SELECT ID FROM ESTADO_NOTIFICACION_OJ WHERE Nombre = 'Atendida');
+SUM(CASE WHEN N.Estado_ID = @EstadoAtendida THEN 1 ELSE 0 END)
+```
+
+### 7.4 Fix Error CS1503 en Backend
+
+**Archivo:** `Back-end/LexControlApi/Dtos/Audiencias/AudienciaDtos.cs:102`
+
+```csharp
+// ANTES (error): HoraInicio ya es string, ToString() intenta usar IFormatProvider
+HoraInicio = f.HoraInicio.ToString(@"hh\:mm"),
+
+// DESPUÉS (fix): usar directamente el string
+HoraInicio = f.HoraInicio,
+```
+
+`AudienciaProximaFila.HoraInicio` es `string` (Dapper convierte TIME a string), por lo que llamar `.ToString(formato)` falla porque el compilador interpreta el formato como `IFormatProvider?`.
+
+### 7.5 Modal de Registro de Resultado
+
+**Archivos nuevos:**
+- `features/agenda/resultado-modal.ts` — Componente modal con `input.required<AudienciaDetalle>()`
+- `features/agenda/resultado-modal.html` — Template con resumen de audiencia + formulario
+
+**Flujo:**
+1. En `/agenda/:id`, si el estado es "Programada" o "Reprogramada", aparece botón "Registrar Resultado"
+2. Al hacer clic → se abre modal con resumen de la audiencia
+3. Select de resultado cargado dinámicamente desde `RESULTADO_AUDIENCIA`
+4. Textarea de descripción (obligatorio)
+5. Input de próxima actuación (opcional)
+6. Al guardar → `PUT /api/audiencias/{id}/resultado`
+7. Modal se cierra y detalle se recarga
+
+**Mejoras en el detalle:**
+- Pills de tipo y estado con colores
+- Panel de resultado con borde lateral izquierdo
+- Icono de check para resultado registrado
+- Próxima actuación destacada con fondo especial
+- Loading spinner animado
+- Responsive mobile

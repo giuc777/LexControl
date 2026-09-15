@@ -10,8 +10,8 @@ public class AudienciaFila
     public string NoExpediente { get; set; } = string.Empty;
     public string? Cliente { get; set; }
     public DateTime Fecha { get; set; }
-    public string HoraInicio { get; set; } = string.Empty;
-    public string? HoraFin { get; set; }
+    public TimeSpan HoraInicio { get; set; }
+    public TimeSpan? HoraFin { get; set; }
     public string Tipo { get; set; } = string.Empty;
     public string Juzgado { get; set; } = string.Empty;
     public string? Sala { get; set; }
@@ -27,8 +27,8 @@ public class AudienciaDetalleFila
     public string NoExpediente { get; set; } = string.Empty;
     public string? Cliente { get; set; }
     public DateTime Fecha { get; set; }
-    public string HoraInicio { get; set; } = string.Empty;
-    public string? HoraFin { get; set; }
+    public TimeSpan HoraInicio { get; set; }
+    public TimeSpan? HoraFin { get; set; }
     public int Tipo_ID { get; set; }
     public string Tipo { get; set; } = string.Empty;
     public int Juzgado_ID { get; set; }
@@ -84,8 +84,8 @@ public class AudienciaDto
         NoExpediente = f.NoExpediente,
         Cliente = f.Cliente,
         Fecha = f.Fecha.ToString("yyyy-MM-dd"),
-        HoraInicio = f.HoraInicio,
-        HoraFin = f.HoraFin,
+        HoraInicio = f.HoraInicio.ToString(@"hh\:mm"),
+        HoraFin = f.HoraFin?.ToString(@"hh\:mm"),
         Tipo = f.Tipo,
         Juzgado = f.Juzgado,
         Sala = f.Sala,
@@ -140,8 +140,8 @@ public class AudienciaDetalleDto
         NoExpediente = f.NoExpediente,
         Cliente = f.Cliente,
         Fecha = f.Fecha.ToString("yyyy-MM-dd"),
-        HoraInicio = f.HoraInicio,
-        HoraFin = f.HoraFin,
+        HoraInicio = f.HoraInicio.ToString(@"hh\:mm"),
+        HoraFin = f.HoraFin?.ToString(@"hh\:mm"),
         TipoId = f.Tipo_ID,
         Tipo = f.Tipo,
         JuzgadoId = f.Juzgado_ID,

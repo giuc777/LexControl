@@ -1,0 +1,137 @@
+<app-page-header
+    [titulo]="tramite()?.noExpediente ?? 'Trámite'"
+    [subtitulo]="'Detalle del trámite judicial'"
+    (volver)="irAVolver()" />
+
+@if (cargando()) {
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Cargando trámite...</p>
+    </div>
+} @else if (!tramite()) {
+    <app-empty-state
+        icono="alert-triangle"
+        titulo="Trámite no encontrado"
+        mensaje="El trámite solicitado no existe o fue eliminado." />
+} @else {
+    <div class="detalle-resumen">
+        <div class="resumen-titulo">
+            <h2>{{ tramite()?.noExpediente }}</h2>
+            <span class="pill-tipo">{{ tramite()?.tipo }}</span>
+            <span class="pill-estado" [style.background-color]="colorEstado(tramite()!.estado)">
+                {{ tramite()?.estado }}
+            </span>
+        </div>
+    </div>
+
+    <div class="detalle-grid">
+        <div class="detalle-campo">
+            <label class="detalle-label">Cliente</label>
+            <div class="detalle-valor">{{ tramite()?.cliente ?? '—' }}</div>
+        </div>
+        <div class="detalle-campo">
+            <label class="detalle-label">Institución</label>
+            <div class="detalle-valor-destacado">{{ tramite()?.institucion }}</div>
+        </div>
+        <div class="detalle-campo">
+            <label class="detalle-label">Fecha de Ingreso</label>
+            <div class="detalle-valor">{{ tramite()?.fechaIngreso }}</div>
+        </div>
+        <div class="detalle-campo">
+            <label class="detalle-label">Oficio de Referencia</label>
+            <div class="detalle-valor">{{ tramite()?.oficioReferencia ?? '—' }}</div>
+        </div>
+    </div>
+
+    @if (tramite()?.descripcion) {
+        <div class="detalle-seccion">
+            <h3>Descripción</h3>
+            <p class="detalle-texto">{{ tramite()?.descripcion }}</p>
+        </div>
+    }
+
+    @if (tramite()?.notasInternas) {
+        <div class="detalle-seccion">
+            <h3>Notas Internas</h3>
+            <p class="detalle-texto">{{ tramite()?.notasInternas }}</p>
+        </div>
+    }
+
+    @if (tramite()?.documentosAdjuntos) {
+        <div class="detalle-seccion">
+            <h3>Documentos Adjuntos</h3>
+            <p class="detalle-texto">{{ tramite()?.documentosAdjuntos }}</p>
+        </div>
+    }
+
+    @if (esResuelto()) {
+        <div class="resultado-panel">
+            <div class="resultado-icono">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="#2ecc71" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+            </div>
+            <div class="resultado-contenido">
+                <h3>Resolución</h3>
+                @if (tramite()?.fechaResolucion) {
+                    <p><strong>Fecha:</strong> {{ tramite()?.fechaResolucion }}</p>
+                }
+                @if (tramite()?.resumenResolucion) {
+                    <p>{{ tramite()?.resumenResolucion }}</p>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="detalle-acciones">
+        @if (!esResuelto()) {
+            <button class="btn btn-primary" (click)="toggleFormEstado()">
+                Cambiar Estado
+            </button>
+        }
+    </div>
+
+    @if (mostrarFormEstado()) {
+        <div class="modal-overlay" (click)="toggleFormEstado()">
+            <div class="modal-contenido" (click)="$event.stopPropagation()">
+                <h3>Cambiar Estado del Trámite</h3>
+                <div class="form-grupo">
+                    <label>Nuevo Estado</label>
+                    <select class="form-control"
+                            [ngModel]="nuevoEstadoId()"
+                            (ngModelChange)="nuevoEstadoId.set(+$event)">
+                        @for (e of estadosTramite(); track e.id) {
+                            <option [value]="e.id">{{ e.nombre }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-grupo">
+                    <label>Fecha de Resolución</label>
+                    <input type="date" class="form-control"
+                           [ngModel]="fechaResolucion()"
+                           (ngModelChange)="fechaResolucion.set($event)" />
+                </div>
+                <div class="form-grupo">
+                    <label>Resumen de Resolución</label>
+                    <textarea class="form-control" rows="3"
+                              [ngModel]="resumenResolucion()"
+                              (ngModelChange)="resumenResolucion.set($event)"
+                              placeholder="Describe el resultado del trámite..."></textarea>
+                </div>
+                <div class="form-acciones">
+                    <button class="btn btn-secondary" (click)="toggleFormEstado()">Cancelar</button>
+                    <button class="btn btn-primary" (click)="guardarEstado()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="detalle-meta">
+        <span>Creado: {{ tramite()?.fechaCreacion }}</span>
+        @if (tramite()?.fechaUltimaActualizacion) {
+            <span>Última actualización: {{ tramite()?.fechaUltimaActualizacion }}</span>
+        }
+    </div>
+}

@@ -72,9 +72,19 @@ export const routes: Routes = [
                 canActivate: [moduloGuard('audiencias')],
                 loadComponent: () => import('./features/agenda/agenda-detalle-page').then(m => m.AgendaDetallePage)
             },
+            {
+                path: 'tramites',
+                canActivate: [moduloGuard('tramites')],
+                loadComponent: () => import('./features/tramites/tramites-page').then(m => m.TramitesPage)
+            },
+            {
+                path: 'tramites/:id',
+                canActivate: [moduloGuard('tramites')],
+                loadComponent: () => import('./features/tramites/tramite-detalle-page').then(m => m.TramiteDetallePage)
+            },
             /* Los demás módulos se registran con la página provisional;
                cada fase del plan reemplazará su loadComponent. */
-            ...MODULOS.filter(m => m.key !== 'dashboard' && m.key !== 'ajustes' && m.key !== 'reportes' && m.key !== 'clientes' && m.key !== 'expedientes' && m.key !== 'mantenimiento' && m.key !== 'audiencias').map(m => ({
+            ...MODULOS.filter(m => m.key !== 'dashboard' && m.key !== 'ajustes' && m.key !== 'reportes' && m.key !== 'clientes' && m.key !== 'expedientes' && m.key !== 'mantenimiento' && m.key !== 'audiencias' && m.key !== 'tramites').map(m => ({
                 path: m.ruta,
                 canActivate: [moduloGuard(m.key)],
                 loadComponent: () =>

@@ -1,0 +1,105 @@
+<app-page-header titulo="Trámites" subtitulo="Gestión de trámites judiciales" />
+
+<div class="tramites-toolbar">
+    <div class="filtros-grid">
+        <div class="filtro-grupo">
+            <label class="filtro-label">Estado</label>
+            <select class="filtro-select"
+                    [ngModel]="filtroEstadoId()"
+                    (ngModelChange)="filtroEstadoId.set($event ? +$event : null)">
+                <option [value]="null">Todos</option>
+                @for (e of estadosTramite(); track e.id) {
+                    <option [value]="e.id">{{ e.nombre }}</option>
+                }
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Tipo</label>
+            <select class="filtro-select"
+                    [ngModel]="filtroTipoId()"
+                    (ngModelChange)="filtroTipoId.set($event ? +$event : null)">
+                <option [value]="null">Todos</option>
+                @for (t of tiposTramite(); track t.id) {
+                    <option [value]="t.id">{{ t.nombre }}</option>
+                }
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Inicio</label>
+            <input type="date" class="filtro-input"
+                   [ngModel]="filtroFechaInicio()"
+                   (ngModelChange)="filtroFechaInicio.set($event)" />
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Fin</label>
+            <input type="date" class="filtro-input"
+                   [ngModel]="filtroFechaFin()"
+                   (ngModelChange)="filtroFechaFin.set($event)" />
+        </div>
+        <div class="filtro-acciones">
+            <button class="btn btn-primary" (click)="cargarTramites()">Buscar</button>
+            <button class="btn btn-secondary" (click)="limpiarFiltros()">Limpiar</button>
+        </div>
+    </div>
+    <button class="btn btn-success" (click)="abrirModal()">+ Nuevo Trámite</button>
+</div>
+
+@if (cargando()) {
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Cargando trámites...</p>
+    </div>
+} @else if (tramites().length === 0) {
+    <app-empty-state
+        icono="file-text"
+        titulo="No hay trámites"
+        mensaje="No se encontraron trámites con los filtros seleccionados." />
+} @else {
+    <div class="tabla-contenedor">
+        <table class="tabla-datos">
+            <thead>
+                <tr>
+                    <th>No. Expediente</th>
+                    <th>Tipo</th>
+                    <th>Cliente</th>
+                    <th>Institución</th>
+                    <th>Fecha Ingreso</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (t of tramites(); track t.id) {
+                    <tr class="fila-clickeable" (click)="irADetalle(t.id)">
+                        <td class="celda-expediente">{{ t.noExpediente }}</td>
+                        <td>{{ t.tipo }}</td>
+                        <td>{{ t.cliente ?? '—' }}</td>
+                        <td>{{ t.institucion }}</td>
+                        <td>{{ t.fechaIngreso }}</td>
+                        <td>
+                            <span class="pill-estado" [style.background-color]="colorEstado(t.estado)">
+                                {{ t.estado }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-icon" title="Ver detalle"
+                                    (click)="irADetalle(t.id); $event.stopPropagation()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (modalAbierto()) {
+    <app-tramite-modal
+        (cerrar)="cerrarModal()"
+        (alCrear)="alCrearTramite()" />
+}

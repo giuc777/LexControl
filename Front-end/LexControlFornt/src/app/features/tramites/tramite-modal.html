@@ -1,0 +1,97 @@
+<div class="modal-overlay" (click)="onCerrar()">
+    <div class="modal-contenido modal-amplio" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Nuevo Trámite</h2>
+            <button class="btn-cerrar" (click)="onCerrar()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="resumen-audiencia">
+                <h4>Datos del Trámite</h4>
+            </div>
+
+            <fieldset class="fieldset-form">
+                <legend>Información General</legend>
+                <div class="form-grid">
+                    <div class="form-grupo">
+                        <label>No. Expediente <span class="obligatorio">*</span></label>
+                        <select class="form-control"
+                                [ngModel]="expedienteId()"
+                                (ngModelChange)="expedienteId.set(+$event)">
+                            <option [value]="0">Seleccione expediente</option>
+                            @for (e of expedientes(); track e.id) {
+                                <option [value]="e.id">{{ e.noExpediente }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-grupo">
+                        <label>Tipo de Trámite <span class="obligatorio">*</span></label>
+                        <select class="form-control"
+                                [ngModel]="tipoId()"
+                                (ngModelChange)="tipoId.set(+$event)">
+                            <option [value]="0">Seleccione tipo</option>
+                            @for (t of tiposTramite(); track t.id) {
+                                <option [value]="t.id">{{ t.nombre }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-grupo">
+                        <label>Institución <span class="obligatorio">*</span></label>
+                        <input type="text" class="form-control"
+                               [ngModel]="institucion()"
+                               (ngModelChange)="institucion.set($event)"
+                               placeholder="Ej: Ministerio Público" />
+                    </div>
+                    <div class="form-grupo">
+                        <label>Fecha de Ingreso</label>
+                        <input type="date" class="form-control"
+                               [ngModel]="fechaIngreso()"
+                               (ngModelChange)="fechaIngreso.set($event)" />
+                    </div>
+                    <div class="form-grupo">
+                        <label>Estado <span class="obligatorio">*</span></label>
+                        <select class="form-control"
+                                [ngModel]="estadoId()"
+                                (ngModelChange)="estadoId.set(+$event)">
+                            @for (e of estadosTramite(); track e.id) {
+                                <option [value]="e.id">{{ e.nombre }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-grupo">
+                        <label>Oficio de Referencia</label>
+                        <input type="text" class="form-control"
+                               [ngModel]="oficioReferencia()"
+                               (ngModelChange)="oficioReferencia.set($event)"
+                               placeholder="Número de oficio" />
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="fieldset-form">
+                <legend>Detalles Adicionales</legend>
+                <div class="form-grupo form-grupo-full">
+                    <label>Descripción</label>
+                    <textarea class="form-control" rows="3"
+                              [ngModel]="descripcion()"
+                              (ngModelChange)="descripcion.set($event)"
+                              placeholder="Descripción del trámite..."></textarea>
+                </div>
+                <div class="form-grupo form-grupo-full">
+                    <label>Notas Internas</label>
+                    <textarea class="form-control" rows="2"
+                              [ngModel]="notasInternas()"
+                              (ngModelChange)="notasInternas.set($event)"
+                              placeholder="Notas internas (no visibles para el cliente)..."></textarea>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="onCerrar()" [disabled]="guardando()">Cancelar</button>
+            <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando()">
+                @if (guardando()) { Guardando... } @else { Crear Trámite }
+            </button>
+        </div>
+    </div>
+</div>

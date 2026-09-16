@@ -283,18 +283,37 @@ export default defineConfig({
 ```
 e2e/
 ├── fixtures/
-│   └── auth.fixture.ts       # Fixture reutilizable de autenticación
+│   └── auth.fixture.ts           # Fixture reutilizable de autenticación
 ├── pages/
-│   ├── login.page.ts         # Page Object: página de login
-│   ├── dashboard.page.ts     # Page Object: dashboard
-│   ├── ajustes.page.ts       # Page Object: ajustes
-│   └── reportes.page.ts      # Page Object: reportes
+│   ├── login.page.ts             # Page Object: página de login
+│   ├── dashboard.page.ts         # Page Object: dashboard
+│   ├── clientes.page.ts          # Page Object: clientes
+│   ├── cliente-detalle.page.ts   # Page Object: detalle de cliente
+│   ├── ajustes.page.ts           # Page Object: ajustes
+│   ├── reportes.page.ts          # Page Object: reportes
+│   ├── expedientes.page.ts       # Page Object: expedientes
+│   ├── agenda.page.ts            # Page Object: agenda
+│   ├── tramites.page.ts          # Page Object: trámites
+│   ├── diligencias.page.ts       # Page Object: diligencias
+│   ├── historico.page.ts         # Page Object: histórico legal
+│   ├── mantenimiento.page.ts     # Page Object: mantenimiento
+│   └── notificaciones.page.ts    # Page Object: notificaciones OJ
 └── tests/
-    ├── 01-login.spec.ts      # Tests de login
-    ├── 02-dashboard.spec.ts  # Tests de dashboard
-    ├── 05-ajustes.spec.ts    # Tests de ajustes
-    ├── 06-reportes.spec.ts   # Tests de reportes
-    └── 07-permisos.spec.ts   # Tests de permisos
+    ├── 01-login.spec.ts          # Tests de login (5)
+    ├── 02-dashboard.spec.ts      # Tests de dashboard (4)
+    ├── 03-clientes.spec.ts       # Tests de clientes (8)
+    ├── 04-cliente-detalle.spec.ts # Tests de detalle cliente (5)
+    ├── 05-ajustes.spec.ts        # Tests de ajustes (6)
+    ├── 06-reportes.spec.ts       # Tests de reportes (3)
+    ├── 07-permisos.spec.ts       # Tests de permisos (4)
+    ├── 08-expedientes.spec.ts    # Tests de expedientes (6)
+    ├── 09-agenda.spec.ts         # Tests de agenda (5)
+    ├── 10-tramites.spec.ts       # Tests de trámites (5)
+    ├── 11-diligencias.spec.ts    # Tests de diligencias (5)
+    ├── 12-historico.spec.ts      # Tests de histórico (5)
+    ├── 13-mantenimiento.spec.ts  # Tests de mantenimiento (3)
+    ├── 14-notificaciones.spec.ts # Tests de notificaciones (5)
+    └── 15-notificacion-detalle.spec.ts # Tests de notif. detalle (3)
 ```
 
 ### 3.4 Page Object Model (POM)
@@ -375,8 +394,8 @@ export const test = base.extend<{ adminPage: Page }>({
 
 ```bash
 # Prerrequisitos
-# 1. Backend corriendo: dotnet run (puerto 7276)
-# 2. Frontend compilable: ng build sin errores
+# 1. Backend corriendo: dotnet run (puerto 5181)
+# 2. Frontend corriendo: ng serve (puerto 4200)
 
 # Instalar Playwright y navegador
 npm install -D @playwright/test
@@ -503,12 +522,22 @@ await page.locator('[data-testid="btn-login"]').click();
 
 | Archivo | Módulo | Tests | Estado |
 |---|---|---|---|
-| `01-login.spec.ts` | Login | 5 | ✅ Todos pasan |
-| `02-dashboard.spec.ts` | Dashboard | 4 | ✅ Todos pasan |
-| `05-ajustes.spec.ts` | Ajustes | 6 | ✅ Todos pasan |
-| `06-reportes.spec.ts` | Reportes | 3 | ✅ Todos pasan |
-| `07-permisos.spec.ts` | Permisos | 4 | ✅ Todos pasan |
-| **Total** | | **22** | **✅** |
+| `01-login.spec.ts` | Login | 5 | ✅ |
+| `02-dashboard.spec.ts` | Dashboard | 4 | ✅ |
+| `03-clientes.spec.ts` | Clientes | 8 | ✅ |
+| `04-cliente-detalle.spec.ts` | Cliente Detalle | 5 | ✅ |
+| `05-ajustes.spec.ts` | Ajustes | 6 | ✅ |
+| `06-reportes.spec.ts` | Reportes | 3 | ✅ |
+| `07-permisos.spec.ts` | Permisos | 4 | ✅ |
+| `08-expedientes.spec.ts` | Expedientes | 6 | ✅ |
+| `09-agenda.spec.ts` | Agenda | 5 | ✅ |
+| `10-tramites.spec.ts` | Trámites | 5 | ✅ |
+| `11-diligencias.spec.ts` | Diligencias | 5 | ✅ |
+| `12-historico.spec.ts` | Histórico Legal | 5 | ✅ |
+| `13-mantenimiento.spec.ts` | Mantenimiento | 3 | ✅ |
+| `14-notificaciones.spec.ts` | Notificaciones OJ | 5 | ✅ |
+| `15-notificacion-detalle.spec.ts` | Notif. Detalle | 3 | ✅ |
+| **Total** | | **72** | **✅** |
 
 ### 6.2 IDs de casos de prueba
 
@@ -523,6 +552,19 @@ await page.locator('[data-testid="btn-login"]').click();
 | TC-DASH-002 | Dashboard | Sidebar visible con navegación |
 | TC-DASH-003 | Dashboard | Agenda semanal visible |
 | TC-DASH-004 | Dashboard | Navegación a módulo desde sidebar |
+| TC-CLI-001 | Clientes | Listado de clientes carga correctamente |
+| TC-CLI-002 | Clientes | Stat cards muestran datos |
+| TC-CLI-003 | Clientes | Filtro por estado funciona |
+| TC-CLI-004 | Clientes | Botón Nuevo Cliente abre modal |
+| TC-CLI-005 | Clientes | Crear nuevo cliente |
+| TC-CLI-006 | Clientes | Paginación funciona |
+| TC-CLI-007 | Clientes | Click en fila navega al detalle |
+| TC-CLI-008 | Clientes | Tabla con columnas correctas |
+| TC-DET-001 | Cliente Detalle | Detalle de cliente carga correctamente |
+| TC-DET-002 | Cliente Detalle | Información del cliente visible |
+| TC-DET-003 | Cliente Detalle | Breadcrumb de navegación |
+| TC-DET-004 | Cliente Detalle | Botón editar visible |
+| TC-DET-005 | Cliente Detalle | Tabla de expedientes del cliente |
 | TC-ADJ-001 | Ajustes | Página de ajustes carga correctamente |
 | TC-ADJ-002 | Ajustes | Tarjeta de perfil visible |
 | TC-ADJ-003 | Ajustes | Módulos de administrador visibles |
@@ -536,6 +578,43 @@ await page.locator('[data-testid="btn-login"]').click();
 | TC-PERM-002 | Permisos | Sidebar muestra módulos correctos para admin |
 | TC-PERM-003 | Permisos | Navegación entre módulos funciona |
 | TC-PERM-004 | Permisos | Ruta no válida redirige a dashboard |
+| TC-EXP-001 | Expedientes | Listado de expedientes carga correctamente |
+| TC-EXP-002 | Expedientes | Tabla muestra filas de datos |
+| TC-EXP-003 | Expedientes | Botón Nuevo Expediente visible |
+| TC-EXP-004 | Expedientes | Filtros visibles |
+| TC-EXP-005 | Expedientes | Click en fila navega al detalle |
+| TC-EXP-006 | Expedientes | Sidebar muestra módulo Expedientes |
+| TC-AGE-001 | Agenda | Agenda carga correctamente |
+| TC-AGE-002 | Agenda | Calendario muestra días |
+| TC-AGE-003 | Agenda | Botón Nueva Audiencia visible |
+| TC-AGE-004 | Agenda | Botón Nueva Diligencia visible |
+| TC-AGE-005 | Agenda | Sidebar muestra módulo Agenda |
+| TC-TRA-001 | Trámites | Listado de trámites carga correctamente |
+| TC-TRA-002 | Trámites | Botón Nuevo Trámite visible |
+| TC-TRA-003 | Trámites | Filtros visibles |
+| TC-TRA-004 | Trámites | Click en fila navega al detalle |
+| TC-TRA-005 | Trámites | Sidebar muestra módulo Trámites |
+| TC-DIL-001 | Diligencias | Listado de diligencias carga correctamente |
+| TC-DIL-002 | Diligencias | Botón Nueva Diligencia visible |
+| TC-DIL-003 | Diligencias | Filtros visibles |
+| TC-DIL-004 | Diligencias | Click en fila navega al detalle |
+| TC-DIL-005 | Diligencias | Modal de nueva diligencia se abre |
+| TC-HIS-001 | Histórico | Página de histórico carga correctamente |
+| TC-HIS-002 | Histórico | Filtros visibles |
+| TC-HIS-003 | Histórico | Botones de buscar y limpiar visibles |
+| TC-HIS-004 | Histórico | Tabla visible o empty state |
+| TC-HIS-005 | Histórico | Sidebar muestra módulo Histórico |
+| TC-MAN-001 | Mantenimiento | Página de mantenimiento carga correctamente |
+| TC-MAN-002 | Mantenimiento | Lista de catálogos visible |
+| TC-MAN-003 | Mantenimiento | Sidebar muestra módulo Mantenimiento |
+| TC-NOT-001 | Notificaciones | Listado de notificaciones carga correctamente |
+| TC-NOT-002 | Notificaciones | Botón Nueva Notificación visible |
+| TC-NOT-003 | Notificaciones | Filtros visibles |
+| TC-NOT-004 | Notificaciones | Click en fila navega al detalle |
+| TC-NOT-005 | Notificaciones | Sidebar muestra módulo Notificaciones |
+| TC-NDE-001 | Notif. Detalle | Detalle de notificación carga correctamente |
+| TC-NDE-002 | Notif. Detalle | Botón volver visible |
+| TC-NDE-003 | Notif. Detalle | Navegación de vuelta funciona |
 
 ---
 

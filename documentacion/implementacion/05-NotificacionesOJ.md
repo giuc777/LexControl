@@ -1,7 +1,7 @@
 # Módulo 05 — Notificaciones OJ
 
 > **Módulo completo:** SPs + Backend + Frontend + Pruebas + Playwright
-> **Estado:** SPs base existen. Faltan controller, service, frontend.
+> **Estado:** ✅ COMPLETADO
 > **Ruta frontend:** `/notificaciones-oj`
 
 ---
@@ -14,8 +14,22 @@ Gestión de notificaciones del Organismo Judicial. Permite crear, listar, atende
 - ✅ `SP_NotificacionOJ_Insertar` (LexControlDB.sql)
 - ✅ `SP_NotificacionOJ_Atender` (LexControlDB.sql)
 - ✅ `SP_NotificacionOJ_VerificarDuplicado` (LexControlDB.sql)
-- ❌ `SP_Notificacion_Listar` — FALTA (definido en Extras_SP.sql)
-- ❌ `SP_Notificacion_ObtenerPorID` — FALTA
+- ✅ `SP_Notificacion_Listar` (05-Complementarios.sql)
+- ✅ `SP_Notificacion_ObtenerPorID` (05-Complementarios.sql)
+
+**Backend:**
+- ✅ `Dtos/Notificaciones/NotificacionDtos.cs` — 7 DTOs
+- ✅ `Services/NotificacionService.cs` — 5 métodos
+- ✅ `Controllers/NotificacionesController.cs` — 5 endpoints
+
+**Frontend:**
+- ✅ `core/models/notificacion.model.ts` — 4 interfaces
+- ✅ `core/services/notificaciones-service.ts` — 5 métodos HTTP
+- ✅ `features/notificaciones-oj/notificaciones-page.ts/html` — Listado con filtros
+- ✅ `features/notificaciones-oj/notificacion-detalle-page.ts/html` — Detalle con "atender"
+- ✅ `features/notificaciones-oj/notificacion-modal.ts/html` — Modal de creación
+- ✅ `styles/modules/notificaciones.css` — Estilos
+- ✅ Rutas `/notificaciones-oj` y `/notificaciones-oj/:id`
 
 ---
 

@@ -7,6 +7,7 @@ import { EventosService } from '../../core/services/eventos-service';
 import { DiligenciasService } from '../../core/services/diligencias-service';
 import { CatalogosService } from '../../core/services/catalogos-service';
 import { ExpedientesService } from '../../core/services/expedientes-service';
+import { ClientesService } from '../../core/services/clientes-service';
 import { Audiencia } from '../../core/models/audiencia.model';
 import { Evento } from '../../core/models/evento.model';
 import { Diligencia } from '../../core/models/diligencia.model';
@@ -55,6 +56,7 @@ export class AgendaPage implements OnInit {
     private readonly diligenciasSvc = inject(DiligenciasService);
     private readonly catalogosSvc = inject(CatalogosService);
     private readonly expedientesSvc = inject(ExpedientesService);
+    private readonly clientesSvc = inject(ClientesService);
     private readonly router = inject(Router);
 
     protected readonly DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -66,6 +68,7 @@ export class AgendaPage implements OnInit {
     protected readonly modalDiligenciaAbierto = signal(false);
 
     protected readonly expedientes = signal<{ id: number; noExpediente: string }[]>([]);
+    protected readonly clientes = signal<{ id: number; nombre: string }[]>([]);
     protected readonly tiposDiligencia = signal<CatalogoItem[]>([]);
 
     protected readonly mesActual = signal(new Date().getMonth());
@@ -167,6 +170,7 @@ export class AgendaPage implements OnInit {
     ngOnInit(): void {
         this.cargarDatos();
         this.cargarExpedientes();
+        this.cargarClientes();
     }
 
     cargarDatos(): void {
@@ -196,6 +200,19 @@ export class AgendaPage implements OnInit {
                     data.expedientes.map((e: { id: number; noExpediente: string }) => ({
                         id: e.id,
                         noExpediente: e.noExpediente
+                    }))
+                );
+            }
+        });
+    }
+
+    cargarClientes(): void {
+        this.clientesSvc.listar({}).subscribe({
+            next: (data) => {
+                this.clientes.set(
+                    data.clientes.map((c: { id: number; nombreCompleto: string }) => ({
+                        id: c.id,
+                        nombre: c.nombreCompleto
                     }))
                 );
             }

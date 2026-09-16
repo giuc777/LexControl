@@ -20,7 +20,10 @@ public class EventosController : ControllerBase
     public async Task<ActionResult<ApiResponse<List<EventoDto>>>> ObtenerDelDia(
         [FromQuery] DateTime? fecha)
     {
-        var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+        var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(claim) || !int.TryParse(claim, out var usuarioId) || usuarioId <= 0)
+            return Unauthorized(ApiResponse<List<EventoDto>>.Fallo("No se pudo identificar al usuario."));
+
         var f = fecha ?? DateTime.Today;
         var resultado = await _service.ObtenerDelDiaAsync(f, usuarioId);
         return Ok(ApiResponse<List<EventoDto>>.Correcto(resultado));
@@ -30,7 +33,10 @@ public class EventosController : ControllerBase
     [Authorize(Roles = "Administrador,Abogado,Secretaria")]
     public async Task<ActionResult<ApiResponse<int>>> Crear(EventoCrearDto dto)
     {
-        var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+        var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(claim) || !int.TryParse(claim, out var usuarioId) || usuarioId <= 0)
+            return Unauthorized(ApiResponse<int>.Fallo("No se pudo identificar al usuario."));
+
         var id = await _service.CrearAsync(dto, usuarioId);
         return Ok(ApiResponse<int>.Correcto(id));
     }
@@ -39,7 +45,10 @@ public class EventosController : ControllerBase
     [Authorize(Roles = "Administrador,Abogado")]
     public async Task<ActionResult<ApiResponse<int>>> CrearAudiencia(EventoAudienciaCrearDto dto)
     {
-        var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+        var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(claim) || !int.TryParse(claim, out var usuarioId) || usuarioId <= 0)
+            return Unauthorized(ApiResponse<int>.Fallo("No se pudo identificar al usuario."));
+
         var id = await _service.CrearAudienciaAsync(dto, usuarioId);
         return Ok(ApiResponse<int>.Correcto(id));
     }

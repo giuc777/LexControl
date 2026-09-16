@@ -25,6 +25,12 @@ public interface IRepositorio
     /// Lanza ExcepcionNegocio si el retorno no es 0 o el ID es inválido.
     /// </summary>
     Task<int> InsertarAsync(string procedimiento, object parametros, string parametroNuevoId);
+
+    /// <summary>
+    /// Ejecuta un SP que devuelve múltiples conjuntos de resultados.
+    /// Devuelve un GridReader de Dapper para leer cada conjunto secuencialmente.
+    /// </summary>
+    Task<Dapper.SqlMapper.GridReader> ConsultarMultiplesAsync(string procedimiento, object? parametros = null);
 }
 
 public class RepositorioSql : IRepositorio
@@ -73,15 +79,34 @@ public class RepositorioSql : IRepositorio
 
         var retorno = dp.Get<int?>("@RETURN_VALUE") ?? -1;
         if (retorno != 0)
-            throw new ExcepcionNegocio(retorno, "No se pudo crear el registro.",
+        {
+            var mensaje = retorno switch
+            {
+                -1 => "No se pudo crear el registro. Verifique que todos los datos sean correctos.",
+                547 => "Error de integridad referencial. Verifique que el tipo, estado y cliente existan.",
+                2627 or 2601 => "Ya existe un registro con los datos proporcionados.",
+                _ => $"No se pudo crear el registro (código de error: {retorno})."
+            };
+            throw new ExcepcionNegocio(retorno, mensaje,
                 StatusCodes.Status500InternalServerError);
+        }
 
         var nuevoId = dp.Get<int?>(parametroNuevoId) ?? -1;
         if (nuevoId <= 0)
-            throw new ExcepcionNegocio(-1, "No se pudo crear el registro.",
+            throw new ExcepcionNegocio(-1, "No se pudo obtener el ID del registro creado.",
                 StatusCodes.Status500InternalServerError);
 
         return nuevoId;
+    }
+
+    public async Task<SqlMapper.GridReader> ConsultarMultiplesAsync(string procedimiento, object? parametros = null)
+    {
+        var conexion = _fabrica.CrearConexion();
+        var dp = CrearParametros(parametros);
+        var grid = await conexion.QueryMultipleAsync(
+            new CommandDefinition(procedimiento, dp, commandType: CommandType.StoredProcedure));
+        VerificarRetorno(dp);
+        return grid;
     }
 
     private static DynamicParameters CrearParametros(object? parametros)

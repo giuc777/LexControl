@@ -1,19 +1,21 @@
 # Módulo 08 — Dashboard
 
 > **Módulo:** Conexión del Dashboard a datos reales del API
-> **Estado:** Dashboard usa datos hardcodeados (seed). Necesita conectar a API.
+> **Estado:** ✅ COMPLETADO — Stat cards conectadas a datos reales
 > **Ruta frontend:** `/dashboard`
 
 ---
 
 ## 1. Descripción
 
-El Dashboard es la primera pantalla que ve el usuario. Actualmente muestra datos de prueba (`ESTADISTICAS_SEED`, `EVENTOS_SEED`). Debe conectarse al API para mostrar datos reales.
+El Dashboard es la primera pantalla que ve el usuario. Muestra stat cards con datos reales y agenda semanal desde la API.
 
-**Depende de:**
-- Módulo 06 (Eventos) — para `GET /api/eventos/dia`
-- Módulo 07 (Reportes) — para `GET /api/reportes/alertas-pendientes`
-- Módulo 02 (Audiencias) — para `GET /api/audiencias/proximas`
+**Conexiones a API:**
+- ✅ `GET /api/expedientes` — Expedientes activos (conteo)
+- ✅ `GET /api/audiencias` — Audiencias próximas (conteo)
+- ✅ `GET /api/tramites` — Trámites pendientes (conteo)
+- ✅ `GET /api/notificaciones` — Notificaciones OJ pendientes (conteo)
+- ✅ `GET /api/eventos/dia` — Agenda semanal (eventos del día)
 
 ---
 

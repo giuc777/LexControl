@@ -41,7 +41,10 @@ public class DiligenciasController : ControllerBase
     [Authorize(Roles = "Administrador,Abogado")]
     public async Task<ActionResult<ApiResponse<int>>> Crear(DiligenciaCrearDto dto)
     {
-        var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+        var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(claim) || !int.TryParse(claim, out var usuarioId) || usuarioId <= 0)
+            return Unauthorized(ApiResponse<int>.Fallo("No se pudo identificar al usuario."));
+
         var id = await _service.CrearAsync(dto, usuarioId);
         return Ok(ApiResponse<int>.Correcto(id));
     }

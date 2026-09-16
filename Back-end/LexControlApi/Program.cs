@@ -137,6 +137,9 @@ builder.Services.AddScoped<IAudienciaService, AudienciaService>();
 builder.Services.AddScoped<ITramiteService, TramiteService>();
 builder.Services.AddScoped<IEventoService, EventoService>();
 builder.Services.AddScoped<IDiligenciaService, DiligenciaService>();
+builder.Services.AddScoped<IHistoricoService, HistoricoService>();
+builder.Services.AddScoped<INotificacionService, NotificacionService>();
+builder.Services.AddScoped<IReporteService, ReporteService>();
 
 // Limite de upload: 50 MB
 builder.WebHost.ConfigureKestrel(opciones =>

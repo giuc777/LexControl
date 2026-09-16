@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { DiligenciasService } from '../../core/services/diligencias-service';
 import { CatalogosService } from '../../core/services/catalogos-service';
 import { ExpedientesService } from '../../core/services/expedientes-service';
+import { ClientesService } from '../../core/services/clientes-service';
 import { Diligencia } from '../../core/models/diligencia.model';
 import { CatalogoItem } from '../../core/models/catalogo.model';
 import { PageHeader } from '../../shared/components/page-header/page-header';
@@ -28,6 +29,7 @@ export class DiligenciasPage implements OnInit {
     private readonly diligenciasSvc = inject(DiligenciasService);
     private readonly catalogosSvc = inject(CatalogosService);
     private readonly expedientesSvc = inject(ExpedientesService);
+    private readonly clientesSvc = inject(ClientesService);
     private readonly router = inject(Router);
 
     protected readonly diligencias = signal<Diligencia[]>([]);
@@ -37,6 +39,7 @@ export class DiligenciasPage implements OnInit {
     protected readonly tiposDiligencia = signal<CatalogoItem[]>([]);
     protected readonly estadosDiligencia = signal<CatalogoItem[]>([]);
     protected readonly expedientes = signal<{ id: number; noExpediente: string }[]>([]);
+    protected readonly clientes = signal<{ id: number; nombre: string }[]>([]);
 
     protected readonly filtroTipoId = signal<number | null>(null);
     protected readonly filtroEstadoId = signal<number | null>(null);
@@ -47,6 +50,7 @@ export class DiligenciasPage implements OnInit {
     ngOnInit(): void {
         this.cargarCatalogos();
         this.cargarExpedientes();
+        this.cargarClientes();
         this.cargarDiligencias();
     }
 
@@ -66,6 +70,19 @@ export class DiligenciasPage implements OnInit {
                     data.expedientes.map((e: { id: number; noExpediente: string }) => ({
                         id: e.id,
                         noExpediente: e.noExpediente
+                    }))
+                );
+            }
+        });
+    }
+
+    cargarClientes(): void {
+        this.clientesSvc.listar({}).subscribe({
+            next: (data) => {
+                this.clientes.set(
+                    data.clientes.map((c: { id: number; nombreCompleto: string }) => ({
+                        id: c.id,
+                        nombre: c.nombreCompleto
                     }))
                 );
             }

@@ -92,9 +92,29 @@ export const routes: Routes = [
                 canActivate: [moduloGuard('audiencias')],
                 loadComponent: () => import('./features/diligencias/diligencia-detalle-page').then(m => m.DiligenciaDetallePage)
             },
+            {
+                path: 'historico',
+                canActivate: [moduloGuard('historico')],
+                loadComponent: () => import('./features/historico/historico-page').then(m => m.HistoricoPage)
+            },
+            {
+                path: 'historico/:id',
+                canActivate: [moduloGuard('historico')],
+                loadComponent: () => import('./features/historico/historico-detalle-page').then(m => m.HistoricoDetallePage)
+            },
+            {
+                path: 'notificaciones-oj',
+                canActivate: [moduloGuard('notificaciones')],
+                loadComponent: () => import('./features/notificaciones-oj/notificaciones-page').then(m => m.NotificacionesPage)
+            },
+            {
+                path: 'notificaciones-oj/:id',
+                canActivate: [moduloGuard('notificaciones')],
+                loadComponent: () => import('./features/notificaciones-oj/notificacion-detalle-page').then(m => m.NotificacionDetallePage)
+            },
             /* Los demás módulos se registran con la página provisional;
                cada fase del plan reemplazará su loadComponent. */
-            ...MODULOS.filter(m => m.key !== 'dashboard' && m.key !== 'ajustes' && m.key !== 'reportes' && m.key !== 'clientes' && m.key !== 'expedientes' && m.key !== 'mantenimiento' && m.key !== 'audiencias' && m.key !== 'tramites').map(m => ({
+            ...MODULOS.filter(m => m.key !== 'dashboard' && m.key !== 'ajustes' && m.key !== 'reportes' && m.key !== 'clientes' && m.key !== 'expedientes' && m.key !== 'mantenimiento' && m.key !== 'audiencias' && m.key !== 'tramites' && m.key !== 'historico' && m.key !== 'notificaciones').map(m => ({
                 path: m.ruta,
                 canActivate: [moduloGuard(m.key)],
                 loadComponent: () =>

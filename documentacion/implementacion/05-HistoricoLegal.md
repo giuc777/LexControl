@@ -1,6 +1,6 @@
 # Módulo 05 — Histórico Legal (Expedientes Archivados)
 
-> **Estado:** No existe. Requiere SPs, Backend y Frontend.
+> **Estado:** ✅ COMPLETADO
 > **Ruta frontend:** `/historico` (lista), `/historico/:id` (detalle)
 
 ---

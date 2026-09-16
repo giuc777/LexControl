@@ -15,6 +15,7 @@ import { ToastService } from '../../layout/toast/toast-service';
 })
 export class DiligenciaModal implements OnInit {
     @Input() expedientes: { id: number; noExpediente: string }[] = [];
+    @Input() clientes: { id: number; nombre: string }[] = [];
     @Input() fechaInicial: string | null = null;
     @Output() cerrar = new EventEmitter<void>();
     @Output() alCrear = new EventEmitter<void>();
@@ -69,8 +70,8 @@ export class DiligenciaModal implements OnInit {
             this.toast.mostrar('Complete los campos obligatorios.', 3000);
             return;
         }
-        if (!this.expedienteId() && !this.clienteId()) {
-            this.toast.mostrar('Seleccione un expediente o cliente.', 3000);
+        if (!this.clienteId()) {
+            this.toast.mostrar('Seleccione un cliente.', 3000);
             return;
         }
         this.guardando.set(true);

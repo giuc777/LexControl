@@ -1,0 +1,153 @@
+@if (cargando()) {
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Cargando expediente...</p>
+    </div>
+} @else if (!expediente()) {
+    <div class="detalle-no-encontrado">
+        <h2>Expediente no encontrado</h2>
+        <p>El expediente solicitado no existe o no es un expediente cerrado/archivado.</p>
+        <button class="btn-primary" (click)="volver()">Volver al Histórico</button>
+    </div>
+} @else {
+    <div class="detalle-container">
+        <div class="detalle-header">
+            <div class="detalle-header-info">
+                <button class="btn-volver" (click)="volver()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <div>
+                    <h1 class="detalle-titulo">{{ expediente()!.noExpediente }}</h1>
+                    <p class="detalle-subtitulo">{{ expediente()!.clienteNombre }}</p>
+                </div>
+            </div>
+            <div class="detalle-header-badge">
+                <span class="pill-estado pill-readonly" [style.background-color]="colorEstado(expediente()!.estadoNombre)">
+                    {{ expediente()!.estadoNombre }}
+                </span>
+                <span class="pill-rama">{{ expediente()!.ramaNombre }}</span>
+            </div>
+        </div>
+
+        <div class="detalle-seccion">
+            <h2>Información General</h2>
+            <div class="detalle-grid">
+                <div class="detalle-campo">
+                    <span class="campo-label">No. Expediente</span>
+                    <span class="campo-valor">{{ expediente()!.noExpediente }}</span>
+                </div>
+                <div class="detalle-campo">
+                    <span class="campo-label">Cliente</span>
+                    <span class="campo-valor">{{ expediente()!.clienteNombre }}</span>
+                </div>
+                <div class="detalle-campo">
+                    <span class="campo-label">Rama</span>
+                    <span class="campo-valor">{{ expediente()!.ramaNombre }}</span>
+                </div>
+                <div class="detalle-campo">
+                    <span class="campo-label">Tipo de Proceso</span>
+                    <span class="campo-valor">{{ expediente()!.tipoProceso ?? '—' }}</span>
+                </div>
+                <div class="detalle-campo">
+                    <span class="campo-label">Juzgado</span>
+                    <span class="campo-valor">{{ expediente()!.juzgadoNombre ?? '—' }}</span>
+                </div>
+                <div class="detalle-campo">
+                    <span class="campo-label">Abogado</span>
+                    <span class="campo-valor">{{ expediente()!.abogadoNombre ?? '—' }}</span>
+                </div>
+                <div class="detalle-campo">
+                    <span class="campo-label">Fecha de Ingreso</span>
+                    <span class="campo-valor">{{ expediente()!.fechaIngreso ?? '—' }}</span>
+                </div>
+                <div class="detalle-campo">
+                    <span class="campo-label">Estado</span>
+                    <span class="campo-valor">
+                        <span class="pill-estado pill-readonly" [style.background-color]="colorEstado(expediente()!.estadoNombre)">
+                            {{ expediente()!.estadoNombre }}
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @if (expediente()!.descripcion) {
+            <div class="detalle-seccion">
+                <h2>Descripción</h2>
+                <p class="detalle-texto">{{ expediente()!.descripcion }}</p>
+            </div>
+        }
+
+        @if (partes().length > 0) {
+            <div class="detalle-seccion">
+                <h2>Partes Procesales</h2>
+                <div class="tabla-contenedor">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Nombre</th>
+                                <th>DPI</th>
+                                <th>Abogado Defensor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (p of partes(); track p.id) {
+                                <tr>
+                                    <td>{{ p.tipo }}</td>
+                                    <td>{{ p.nombreCompleto }}</td>
+                                    <td>{{ p.dpi ?? '—' }}</td>
+                                    <td>{{ p.abogadoDefensor ?? '—' }}</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        @if (notas().length > 0) {
+            <div class="detalle-seccion">
+                <h2>Notas</h2>
+                <div class="notas-lista">
+                    @for (n of notas(); track n.id) {
+                        <div class="nota-card">
+                            <div class="nota-header">
+                                <span class="nota-etiqueta">{{ n.etiquetaNombre ?? 'Sin etiqueta' }}</span>
+                                <span class="nota-fecha">{{ n.fechaCreacion ?? '—' }}</span>
+                            </div>
+                            <p class="nota-contenido">{{ n.contenido }}</p>
+                            <span class="nota-autor">— {{ n.usuarioNombre ?? 'Anónimo' }}</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (documentos().length > 0) {
+            <div class="detalle-seccion">
+                <h2>Documentos</h2>
+                <div class="documentos-lista">
+                    @for (d of documentos(); track d.id) {
+                        <div class="documento-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            <span>{{ d.nombreArchivo }}</span>
+                            <span class="documento-tamano">{{ d.tipoArchivo }}</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="detalle-footer">
+            <button class="btn-secondary" (click)="volver()">Volver al Histórico</button>
+        </div>
+    </div>
+}

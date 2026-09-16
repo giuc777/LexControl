@@ -1,0 +1,129 @@
+<div class="detalle-container">
+    <div class="detalle-breadcrumb">
+        <a class="breadcrumb-link" (click)="irAVolver()">Notificaciones OJ</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-actual">Detalle</span>
+    </div>
+
+    @if (cargando()) {
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Cargando notificacion...</p>
+        </div>
+    } @else if (notificacion()) {
+        <div class="detalle-header">
+            <div class="detalle-titulo-fila">
+                <h1 class="page-title">Notificacion #{{ notificacion()!.id }}</h1>
+                <span class="pill-estado-lg" [style.background-color]="colorEstado(notificacion()!.estado)">
+                    {{ notificacion()!.estado }}
+                </span>
+            </div>
+        </div>
+
+        <div class="detalle-seccion">
+            <h3 class="seccion-titulo">Informacion General</h3>
+            <div class="detalle-grid">
+                <div class="detalle-campo">
+                    <label class="campo-label">Expediente</label>
+                    <p class="campo-valor">{{ notificacion()!.noExpediente ?? '--' }}</p>
+                </div>
+                <div class="detalle-campo">
+                    <label class="campo-label">Cliente</label>
+                    <p class="campo-valor">{{ notificacion()!.cliente ?? '--' }}</p>
+                </div>
+                <div class="detalle-campo">
+                    <label class="campo-label">Juzgado</label>
+                    <p class="campo-valor">{{ notificacion()!.juzgado ?? '--' }}</p>
+                </div>
+                <div class="detalle-campo">
+                    <label class="campo-label">Tipo</label>
+                    <p class="campo-valor">{{ notificacion()!.tipo }}</p>
+                </div>
+                <div class="detalle-campo">
+                    <label class="campo-label">Fecha Recepcion</label>
+                    <p class="campo-valor">{{ notificacion()!.fechaRecepcion }}</p>
+                </div>
+                <div class="detalle-campo">
+                    <label class="campo-label">Fecha Atencion</label>
+                    <p class="campo-valor">{{ notificacion()!.fechaAtencion ?? 'Pendiente' }}</p>
+                </div>
+                <div class="detalle-campo">
+                    <label class="campo-label">No. Expediente OJ</label>
+                    <p class="campo-valor">{{ notificacion()!.numeroExpedienteOj ?? '--' }}</p>
+                </div>
+                <div class="detalle-campo">
+                    <label class="campo-label">Resolucion</label>
+                    <p class="campo-valor">{{ notificacion()!.numeroResolucion ?? '--' }}</p>
+                </div>
+                <div class="detalle-campo">
+                    <label class="campo-label">Favorable</label>
+                    <p class="campo-valor">{{ notificacion()!.favorable === null ? '--' : (notificacion()!.favorable ? 'Si' : 'No') }}</p>
+                </div>
+                <div class="detalle-campo">
+                    <label class="campo-label">Es Resolucion</label>
+                    <p class="campo-valor">{{ notificacion()!.esResolucion ? 'Si' : 'No' }}</p>
+                </div>
+            </div>
+        </div>
+
+        @if (notificacion()!.contenido || notificacion()!.resumen) {
+            <div class="detalle-seccion">
+                <h3 class="seccion-titulo">Contenido</h3>
+                @if (notificacion()!.resumen) {
+                    <div class="campo-grande">
+                        <label class="campo-label">Resumen</label>
+                        <p class="campo-valor">{{ notificacion()!.resumen }}</p>
+                    </div>
+                }
+                @if (notificacion()!.contenido) {
+                    <div class="campo-grande">
+                        <label class="campo-label">Contenido Completo</label>
+                        <p class="campo-valor">{{ notificacion()!.contenido }}</p>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (notificacion()!.notas) {
+            <div class="detalle-seccion">
+                <h3 class="seccion-titulo">Notas</h3>
+                <div class="campo-grande">
+                    <p class="campo-valor">{{ notificacion()!.notas }}</p>
+                </div>
+            </div>
+        }
+
+        <div class="detalle-seccion">
+            <h3 class="seccion-titulo">Acciones</h3>
+            <div class="acciones-fila">
+                @if (!esAtendida()) {
+                    <button class="btn-primary" (click)="toggleFormAtender()">
+                        Marcar como Atendida
+                    </button>
+                }
+                <button class="btn-secondary" (click)="irAVolver()">Volver</button>
+            </div>
+
+            @if (mostrarFormAtender()) {
+                <div class="form-atender">
+                    <div class="form-grupo form-grupo-full">
+                        <label>Notas de atencion</label>
+                        <textarea class="form-control" rows="3"
+                                  [ngModel]="notasAtencion()"
+                                  (ngModelChange)="notasAtencion.set($event)"
+                                  placeholder="Observaciones al atender la notificacion..."></textarea>
+                    </div>
+                    <div class="acciones-fila">
+                        <button class="btn-primary" (click)="atender()">Confirmar Atencion</button>
+                        <button class="btn-secondary" (click)="toggleFormAtender()">Cancelar</button>
+                    </div>
+                </div>
+            }
+        </div>
+    } @else {
+        <app-empty-state
+            icono="alert-circle"
+            titulo="Notificacion no encontrada"
+            mensaje="La notificacion solicitada no existe o fue eliminada." />
+    }
+</div>

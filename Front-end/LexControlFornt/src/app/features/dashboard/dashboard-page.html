@@ -1,5 +1,5 @@
 <section class="dash-grid" data-testid="dashboard-stats" aria-label="Resumen del despacho">
-    @for (card of estadisticas; track card.label) {
+    @for (card of estadisticas(); track card.label) {
         <article class="stat-card">
             <h3 class="stat-label">{{ card.label }}</h3>
             <div class="stat-value">{{ card.valor }}</div>

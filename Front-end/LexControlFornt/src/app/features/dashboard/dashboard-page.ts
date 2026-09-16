@@ -2,6 +2,10 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } 
 import { Router } from '@angular/router';
 
 import { EventosService } from '../../core/services/eventos-service';
+import { ExpedientesService } from '../../core/services/expedientes-service';
+import { AudienciasService } from '../../core/services/audiencias-service';
+import { TramitesService } from '../../core/services/tramites-service';
+import { NotificacionesService } from '../../core/services/notificaciones-service';
 import { Evento } from '../../core/models/evento.model';
 
 interface StatCard {
@@ -54,8 +58,17 @@ const HORAS = 5;
 export class DashboardPage implements OnInit {
     private readonly router = inject(Router);
     private readonly eventosSvc = inject(EventosService);
+    private readonly expedientesSvc = inject(ExpedientesService);
+    private readonly audienciasSvc = inject(AudienciasService);
+    private readonly tramitesSvc = inject(TramitesService);
+    private readonly notificacionesSvc = inject(NotificacionesService);
 
-    readonly estadisticas = ESTADISTICAS_SEED;
+    readonly estadisticas = signal<StatCard[]>([
+        { label: 'Expedientes Activos', valor: 0, detalle: 'Cargando...', tono: '' },
+        { label: 'Audiencias Proximas', valor: 0, detalle: 'Cargando...', tono: '' },
+        { label: 'Tramites Pendientes', valor: 0, detalle: 'Cargando...', tono: '' },
+        { label: 'Notificaciones OJ', valor: 0, detalle: 'Cargando...', tono: '' }
+    ]);
     private readonly eventosRaw = signal<Evento[]>([]);
 
     private readonly hoy = new Date();
@@ -112,6 +125,60 @@ export class DashboardPage implements OnInit {
         this.eventosSvc.obtenerDelDia(fechaStr).subscribe({
             next: (datos) => { this.eventosRaw.set(datos); },
             error: () => { this.eventosRaw.set([]); }
+        });
+        this.cargarEstadisticas();
+    }
+
+    cargarEstadisticas(): void {
+        const hoy = new Date();
+        const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+        const fechaFin = this.formatoFechaISO(finMes);
+
+        this.expedientesSvc.listar({ estadoId: 1 }).subscribe({
+            next: (data) => {
+                this.estadisticas.update(s => {
+                    const copia = [...s];
+                    copia[0] = { label: 'Expedientes Activos', valor: data.total, detalle: `${data.total} activos`, tono: '' };
+                    return copia;
+                });
+            },
+            error: () => {}
+        });
+
+        this.audienciasSvc.listar({}).subscribe({
+            next: (audiencias) => {
+                const proximas = audiencias.filter(a => a.fecha >= this.formatoFechaISO(hoy)).length;
+                this.estadisticas.update(s => {
+                    const copia = [...s];
+                    copia[1] = { label: 'Audiencias Proximas', valor: proximas, detalle: proximas > 0 ? `${proximas} programadas` : 'Sin proximas', tono: '' };
+                    return copia;
+                });
+            },
+            error: () => {}
+        });
+
+        this.tramitesSvc.listar({}).subscribe({
+            next: (tramites) => {
+                const pendientes = tramites.filter(t => t.estado !== 'Resuelto' && t.estado !== 'Rechazado').length;
+                this.estadisticas.update(s => {
+                    const copia = [...s];
+                    copia[2] = { label: 'Tramites Pendientes', valor: pendientes, detalle: pendientes > 0 ? `${pendientes} pendientes` : 'Todo resuelto', tono: pendientes > 3 ? 'warn' : '' };
+                    return copia;
+                });
+            },
+            error: () => {}
+        });
+
+        this.notificacionesSvc.listar({}).subscribe({
+            next: (notificaciones) => {
+                const pendientes = notificaciones.filter(n => n.estado === 'Pendiente').length;
+                this.estadisticas.update(s => {
+                    const copia = [...s];
+                    copia[3] = { label: 'Notificaciones OJ', valor: pendientes, detalle: pendientes > 0 ? `${pendientes} pendientes` : 'Al dia', tono: pendientes > 0 ? 'danger' : '' };
+                    return copia;
+                });
+            },
+            error: () => {}
         });
     }
 

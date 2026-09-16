@@ -1,0 +1,437 @@
+/* Estilos del modulo Notificaciones OJ.
+   Toolbar, tabla, pills, detalle -- reutiliza primitivas de otros modulos. */
+
+/* ============ Detalle page ============ */
+
+.notificaciones-toolbar {
+    background: var(--surface, #fff);
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-card);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+
+.filtros-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.filtro-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 150px;
+}
+
+.filtro-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.filtro-select,
+.filtro-input {
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--field-line);
+    border-radius: var(--radius-field);
+    font-size: 14px;
+    color: var(--ink);
+    background: #fff;
+}
+
+.filtro-acciones {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+/* ============ Detalle ============ */
+
+.detalle-container {
+    max-width: 900px;
+}
+
+.detalle-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.breadcrumb-link {
+    color: var(--accent, #358292);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.breadcrumb-link:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-sep {
+    color: var(--muted);
+}
+
+.breadcrumb-actual {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.detalle-header {
+    margin-bottom: 24px;
+}
+
+.detalle-titulo-fila {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0;
+}
+
+.pill-estado-lg {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.detalle-seccion {
+    background: var(--surface, #fff);
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-card);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+}
+
+.seccion-titulo {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--panel-line);
+}
+
+.detalle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.detalle-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.campo-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.campo-valor {
+    font-size: 15px;
+    color: var(--ink);
+    margin: 0;
+}
+
+.campo-grande {
+    margin-bottom: 16px;
+}
+
+.campo-grande:last-child {
+    margin-bottom: 0;
+}
+
+.acciones-fila {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.form-atender {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--panel-line);
+}
+
+/* ============ Tabla (reutiliza estilos globales) ============ */
+
+.tabla-contenedor {
+    background: var(--surface, #fff);
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-card);
+    overflow-x: auto;
+}
+
+.tabla-datos {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.tabla-datos th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 2px solid var(--panel-line);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.tabla-datos td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--panel-line);
+    color: var(--ink);
+}
+
+.fila-clickeable {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.fila-clickeable:hover {
+    background: var(--hover, #f5f7f9);
+}
+
+.celda-titulo {
+    font-weight: 600;
+}
+
+.pill-estado {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+}
+
+/* ============ Loading / Empty ============ */
+
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    gap: 12px;
+    color: var(--muted);
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--panel-line);
+    border-top-color: var(--accent, #358292);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============ Modal (reutiliza estilos globales) ============ */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-contenido {
+    background: var(--surface, #fff);
+    border-radius: var(--radius-card);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-amplio {
+    max-width: 700px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--panel-line);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.btn-cerrar {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 0;
+    line-height: 1;
+}
+
+.btn-cerrar:hover {
+    color: var(--ink);
+}
+
+.modal-body {
+    padding: 20px 24px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--panel-line);
+}
+
+/* ============ Forms ============ */
+
+.fieldset-form {
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-field);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.fieldset-form:last-child {
+    margin-bottom: 0;
+}
+
+.fieldset-form legend {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    padding: 0 8px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.form-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-grupo-full {
+    grid-column: 1 / -1;
+}
+
+.form-control {
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--field-line);
+    border-radius: var(--radius-field);
+    font-size: 14px;
+    color: var(--ink);
+    background: #fff;
+}
+
+textarea.form-control {
+    height: auto;
+    padding: 8px 10px;
+    resize: vertical;
+}
+
+.obligatorio {
+    color: #e74c3c;
+}
+
+/* ============ Buttons ============ */
+
+.btn-primary {
+    background: var(--accent, #358292);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-field);
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover, #2c6a78);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: var(--surface, #fff);
+    color: var(--ink);
+    border: 1px solid var(--field-line);
+    border-radius: var(--radius-field);
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-secondary:hover {
+    background: var(--hover, #f5f7f9);
+}
+
+.btn-secondary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: var(--muted);
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+}
+
+.btn-icon:hover {
+    color: var(--accent, #358292);
+    background: var(--hover, #f5f7f9);
+}

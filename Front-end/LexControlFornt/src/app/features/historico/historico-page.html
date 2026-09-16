@@ -1,0 +1,88 @@
+<app-page-header titulo="Histórico Legal" subtitulo="Consulta de expedientes cerrados y archivados" />
+
+<div class="historico-toolbar">
+    <div class="filtros-grid">
+        <div class="filtro-grupo">
+            <label class="filtro-label">Buscar</label>
+            <input type="text" class="filtro-input" placeholder="No. Expediente o cliente"
+                   [ngModel]="filtroBusqueda()"
+                   (ngModelChange)="filtroBusqueda.set($event)" />
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Rama</label>
+            <select class="filtro-select"
+                    [ngModel]="filtroRamaId()"
+                    (ngModelChange)="filtroRamaId.set($event ? +$event : null)">
+                <option [value]="null">Todas</option>
+                @for (r of ramas(); track r.id) {
+                    <option [value]="r.id">{{ r.nombre }}</option>
+                }
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Inicio</label>
+            <input type="date" class="filtro-input"
+                   [ngModel]="filtroFechaInicio()"
+                   (ngModelChange)="filtroFechaInicio.set($event)" />
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Fin</label>
+            <input type="date" class="filtro-input"
+                   [ngModel]="filtroFechaFin()"
+                   (ngModelChange)="filtroFechaFin.set($event)" />
+        </div>
+        <div class="filtro-acciones">
+            <button class="btn-primary" (click)="cargarExpedientes()">Buscar</button>
+            <button class="btn-secondary" (click)="limpiarFiltros()">Limpiar</button>
+        </div>
+    </div>
+</div>
+
+@if (cargando()) {
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Cargando expedientes...</p>
+    </div>
+} @else if (expedientes().length === 0) {
+    <app-empty-state
+        icono="archive"
+        titulo="No hay expedientes históricos"
+        mensaje="No se encontraron expedientes cerrados o archivados con los filtros seleccionados." />
+} @else {
+    <div class="tabla-contenedor">
+        <table class="tabla-datos">
+            <thead>
+                <tr>
+                    <th>No. Expediente</th>
+                    <th>Cliente</th>
+                    <th>Rama</th>
+                    <th>Tipo Proceso</th>
+                    <th>Juzgado</th>
+                    <th>Fecha Ingreso</th>
+                    <th>Estado</th>
+                    <th>Abogado</th>
+                    <th>Fecha Cierre</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (e of expedientes(); track e.id) {
+                    <tr class="fila-clickeable" (click)="irADetalle(e.id)">
+                        <td class="celda-expediente">{{ e.noExpediente }}</td>
+                        <td>{{ e.cliente ?? '—' }}</td>
+                        <td>{{ e.rama }}</td>
+                        <td>{{ e.tipoProceso ?? '—' }}</td>
+                        <td>{{ e.juzgado ?? '—' }}</td>
+                        <td>{{ e.fechaIngreso }}</td>
+                        <td>
+                            <span class="pill-estado" [style.background-color]="colorEstado(e.estado)">
+                                {{ e.estado }}
+                            </span>
+                        </td>
+                        <td>{{ e.abogado ?? '—' }}</td>
+                        <td>{{ e.fechaCierre ?? '—' }}</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

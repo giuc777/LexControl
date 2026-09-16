@@ -93,6 +93,7 @@
 @if (modalDiligenciaAbierto()) {
     <app-diligencia-modal
         [expedientes]="expedientes()"
+        [clientes]="clientes()"
         [fechaInicial]="fechaSeleccionada()"
         (cerrar)="cerrarModalDiligencia()"
         (alCrear)="alCrearDiligencia()" />

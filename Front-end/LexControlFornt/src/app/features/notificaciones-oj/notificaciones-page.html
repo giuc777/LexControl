@@ -1,0 +1,114 @@
+<app-page-header titulo="Notificaciones OJ" subtitulo="Seguimiento de notificaciones del Organismo Judicial">
+</app-page-header>
+
+<div class="notificaciones-toolbar">
+    <div class="filtros-grid">
+        <div class="filtro-grupo">
+            <label class="filtro-label">Tipo</label>
+            <select class="filtro-select"
+                    [ngModel]="filtroTipoId()"
+                    (ngModelChange)="filtroTipoId.set($event ? +$event : null)">
+                <option [value]="null">Todos</option>
+                @for (t of tiposNotificacion(); track t.id) {
+                    <option [value]="t.id">{{ t.nombre }}</option>
+                }
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Estado</label>
+            <select class="filtro-select"
+                    [ngModel]="filtroEstadoId()"
+                    (ngModelChange)="filtroEstadoId.set($event ? +$event : null)">
+                <option [value]="null">Todos</option>
+                @for (e of estadosNotificacion(); track e.id) {
+                    <option [value]="e.id">{{ e.nombre }}</option>
+                }
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Expediente</label>
+            <select class="filtro-select"
+                    [ngModel]="filtroExpedienteId()"
+                    (ngModelChange)="filtroExpedienteId.set($event ? +$event : null)">
+                <option [value]="null">Todos</option>
+                @for (e of expedientes(); track e.id) {
+                    <option [value]="e.id">{{ e.noExpediente }}</option>
+                }
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Inicio</label>
+            <input type="date" class="filtro-input"
+                   [ngModel]="filtroFechaInicio()"
+                   (ngModelChange)="filtroFechaInicio.set($event)" />
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Fin</label>
+            <input type="date" class="filtro-input"
+                   [ngModel]="filtroFechaFin()"
+                   (ngModelChange)="filtroFechaFin.set($event)" />
+        </div>
+        <div class="filtro-acciones">
+            <button class="btn-primary" (click)="cargarNotificaciones()">Buscar</button>
+            <button class="btn-secondary" (click)="limpiarFiltros()">Limpiar</button>
+        </div>
+    </div>
+</div>
+
+@if (cargando()) {
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Cargando notificaciones...</p>
+    </div>
+} @else if (notificaciones().length === 0) {
+    <app-empty-state
+        icono="inbox"
+        titulo="No hay notificaciones"
+        mensaje="No se encontraron notificaciones con los filtros seleccionados." />
+} @else {
+    <div class="tabla-contenedor">
+        <table class="tabla-datos">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Expediente</th>
+                    <th>Cliente</th>
+                    <th>Tipo</th>
+                    <th>Juzgado</th>
+                    <th>Fecha Recepcion</th>
+                    <th>Estado</th>
+                    <th>Resolucion</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (n of notificaciones(); track n.id) {
+                    <tr class="fila-clickeable" (click)="irADetalle(n.id)">
+                        <td class="celda-titulo">{{ n.id }}</td>
+                        <td>{{ n.noExpediente ?? '--' }}</td>
+                        <td>{{ n.cliente ?? '--' }}</td>
+                        <td>{{ n.tipo }}</td>
+                        <td>{{ n.juzgado ?? '--' }}</td>
+                        <td>{{ n.fechaRecepcion }}</td>
+                        <td>
+                            <span class="pill-estado" [style.background-color]="colorEstado(n.estado)">
+                                {{ n.estado }}
+                            </span>
+                        </td>
+                        <td>{{ n.numeroResolucion ?? '--' }}</td>
+                        <td>
+                            <button class="btn-icon" title="Ver detalle"
+                                    (click)="irADetalle(n.id); $event.stopPropagation()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

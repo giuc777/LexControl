@@ -1,19 +1,29 @@
 # Módulo 07 — Reportes
 
 > **Módulo completo:** Corrección de SPs + Backend + Frontend + Pruebas + Playwright
-> **Estado:** 11 SPs definidos, 4 con errores, 1 comentado. Falta controller, service, 4 sub-páginas frontend.
+> **Estado:** ✅ Backend COMPLETADO (SPs + DTOs + Service + Controller). Frontend: model + service creados.
 > **Ruta frontend:** `/reportes`
 
 ---
 
 ## 1. Descripción
 
-Sistema de reportes con 11 consultas estadísticas. Devuelven resumen (agrupado) y detalle (filas individuales). Solo 2 de 6 categorías tienen frontend implementado.
+Sistema de reportes con 11 consultas estadísticas. Devuelven resumen (agrupado) y detalle (filas individuales).
 
 **Estado de SPs:**
 - ✅ 6 SPs funcionan: ExpedientesPorEstado, ExpedientesPorRama, ExpedientesPorJuzgado, AntiguedadExpedientes, ActividadAudiencias, AlertasPendientes, PlazosVencimiento
-- ❌ 3 SPs con errores de aggregate-on-subquery: NotificacionesOJ, Diligencias, EventosAgendaMes
-- ❌ 1 SP comentado: GestionTramites
+- ✅ 3 SPs corregidos: NotificacionesOJ, Diligencias, EventosAgendaMes (fix en 10-Reportes-FixSubquery.sql)
+- ✅ 1 SP corregido: GestionTramites (descomentado y corregido)
+
+**Backend:**
+- ✅ `Dtos/Reportes/ReporteDtos.cs` — 22 DTOs (11 resumen + 11 detalle)
+- ✅ `Services/ReporteService.cs` — 11 métodos (uno por SP)
+- ✅ `Controllers/ReportesController.cs` — 11 endpoints GET
+- ✅ `Data/IRepositorio.cs` — Nuevo método `ConsultarMultiplesAsync` para multi-result sets
+
+**Frontend:**
+- ✅ `core/models/reporte.model.ts` — 22 interfaces
+- ✅ `core/services/reportes-service.ts` — 11 métodos HTTP
 
 ---
 

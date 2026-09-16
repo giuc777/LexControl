@@ -1,0 +1,130 @@
+<div class="modal-overlay" (click)="onCerrar()">
+    <div class="modal-contenido modal-amplio" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Nueva Notificacion OJ</h2>
+            <button class="btn-cerrar" (click)="onCerrar()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <fieldset class="fieldset-form">
+                <legend>Datos de la Notificacion</legend>
+                <div class="form-grid">
+                    <div class="form-grupo">
+                        <label>Expediente <span class="obligatorio">*</span></label>
+                        <select class="form-control"
+                                [ngModel]="expedienteId()"
+                                (ngModelChange)="expedienteId.set(+$event)">
+                            <option [value]="0">Seleccione expediente</option>
+                            @for (e of expedientes; track e.id) {
+                                <option [value]="e.id">{{ e.noExpediente }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-grupo">
+                        <label>Juzgado <span class="obligatorio">*</span></label>
+                        <select class="form-control"
+                                [ngModel]="juzgadoId()"
+                                (ngModelChange)="juzgadoId.set(+$event)">
+                            <option [value]="0">Seleccione juzgado</option>
+                            @for (j of juzgados; track j.id) {
+                                <option [value]="j.id">{{ j.nombre }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-grupo">
+                        <label>Tipo <span class="obligatorio">*</span></label>
+                        <select class="form-control"
+                                [ngModel]="tipoId()"
+                                (ngModelChange)="tipoId.set(+$event)">
+                            <option [value]="0">Seleccione tipo</option>
+                            @for (t of tiposNotificacion(); track t.id) {
+                                <option [value]="t.id">{{ t.nombre }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-grupo">
+                        <label>Fecha Recepcion <span class="obligatorio">*</span></label>
+                        <input type="date" class="form-control"
+                               [ngModel]="fechaRecepcion()"
+                               (ngModelChange)="fechaRecepcion.set($event)" />
+                    </div>
+                    <div class="form-grupo">
+                        <label>Estado <span class="obligatorio">*</span></label>
+                        <select class="form-control"
+                                [ngModel]="estadoId()"
+                                (ngModelChange)="estadoId.set(+$event)">
+                            @for (e of estadosNotificacion(); track e.id) {
+                                <option [value]="e.id">{{ e.nombre }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-grupo">
+                        <label>No. Expediente OJ</label>
+                        <input type="text" class="form-control"
+                               [ngModel]="numeroExpedienteOj()"
+                               (ngModelChange)="numeroExpedienteOj.set($event)"
+                               placeholder="Ej: OJ-2026-001" />
+                    </div>
+                    <div class="form-grupo">
+                        <label>No. Resolucion</label>
+                        <input type="text" class="form-control"
+                               [ngModel]="numeroResolucion()"
+                               (ngModelChange)="numeroResolucion.set($event)"
+                               placeholder="Ej: RES-2026-001" />
+                    </div>
+                    <div class="form-grupo">
+                        <label>Es Resolucion</label>
+                        <select class="form-control"
+                                [ngModel]="esResolucion()"
+                                (ngModelChange)="esResolucion.set($event === 'true')">
+                            <option value="false">No</option>
+                            <option value="true">Si</option>
+                        </select>
+                    </div>
+                    <div class="form-grupo">
+                        <label>Favorable</label>
+                        <select class="form-control"
+                                [ngModel]="favorable()"
+                                (ngModelChange)="favorable.set($event === 'true' ? true : ($event === 'false' ? false : null))">
+                            <option [ngValue]="null">No determinado</option>
+                            <option [ngValue]="true">Favorable</option>
+                            <option [ngValue]="false">Desfavorable</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="fieldset-form">
+                <legend>Detalles Adicionales</legend>
+                <div class="form-grupo form-grupo-full">
+                    <label>Resumen</label>
+                    <textarea class="form-control" rows="2"
+                              [ngModel]="resumen()"
+                              (ngModelChange)="resumen.set($event)"
+                              placeholder="Resumen de la notificacion..."></textarea>
+                </div>
+                <div class="form-grupo form-grupo-full">
+                    <label>Contenido</label>
+                    <textarea class="form-control" rows="4"
+                              [ngModel]="contenido()"
+                              (ngModelChange)="contenido.set($event)"
+                              placeholder="Contenido completo de la notificacion..."></textarea>
+                </div>
+                <div class="form-grupo form-grupo-full">
+                    <label>Notas</label>
+                    <textarea class="form-control" rows="2"
+                              [ngModel]="notas()"
+                              (ngModelChange)="notas.set($event)"
+                              placeholder="Notas internas..."></textarea>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="onCerrar()" [disabled]="guardando()">Cancelar</button>
+            <button class="btn-primary" (click)="guardar()" [disabled]="guardando()">
+                @if (guardando()) { Guardando... } @else { Crear Notificacion }
+            </button>
+        </div>
+    </div>
+</div>

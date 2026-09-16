@@ -1,5 +1,6 @@
 using LexControlApi.Data;
 using LexControlApi.Dtos.Diligencias;
+using LexControlApi.Excepciones;
 
 namespace LexControlApi.Services;
 
@@ -50,6 +51,18 @@ public class DiligenciaService : IDiligenciaService
 
     public async Task<int> CrearAsync(DiligenciaCrearDto dto, int usuarioId)
     {
+        if (dto.TipoId <= 0)
+            throw new ExcepcionNegocio(-2, "El tipo de diligencia seleccionado no es válido.",
+                StatusCodes.Status400BadRequest);
+
+        if (dto.EstadoId <= 0)
+            throw new ExcepcionNegocio(-2, "El estado seleccionado no es válido.",
+                StatusCodes.Status400BadRequest);
+
+        if (dto.ClienteId is null || dto.ClienteId <= 0)
+            throw new ExcepcionNegocio(-2, "El cliente es obligatorio.",
+                StatusCodes.Status400BadRequest);
+
         TimeSpan? horaInicio = null;
         if (!string.IsNullOrEmpty(dto.HoraInicio))
         {

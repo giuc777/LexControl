@@ -155,6 +155,7 @@ public class DiligenciaCrearDto
 {
     public int? ExpedienteId { get; set; }
 
+    [Required(ErrorMessage = "El cliente es obligatorio.")]
     public int? ClienteId { get; set; }
 
     [Required(ErrorMessage = "El tipo de diligencia es obligatorio.")]

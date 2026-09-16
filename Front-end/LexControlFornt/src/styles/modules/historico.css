@@ -1,0 +1,241 @@
+/* Estilos del módulo de Histórico Legal.
+   Reutiliza primitivas de tramites.css (page-header, filtros, tabla, pills). */
+
+/* ============ Toolbar de filtros ============ */
+
+.historico-toolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+/* ============ Detalle (solo lectura) ============ */
+
+.detalle-container {
+    max-width: 960px;
+}
+
+.detalle-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+
+.detalle-header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.detalle-header-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detalle-titulo {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+}
+
+.detalle-subtitulo {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 2px 0 0;
+}
+
+.btn-volver {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--field-line);
+    border-radius: var(--radius-field);
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-volver:hover {
+    background: #f0f2f4;
+}
+
+.pill-readonly {
+    cursor: default;
+    opacity: 0.9;
+}
+
+.pill-rama {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: #e8f4f8;
+    color: var(--brand);
+}
+
+/* ============ Secciones del detalle ============ */
+
+.detalle-seccion {
+    margin-bottom: 28px;
+}
+
+.detalle-seccion h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--panel-line);
+}
+
+.detalle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.detalle-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.campo-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.campo-valor {
+    font-size: 14px;
+    color: var(--ink);
+}
+
+.detalle-texto {
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ============ Notas ============ */
+
+.notas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.nota-card {
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-card);
+}
+
+.nota-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.nota-etiqueta {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brand);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.nota-fecha {
+    font-size: 12px;
+    color: var(--subtle);
+}
+
+.nota-contenido {
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.5;
+    margin: 0 0 6px;
+}
+
+.nota-autor {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+}
+
+/* ============ Documentos ============ */
+
+.documentos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.documento-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #fff;
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-field);
+    font-size: 14px;
+    color: var(--ink);
+}
+
+.documento-item svg {
+    color: var(--brand);
+    flex-shrink: 0;
+}
+
+.documento-tamano {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--subtle);
+}
+
+/* ============ Footer ============ */
+
+.detalle-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--panel-line);
+}
+
+.detalle-no-encontrado {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.detalle-no-encontrado h2 {
+    font-size: 20px;
+    color: var(--ink);
+    margin: 0 0 8px;
+}
+
+.detalle-no-encontrado p {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 20px;
+}

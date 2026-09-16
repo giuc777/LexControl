@@ -361,7 +361,7 @@ CREATE TABLE CONFIGURACION (
 | `SP_Permiso_ObtenerPorRol` | `@Rol_ID` | SELECT módulos | `GET /api/permisos/{rolId}` (menú) |
 | `SP_Permiso_Actualizar` | `@Rol_ID`, `@Modulo_Nombre`, `@Activo` | RETURN 0 / THROW | Actualización individual (SP alternativo) |
 
-> **Nota**: El `PermisoService` backend llama a `SP_Permiso_Listar` y `SP_Permiso_GuardarRol`, pero **estos SPs no están definidos** en `Usuarios_SP.sql` (que define `SP_Permiso_ObtenerPorRol` y `SP_Permiso_Actualizar` en su lugar). `SP_Permiso_GuardarRol` (guardado masivo en JSON) **no existe todavía**. Esto es un gap conocido por implementar.
+> **Nota**: Los SPs `SP_Permiso_Listar`, `SP_Permiso_GuardarRol`, `SP_Permiso_ObtenerPorRol` y `SP_Permiso_Actualizar` ya existen en la base de datos. El módulo de Permisos está completamente implementado.
 
 ### 4.3 Seeds de catálogos (verificación)
 

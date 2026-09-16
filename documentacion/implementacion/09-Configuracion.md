@@ -1,7 +1,7 @@
 # Módulo 09 — Configuración del Bufete
 
 > **Módulo:** SPs + Backend + Frontend (reemplazar mocks de BufeteCard y PreferenciasCard)
-> **Estado:** BufeteCard y PreferenciasCard usan localStorage como placeholder.
+> **Estado:** ⚠️ BufeteCard y PreferenciasCard usan localStorage (brecha conocida, no bloqueante).
 > **Ruta frontend:** `/ajustes` (sección Bufete y Preferencias)
 
 ---
@@ -15,8 +15,8 @@ Configuración general del bufete: nombre, dirección, teléfono, email, logo, y
 - ✅ `UsuariosCard` — Conectado a `GET/POST/PUT /api/usuarios`
 - ✅ `PermisosCard` — Conectado a `GET/PUT /api/permisos`
 - ✅ `SeguridadCard` — Conectado a `PUT /api/perfil/contrasena`
-- ❌ `BufeteCard` — Usa localStorage (MOCK)
-- ❌ `PreferenciasCard` — Usa localStorage (MOCK)
+- ⚠️ `BufeteCard` — Usa localStorage (pendiente conectar a `GET/PUT /api/configuracion`)
+- ⚠️ `PreferenciasCard` — Usa localStorage (pendiente conectar a `GET/PUT /api/configuracion`)
 
 ---
 

@@ -1,24 +1,28 @@
 # Módulo 01 — Catálogos y Juzgados
 
-> **Estado:** El backend ya tiene el controller y service, pero faltan 5 SPs que el service llama.
-> **Prerequisito:** `sp_seguridad.sql` ejecutado
-> **Archivos SQL de salida:** `ScriptsDB/sp_catalogos_juzgados.sql`
+> **Estado:** ✅ COMPLETADO — Todos los SPs ejecutados en la DB.
+> **Archivos SQL:** `ScriptsDB/06-Mantenimiento_Catalogos.sql`, `ScriptsDB/07-Catalogos_Juzgados.sql`
 
 ---
 
 ## 1. Descripción
 
-El módulo de Catálogos permite gestionar las 16 tablas de catálogos del sistema (RAMA, ESTADO_EXPEDIENTE, TIPO_AUDIENCIA, etc.) y la tabla JUZGADO con sus FKs. El `CatalogoService.cs` ya implementa el CRUD genérico pero llama a 5 SPs que no existen en la BD.
+El módulo de Catálogos permite gestionar las 16 tablas de catálogos del sistema (RAMA, ESTADO_EXPEDIENTE, TIPO_AUDIENCIA, etc.) y la tabla JUZGADO con sus FKs.
 
 **Estado actual:**
 - ✅ `CatalogosController.cs` — 10 endpoints
 - ✅ `CatalogoService.cs` — 10 métodos
 - ✅ `CatalogoDtos.cs` — DTOs completos
-- ❌ `SP_Catalogo_ObtenerPorID` — No existe
-- ❌ `SP_Juzgado_Buscar` — No existe
-- ❌ `SP_Juzgado_Insertar` — No existe
-- ❌ `SP_Juzgado_Actualizar` — No existe
-- ❌ `SP_Juzgado_ObtenerPorID` — No existe
+- ✅ `SP_Catalogo_Buscar` — Ejecutado
+- ✅ `SP_Catalogo_ObtenerPorID` — Ejecutado
+- ✅ `SP_Catalogo_Insertar` — Ejecutado
+- ✅ `SP_Catalogo_Actualizar` — Ejecutado
+- ✅ `SP_Catalogo_CambiarEstado` — Ejecutado
+- ✅ `SP_Juzgado_Buscar` — Ejecutado
+- ✅ `SP_Juzgado_Insertar` — Ejecutado
+- ✅ `SP_Juzgado_Actualizar` — Ejecutado
+- ✅ `SP_Juzgado_CambiarEstado` — Ejecutado
+- ✅ `SP_Juzgado_ObtenerPorID` — Ejecutado
 - ✅ Frontend `MantenimientoPage` — Completo
 - ✅ Frontend `MantenimientoDetallePage` — Completo
 - ✅ Frontend `MantenimientoItemModal` — Completo

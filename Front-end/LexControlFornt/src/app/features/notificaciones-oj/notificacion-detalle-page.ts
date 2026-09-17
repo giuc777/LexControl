@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 
 import { NotificacionesService } from '../../core/services/notificaciones-service';
 import { CatalogosService } from '../../core/services/catalogos-service';
+import { ExpedientesService } from '../../core/services/expedientes-service';
 import { NotificacionDetalle, NotificacionAtender } from '../../core/models/notificacion.model';
-import { CatalogoItem } from '../../core/models/catalogo.model';
+import { JuzgadoItem } from '../../core/models/catalogo.model';
 import { PageHeader } from '../../shared/components/page-header/page-header';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { ToastService } from '../../layout/toast/toast-service';
+import { NotificacionModal } from './notificacion-modal';
 
 const COLORES_ESTADO: Record<string, string> = {
     'Pendiente': '#f39c12',
@@ -21,13 +23,15 @@ const COLORES_ESTADO: Record<string, string> = {
 @Component({
     selector: 'app-notificacion-detalle-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, PageHeader, EmptyState],
+    imports: [FormsModule, PageHeader, EmptyState, NotificacionModal],
     templateUrl: './notificacion-detalle-page.html'
 })
 export class NotificacionDetallePage implements OnInit {
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
     private readonly notificacionesSvc = inject(NotificacionesService);
+    private readonly catalogosSvc = inject(CatalogosService);
+    private readonly expedientesSvc = inject(ExpedientesService);
     private readonly toast = inject(ToastService);
 
     protected readonly notificacion = signal<NotificacionDetalle | null>(null);
@@ -36,9 +40,15 @@ export class NotificacionDetallePage implements OnInit {
     protected readonly mostrarFormAtender = signal(false);
     protected readonly notasAtencion = signal('');
 
+    protected readonly mostrarModal = signal(false);
+    protected readonly expedientes = signal<{ id: number; noExpediente: string }[]>([]);
+    protected readonly juzgados = signal<{ id: number; nombre: string }[]>([]);
+
     ngOnInit(): void {
         const id = Number(this.route.snapshot.paramMap.get('id'));
         if (id) this.cargarDetalle(id);
+        this.cargarExpedientes();
+        this.cargarJuzgados();
     }
 
     cargarDetalle(id: number): void {
@@ -55,8 +65,51 @@ export class NotificacionDetallePage implements OnInit {
         });
     }
 
+    cargarExpedientes(): void {
+        this.expedientesSvc.listar({}).subscribe({
+            next: (data) => {
+                this.expedientes.set(
+                    data.expedientes.map((e: { id: number; noExpediente: string }) => ({
+                        id: e.id,
+                        noExpediente: e.noExpediente
+                    }))
+                );
+            }
+        });
+    }
+
+    cargarJuzgados(): void {
+        this.catalogosSvc.buscarJuzgados({}).subscribe({
+            next: (data) => {
+                this.juzgados.set(
+                    data.items.map((j: JuzgadoItem) => ({ id: j.id, nombre: j.nombre }))
+                );
+            }
+        });
+    }
+
     irAVolver(): void {
         this.router.navigate(['/notificaciones-oj']);
+    }
+
+    abrirEditar(): void {
+        this.mostrarModal.set(true);
+    }
+
+    cerrarModal(): void {
+        this.mostrarModal.set(false);
+    }
+
+    alGuardar(): void {
+        this.mostrarModal.set(false);
+        const id = this.notificacion()?.id;
+        if (id) this.cargarDetalle(id);
+    }
+
+    descargarPdf(): void {
+        const ruta = this.notificacion()?.pdfRuta;
+        if (!ruta) return;
+        window.open(this.notificacionesSvc.descargar(ruta), '_blank');
     }
 
     toggleFormAtender(): void {

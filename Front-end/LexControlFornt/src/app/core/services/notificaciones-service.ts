@@ -9,7 +9,9 @@ import {
     NotificacionAtender,
     NotificacionCrear,
     NotificacionDetalle,
-    NotificacionLista
+    NotificacionDuplicado,
+    NotificacionLista,
+    NotificacionPdfResponse
 } from '../models/notificacion.model';
 
 /* Servicio HTTP del modulo Notificaciones OJ. */
@@ -57,5 +59,33 @@ export class NotificacionesService {
 
     atender(id: number, dto: NotificacionAtender): Observable<void> {
         return this.http.put<void>(`${this.base}/${id}/atender`, dto);
+    }
+
+    /* Verifica duplicados de una notificación no atendida. */
+    verificarDuplicado(dto: {
+        expedienteId: number;
+        numeroResolucion?: string | null;
+        numeroExpedienteOj?: string | null;
+    }): Observable<NotificacionDuplicado[]> {
+        return this.http
+            .post<RespuestaApi<NotificacionDuplicado[]>>(`${this.base}/verificar-duplicado`, dto)
+            .pipe(map(r => r.data));
+    }
+
+    /* Sube el PDF asociado a una notificación existente. */
+    subirPdf(id: number, archivo: File, descripcion: string | null = null): Observable<NotificacionPdfResponse> {
+        const formData = new FormData();
+        formData.append('file', archivo);
+        if (descripcion) formData.append('descripcion', descripcion);
+
+        return this.http
+            .post<RespuestaApi<NotificacionPdfResponse>>(`${this.base}/${id}/pdf`, formData)
+            .pipe(map(r => r.data));
+    }
+
+    /* URL de descarga de un archivo por su ruta relativa. */
+    descargar(rutaArchivo: string): string {
+        const base = `${environment.apiBaseUrl}/api/documentos`;
+        return `${base}/download/${encodeURIComponent(rutaArchivo)}`;
     }
 }

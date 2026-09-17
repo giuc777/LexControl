@@ -102,6 +102,17 @@ export function iconoDe(clave: string): string {
     return modulo?.icon ?? MODULOS[0].icon;
 }
 
+/* Resuelve la ruta de navegación de un módulo: usa la ruta del registro
+   local MODULOS (fuente de verdad del SPA) y garantiza un único '/' inicial.
+   Evita que una ruta obsoleta del API (p. ej. '/notificaciones' cuando la
+   ruta real es '/notificaciones-oj') rompa la navegación del sidebar. */
+function resolverRuta(clave: string, rutaApi?: string | null): string {
+    const key = (clave ?? '').toLowerCase();
+    const local = MODULOS.find(m => m.key === key);
+    const ruta = local?.ruta ?? (rutaApi ?? '');
+    return '/' + ruta.replace(/^\/+/, '');
+}
+
 /* Copia de la matriz por defecto de un rol («Restaurar valores»). */
 export function matrizDefectoDe(rol: string): Record<string, boolean> {
     const base = PERMISOS_DEFECTO[rol];
@@ -130,7 +141,7 @@ export class PermisosService {
         return MODULOS.filter(m => defecto[m.key]).map((m, i) => ({
             clave: m.key,
             nombre: m.label,
-            ruta: `/${m.ruta}`,
+            ruta: resolverRuta(m.key),
             icono: m.key,
             orden: i + 1,
             activo: true
@@ -190,6 +201,10 @@ export class PermisosService {
         return [...modulos]
             .filter(m => m.activo)
             .sort((a, b) => a.orden - b.orden)
-            .map(m => ({ ...m, clave: m.clave.toLowerCase() }));
+            .map(m => ({
+                ...m,
+                clave: m.clave.toLowerCase(),
+                ruta: resolverRuta(m.clave, m.ruta)
+            }));
     }
 }

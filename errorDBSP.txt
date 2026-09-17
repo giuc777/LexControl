@@ -1,2 +1,0 @@
-Errores de SPs de reportes corregidos en 10-Reportes-FixSubquery.sql
-(SPs corregidos: SP_Reporte_NotificacionesOJ, SP_Reporte_Diligencias, SP_Reporte_EventosAgendaMes)

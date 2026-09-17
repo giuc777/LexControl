@@ -1,291 +1,120 @@
 # Módulo 07 — Reportes
 
-> **Módulo completo:** Corrección de SPs + Backend + Frontend + Pruebas + Playwright
-> **Estado:** ✅ Backend COMPLETADO (SPs + DTOs + Service + Controller). Frontend: model + service creados.
+> **Estado:** ✅ COMPLETADO
 > **Ruta frontend:** `/reportes`
+> **Backend:** 13 endpoints · **Frontend:** 8 categorías con exportación PDF
 
 ---
 
 ## 1. Descripción
 
-Sistema de reportes con 11 consultas estadísticas. Devuelven resumen (agrupado) y detalle (filas individuales).
+Sistema de reportes con consultas estadísticas. Cada reporte devuelve un **resumen**
+(agrupado) y un **detalle** (filas individuales). Los reportes que ya existían en el
+backend se expusieron en la UI, se corrigió el SP de trámites y se agregaron dos reportes
+nuevos derivados de otros módulos (Clientes y Rendimiento).
 
-**Estado de SPs:**
-- ✅ 6 SPs funcionan: ExpedientesPorEstado, ExpedientesPorRama, ExpedientesPorJuzgado, AntiguedadExpedientes, ActividadAudiencias, AlertasPendientes, PlazosVencimiento
-- ✅ 3 SPs corregidos: NotificacionesOJ, Diligencias, EventosAgendaMes (fix en 10-Reportes-FixSubquery.sql)
-- ✅ 1 SP corregido: GestionTramites (descomentado y corregido)
+## 2. Categorías en la UI
 
-**Backend:**
-- ✅ `Dtos/Reportes/ReporteDtos.cs` — 22 DTOs (11 resumen + 11 detalle)
-- ✅ `Services/ReporteService.cs` — 11 métodos (uno por SP)
-- ✅ `Controllers/ReportesController.cs` — 11 endpoints GET
-- ✅ `Data/IRepositorio.cs` — Nuevo método `ConsultarMultiplesAsync` para multi-result sets
-
-**Frontend:**
-- ✅ `core/models/reporte.model.ts` — 22 interfaces
-- ✅ `core/services/reportes-service.ts` — 11 métodos HTTP
-
----
-
-## 2. Procedimientos Almacenados — Correcciones
-
-### 2.1 SP_Reporte_GestionTramites (descomentar)
-
-**Archivo:** `LexControlDB.sql:2408-2459`
-**Acción:** Descomentar el código y verificar ejecución
-
-### 2.2 SP_Reporte_NotificacionesOJ (corregir)
-
-**Error:** Msg 130 — Cannot perform aggregate on subquery
-**Solución:** Reemplazar subquery por CTE o JOIN
-
-```sql
--- ANTES (con error):
-SELECT COUNT(*) FROM (SELECT ...) AS subquery
-
--- DESPUÉS (corregido):
-;WITH Base AS (
-    SELECT N.*, ENO.Nombre AS Estado
-    FROM NOTIFICACION_OJ N
-    INNER JOIN ESTADO_NOTIFICACION_OJ ENO ON N.Estado_Notificacion_ID = ENO.ID
-)
-SELECT Estado, COUNT(*) AS Total
-FROM Base
-GROUP BY Estado;
-```
-
-### 2.3 SP_Reporte_Diligencias (corregir)
-
-**Mismo patrón de corrección** — reemplazar aggregate sobre subquery por CTE.
-
-### 2.4 SP_Reporte_EventosAgendaMes (corregir)
-
-**Mismo patrón de corrección** — reemplazar aggregate sobre subquery por CTE.
+| Categoría | Reportes incluidos |
+|---|---|
+| Reporte de Usuarios | Actividad, roles y estado de usuarios (calculado desde `/api/usuarios`) |
+| Clientes por Tipo | Clientes por tipo/estado (nuevo) |
+| Expedientes | Por estado · por juzgado · por rama · antigüedad |
+| Agenda y Audiencias | Actividad de audiencias · eventos del mes · plazos por vencer |
+| Trámites en Curso | Gestión de trámites |
+| Notificaciones OJ | Notificaciones por tipo/estado |
+| Diligencias y Alertas | Diligencias · alertas pendientes |
+| Rendimiento del Bufete | Carga de trabajo por responsable (nuevo) |
 
 ---
 
-## 3. Backend
+## 3. Procedimientos almacenados
 
-### 3.1 DTOs — `Dtos/Reportes/ReporteDtos.cs`
+### Existían
 
-```csharp
-namespace LexControlApi.Dtos.Reportes;
+`SP_Reporte_ExpedientesPorEstado`, `SP_Reporte_PlazosVencimiento`,
+`SP_Reporte_ExpedientesPorRama`, `SP_Reporte_ExpedientesPorJuzgado`,
+`SP_Reporte_AntiguedadExpedientes`, `SP_Reporte_ActividadAudiencias`,
+`SP_Reporte_NotificacionesOJ`, `SP_Reporte_Diligencias`,
+`SP_Reporte_AlertasPendientes`, `SP_Reporte_EventosAgendaMes`.
 
-public class ReporteRespuesta<T>
-{
-    public List<T> Resumen { get; set; } = new();
-    public List<T> Detalle { get; set; } = new();
-}
+### Nuevos — `ScriptsDB/14-Reportes-Completar.sql`
 
-// DTOs genéricos para cada reporte
-public class ExpedienteEstadoResumen
-{
-    public string Estado { get; set; } = "";
-    public int Cantidad { get; set; }
-    public decimal Porcentaje { get; set; }
-}
+| SP | Descripción |
+|---|---|
+| `SP_Reporte_GestionTramites` | **Corregido**: estaba comentado y ausente en la BD (causaba 500). Usa variables `@Resuelto`/`@Rechazado` para evitar agregado sobre subquery. |
+| `SP_Reporte_ClientesPorTipo` | Resumen por tipo (total/activos/inactivos/%) + detalle. |
+| `SP_Reporte_CargaPorAbogado` | Carga por usuario asignado (activos/en espera/urgentes/cerrados) + detalle. |
 
-public class ExpedienteRamaResumen
-{
-    public string Rama { get; set; } = "";
-    public int Cantidad { get; set; }
-    public string Color { get; set; } = "";
-}
-
-public class AlertaPendiente
-{
-    public string Tipo { get; set; } = "";
-    public string Descripcion { get; set; } = "";
-    public int Cantidad { get; set; }
-    public string Prioridad { get; set; } = "";
-}
-```
-
-### 3.2 Service — `Services/ReporteService.cs`
-
-```csharp
-using LexControlApi.Dtos.Reportes;
-
-namespace LexControlApi.Services;
-
-public interface IReporteService
-{
-    Task<ReporteRespuesta<ExpedienteEstadoResumen>> ExpedientesPorEstadoAsync();
-    Task<ReporteRespuesta<ExpedienteRamaResumen>> ExpedientesPorRamaAsync();
-    Task<ReporteRespuesta<dynamic>> ExpedientesPorJuzgadoAsync();
-    Task<ReporteRespuesta<dynamic>> AntiguedadExpedientesAsync();
-    Task<ReporteRespuesta<dynamic>> ActividadAudienciasAsync();
-    Task<ReporteRespuesta<dynamic>> GestionTramitesAsync();
-    Task<ReporteRespuesta<dynamic>> NotificacionesOJAsync();
-    Task<ReporteRespuesta<dynamic>> DiligenciasAsync();
-    Task<ReporteRespuesta<AlertaPendiente>> AlertasPendientesAsync();
-    Task<ReporteRespuesta<dynamic>> EventosAgendaMesAsync();
-    Task<ReporteRespuesta<dynamic>> PlazosVencimientoAsync();
-}
-
-public class ReporteService : IReporteService
-{
-    private readonly Data.IRepositorio _repositorio;
-    public ReporteService(Data.IRepositorio repositorio) => _repositorio = repositorio;
-
-    public async Task<ReporteRespuesta<ExpedienteEstadoResumen>> ExpedientesPorEstadoAsync()
-    {
-        var filas = await _repositorio.ConsultarAsync<ExpedienteEstadoResumen>(
-            "SP_Reporte_ExpedientesPorEstado");
-        return new ReporteRespuesta<ExpedienteEstadoResumen> { Resumen = filas, Detalle = new() };
-    }
-
-    public async Task<ReporteRespuesta<ExpedienteRamaResumen>> ExpedientesPorRamaAsync()
-    {
-        var filas = await _repositorio.ConsultarAsync<ExpedienteRamaResumen>(
-            "SP_Reporte_ExpedientesPorRama");
-        return new ReporteRespuesta<ExpedienteRamaResumen> { Resumen = filas, Detalle = new() };
-    }
-
-    // ... implementar cada método llamando a su SP correspondiente
-    // Para los que usan QueryMultiple (resumen + detalle):
-    // var multiplo = await _repositorio.ConsultarMultiploAsync(
-    //     "SP_Reporte_X", new { });
-    // var resumen = await multiplo.ReadAsync<...>();
-    // var detalle = await multiplo.ReadAsync<...>();
-
-    public async Task<ReporteRespuesta<AlertaPendiente>> AlertasPendientesAsync()
-    {
-        var filas = await _repositorio.ConsultarAsync<AlertaPendiente>(
-            "SP_Reporte_AlertasPendientes");
-        return new ReporteRespuesta<AlertaPendiente> { Resumen = filas, Detalle = new() };
-    }
-}
-```
-
-### 3.3 Controller — `Controllers/ReportesController.cs`
-
-```csharp
-using LexControlApi.Dtos.Reportes;
-using LexControlApi.Helpers;
-using LexControlApi.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-namespace LexControlApi.Controllers;
-
-[ApiController]
-[Route("api/reportes")]
-[Authorize]
-public class ReportesController : ControllerBase
-{
-    private readonly IReporteService _service;
-    public ReportesController(IReporteService service) => _service = service;
-
-    [HttpGet("expedientes-por-estado")]
-    public async Task<ActionResult<ApiResponse<ReporteRespuesta<ExpedienteEstadoResumen>>>> ExpedientesPorEstado()
-        => Ok(ApiResponse<ReporteRespuesta<ExpedienteEstadoResumen>>.Correcto(
-            await _service.ExpedientesPorEstadoAsync()));
-
-    [HttpGet("expedientes-por-rama")]
-    public async Task<ActionResult<ApiResponse<ReporteRespuesta<ExpedienteRamaResumen>>>> ExpedientesPorRama()
-        => Ok(ApiResponse<ReporteRespuesta<ExpedienteRamaResumen>>.Correcto(
-            await _service.ExpedientesPorRamaAsync()));
-
-    [HttpGet("alertas-pendientes")]
-    public async Task<ActionResult<ApiResponse<ReporteRespuesta<AlertaPendiente>>>> AlertasPendientes()
-        => Ok(ApiResponse<ReporteRespuesta<AlertaPendiente>>.Correcto(
-            await _service.AlertasPendientesAsync()));
-
-    // ... 8 endpoints más siguiendo el mismo patrón
-}
-```
-
-### 3.4 Registro en Program.cs
-
-```csharp
-builder.Services.AddScoped<IReporteService, ReporteService>();
-```
+> Ejecutar el script contra `DBLexControl` con `sqlcmd`. Incluye bloque de verificación.
 
 ---
 
-## 4. Pruebas de Endpoints
+## 4. Backend
 
-```http
-### Expedientes por estado
-GET http://localhost:5181/api/reportes/expedientes-por-estado
-Authorization: Bearer <token>
+### DTOs — `Dtos/Reportes/ReporteDtos.cs`
 
-### Expedientes por rama
-GET http://localhost:5181/api/reportes/expedientes-por-rama
-Authorization: Bearer <token>
+`ReporteRespuesta<TResumen, TDetalle>` + 13 pares resumen/detalle. Nuevos:
+`ClientesPorTipoResumen/Detalle`, `CargaPorAbogadoResumen/Detalle`.
 
-### Alertas pendientes
-GET http://localhost:5181/api/reportes/alertas-pendientes
-Authorization: Bearer <token>
+### Service — `Services/ReporteService.cs`
 
-### Plazos vencimiento
-GET http://localhost:5181/api/reportes/plazos-vencimiento
-Authorization: Bearer <token>
-```
+13 métodos; los multi-resultset usan `IRepositorio.ConsultarMultiplesAsync`.
+
+### Controller — `Controllers/ReportesController.cs`
+
+| Método | Endpoint |
+|---|---|
+| GET | `/api/reportes/expedientes-por-estado` |
+| GET | `/api/reportes/plazos-vencimiento` |
+| GET | `/api/reportes/expedientes-por-rama` |
+| GET | `/api/reportes/expedientes-por-juzgado` |
+| GET | `/api/reportes/antiguedad-expedientes` |
+| GET | `/api/reportes/actividad-audiencias` |
+| GET | `/api/reportes/gestion-tramites` |
+| GET | `/api/reportes/notificaciones-oj` |
+| GET | `/api/reportes/diligencias` |
+| GET | `/api/reportes/alertas-pendientes` |
+| GET | `/api/reportes/eventos-agenda-mes` |
+| GET | `/api/reportes/clientes-por-tipo` |
+| GET | `/api/reportes/carga-por-abogado` |
 
 ---
 
 ## 5. Frontend
 
-### 5.1 Service — `core/services/reportes-service.ts`
+| Archivo | Rol |
+|---|---|
+| `core/models/reporte.model.ts` | Interfaces de los 13 reportes |
+| `core/services/reportes-service.ts` | 13 métodos HTTP |
+| `features/reportes/reportes-page.*` | Grid de 8 categorías |
+| `features/reportes/reportes-utils.ts` | Utilidades de formato de fechas/iniciales |
+| `features/reportes/reportes-clientes-page.*` | Clientes por tipo (nuevo) |
+| `features/reportes/reportes-expedientes-page.*` | Expedientes (estado/juzgado/rama/antigüedad) |
+| `features/reportes/reportes-agenda-page.*` | Agenda y audiencias |
+| `features/reportes/reportes-tramites-page.*` | Trámites |
+| `features/reportes/reportes-notificaciones-page.*` | Notificaciones OJ |
+| `features/reportes/reportes-diligencias-page.*` | Diligencias y alertas |
+| `features/reportes/reportes-rendimiento-page.*` | Carga por responsable (nuevo) |
+| `styles/modules/reportes.css` | Estilos reutilizables (stats, progress, barras, tablas) |
 
-```typescript
-@Injectable({ providedIn: 'root' })
-export class ReportesService {
-  private http = inject(HttpClient);
-  private base = `${environment.apiBaseUrl}/api/reportes`;
-
-  expedientesPorEstado() { return this.http.get<RespuestaApi<ReporteRespuesta<any>>>(`${this.base}/expedientes-por-estado`); }
-  expedientesPorRama() { return this.http.get<RespuestaApi<ReporteRespuesta<any>>>(`${this.base}/expedientes-por-rama`); }
-  // ... 9 métodos más
-}
-```
-
-### 5.2 Sub-páginas nuevas (4)
-
-| Archivo | Reporte |
-|---------|---------|
-| `reportes-agenda-page.ts` + `.html` | Eventos agenda del mes |
-| `reportes-tramites-page.ts` + `.html` | Gestión de trámites |
-| `reportes-notificaciones-page.ts` + `.html` | Notificaciones OJ |
-| `reportes-rendimiento-page.ts` + `.html` | Rendimiento del bufete |
-
-### 5.3 Actualizar reportes-page.ts
-
-Importar los 4 nuevos componentes y agregar `@if` para cada reporte.
+Cada página incluye stat cards, paneles de progreso/barras, tabla de detalle y botón
+**Exportar PDF** (`jspdf` + `jspdf-autotable`).
 
 ---
 
-## 6. Tests Playwright
+## 6. Pruebas
 
-### Actualizar `06-reportes.spec.ts`
-
-```typescript
-test('reporte de expedientes por rama muestra datos', async ({ page }) => {
-  await loginAsAdmin(page);
-  await page.goto('/reportes');
-  await page.click('[data-testid="reporte-expedientes-rama"]');
-  await expect(page.locator('[data-testid="reporte-titulo"]')).toContainText('Expedientes por Rama');
-  await expect(page.locator('[data-testid="grafica-barras"]')).toBeVisible();
-});
-
-test('reporte de agenda muestra datos', async ({ page }) => {
-  await loginAsAdmin(page);
-  await page.goto('/reportes');
-  await page.click('[data-testid="reporte-agenda"]');
-  await expect(page.locator('[data-testid="reporte-titulo"]')).toBeVisible();
-});
-```
+- **Integración (xUnit)** — `ReportesControllerTests.cs`: 17 tests (13 endpoints + auth +
+  filtros + disponibilidad masiva).
+- **E2E (Playwright)** — `e2e/tests/06-reportes.spec.ts`: TC-REP-001..011 (una por categoría + volver).
 
 ---
 
-## 7. Criterios de Aceptación
+## 7. Criterios de aceptación
 
-- [ ] Los 4 SPs corregidos ejecutan sin errores
-- [ ] Los 11 endpoints retornan datos
-- [ ] Las 6 sub-páginas de reportes están implementadas
-- [ ] Gráficas SVG/CSS renderizan correctamente
-- [ ] PDF export funciona en todas las sub-páginas
-- [ ] `npx ng build` exitoso
-- [ ] Tests Playwright pasan
+- [x] `SP_Reporte_GestionTramites` existe y `gestion-tramites` responde 200.
+- [x] Reportes nuevos `clientes-por-tipo` y `carga-por-abogado` operativos.
+- [x] Las 8 categorías abren su página y muestran datos.
+- [x] Exportación PDF en cada reporte.
+- [x] `npm run build` exitoso y `dotnet test` en verde.

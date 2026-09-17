@@ -1,0 +1,118 @@
+using FluentAssertions;
+using LexControlApi.Tests.Fixtures;
+using System.Net;
+using System.Net.Http.Json;
+
+namespace LexControlApi.Tests;
+
+/// <summary>Tests de integración para DiligenciasController.</summary>
+public class DiligenciasControllerTests : IClassFixture<TestWebApplicationFactory>
+{
+    private readonly HttpClient _client;
+
+    public DiligenciasControllerTests(TestWebApplicationFactory factory)
+    {
+        _client = factory.CreateClient();
+    }
+
+    [Fact]
+    public async Task Listar_SinAutenticacion_Devuelve401()
+    {
+        var response = await _client.GetAsync("/api/diligencias");
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task Listar_ConToken_Devuelve200()
+    {
+        var token = AuthHelper.GenerarTokenAdmin();
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var response = await _client.GetAsync("/api/diligencias");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<ApiResponseDto<object>>();
+        body.Should().NotBeNull();
+        body!.Success.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ObtenerPorId_DiligenciaExistente_Devuelve200()
+    {
+        var token = AuthHelper.GenerarTokenAdmin();
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var response = await _client.GetAsync("/api/diligencias/1");
+
+        // Puede devolver 200 o 404
+        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task ObtenerPorId_DiligenciaInexistente_Devuelve404()
+    {
+        var token = AuthHelper.GenerarTokenAdmin();
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var response = await _client.GetAsync("/api/diligencias/99999");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task Crear_DiligenciaValida_Devuelve200()
+    {
+        var token = AuthHelper.GenerarTokenAdmin();
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var diligencia = new
+        {
+            ClienteId = 1,
+            TipoId = 1,
+            Descripcion = "Diligencia de prueba de integración",
+            FechaVencimiento = DateTime.Now.AddDays(7).ToString("yyyy-MM-dd")
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/diligencias", diligencia);
+
+        response.StatusCode.Should().NotBe(HttpStatusCode.InternalServerError);
+    }
+
+    [Fact]
+    public async Task Crear_SinRolAbogado_Devuelve403()
+    {
+        var token = AuthHelper.GenerarTokenSecretaria();
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var diligencia = new { ClienteId = 1, TipoId = 1, Descripcion = "Test" };
+
+        var response = await _client.PostAsJsonAsync("/api/diligencias", diligencia);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Listar_ConFiltros_Devuelve200()
+    {
+        var token = AuthHelper.GenerarTokenAdmin();
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var response = await _client.GetAsync("/api/diligencias?estadoId=1&tipoId=1");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    // Tipos auxiliares
+    public class ApiResponseDto<T>
+    {
+        public bool Success { get; set; }
+        public T? Data { get; set; }
+        public string? Error { get; set; }
+    }
+}

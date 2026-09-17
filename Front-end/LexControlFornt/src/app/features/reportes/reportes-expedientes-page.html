@@ -1,0 +1,183 @@
+<div class="page-header">
+    <div>
+        <span class="page-overline">Reportes</span>
+        <h1 class="page-title">Expedientes</h1>
+        <p class="page-subtitle">Estado, juzgado, antigüedad y distribución por rama de los expedientes</p>
+    </div>
+    <div class="page-actions">
+        <button class="rep-export-btn" (click)="exportarPDF()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Exportar PDF
+        </button>
+    </div>
+</div>
+
+<section class="rep-stats" data-testid="reporte-expedientes">
+    <article class="rep-stat">
+        <span class="rep-stat-label">Total Expedientes</span>
+        <span class="rep-stat-value">{{ total() }}</span>
+        <span class="rep-stat-badge info">Todos los registros</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Activos</span>
+        <span class="rep-stat-value">{{ activos() }}</span>
+        <span class="rep-stat-badge ok">En proceso</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">En Espera</span>
+        <span class="rep-stat-value">{{ enEspera() }}</span>
+        <span class="rep-stat-badge warn">Pendientes</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Cerrados / Archivados</span>
+        <span class="rep-stat-value">{{ cerrados() }}</span>
+        <span class="rep-stat-badge info">Finalizados</span>
+    </article>
+</section>
+
+<section class="rep-grid">
+    <article class="rep-panel rep-c5">
+        <div class="aj-card-head">
+            <h2 class="aj-card-title">Distribución por Rama</h2>
+        </div>
+        <div class="rep-progress-list">
+            @for (r of resumenRamas(); track r.rama) {
+                <div class="rep-progress-row">
+                    <div class="rep-progress-head">
+                        <span class="rep-progress-nombre">
+                            <span class="rep-dot" [style.background]="r.color || '#8b9aa0'"></span>
+                            {{ r.rama }}
+                        </span>
+                        <span class="rep-progress-val">{{ r.cantidad }} <small>({{ r.porcentaje }}%)</small></span>
+                    </div>
+                    <div class="rep-progress-track">
+                        <div class="rep-progress-fill" [style.width.%]="r.porcentaje"
+                            [style.background]="r.color || '#8b9aa0'"></div>
+                    </div>
+                </div>
+            }
+            @if (resumenRamas().length === 0) {
+                <div class="rep-empty">Sin datos disponibles</div>
+            }
+        </div>
+    </article>
+
+    <article class="rep-panel rep-c7">
+        <div class="aj-card-head">
+            <h2 class="aj-card-title">Distribución por Estado</h2>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="data-table rep-usuarios-table">
+                <thead>
+                    <tr><th>Estado</th><th>Cantidad</th><th>Porcentaje</th></tr>
+                </thead>
+                <tbody>
+                    @for (e of resumenEstados(); track e.estado) {
+                        <tr>
+                            <td>
+                                <span class="pill" [style.background]="(e.color || '#358292') + '18'"
+                                    [style.color]="e.color || '#358292'"
+                                    [style.border]="'1px solid ' + (e.color || '#358292') + '40'">{{ e.estado }}</span>
+                            </td>
+                            <td><strong>{{ e.cantidad }}</strong></td>
+                            <td class="rep-fecha">{{ e.porcentaje }}%</td>
+                        </tr>
+                    }
+                    @if (resumenEstados().length === 0) {
+                        <tr><td colspan="3" class="empty-state">Sin datos disponibles</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="rep-panel rep-c7">
+        <div class="aj-card-head">
+            <h2 class="aj-card-title">Expedientes por Juzgado</h2>
+        </div>
+        <div class="rep-progress-list">
+            @for (j of resumenJuzgados(); track j.juzgado) {
+                <div class="rep-progress-row">
+                    <div class="rep-progress-head">
+                        <span class="rep-progress-nombre">{{ j.juzgado }}</span>
+                        <span class="rep-progress-val">{{ j.cantidad }} <small>({{ j.porcentaje }}%)</small></span>
+                    </div>
+                    <div class="rep-progress-track">
+                        <div class="rep-progress-fill" [style.width.%]="j.porcentaje" style="background: #358292;"></div>
+                    </div>
+                </div>
+            }
+            @if (resumenJuzgados().length === 0) {
+                <div class="rep-empty">Sin datos disponibles</div>
+            }
+        </div>
+    </article>
+
+    <article class="rep-panel rep-c5">
+        <div class="aj-card-head">
+            <h2 class="aj-card-title">Antigüedad</h2>
+        </div>
+        <div class="rep-progress-list">
+            @for (a of resumenAntiguedad(); track a.rangoAntiguedad) {
+                <div class="rep-progress-row">
+                    <div class="rep-progress-head">
+                        <span class="rep-progress-nombre">{{ a.rangoAntiguedad }}</span>
+                        <span class="rep-progress-val">{{ a.cantidad }} <small>({{ a.porcentaje }}%)</small></span>
+                    </div>
+                    <div class="rep-progress-track">
+                        <div class="rep-progress-fill" [style.width.%]="a.porcentaje" style="background: #B2845A;"></div>
+                    </div>
+                </div>
+            }
+            @if (resumenAntiguedad().length === 0) {
+                <div class="rep-empty">Sin datos disponibles</div>
+            }
+        </div>
+    </article>
+</section>
+
+<section class="aj-card" style="margin-top: 22px;">
+    <div class="aj-card-head">
+        <h2 class="aj-card-title">Detalle de Expedientes</h2>
+        <span class="rep-chip">{{ detalle().length }} registros</span>
+    </div>
+    <div style="overflow-x: auto;">
+        <table class="data-table rep-usuarios-table">
+            <thead>
+                <tr>
+                    <th>No. Expediente</th><th>Cliente</th><th>Rama</th><th>Estado</th>
+                    <th>Abogado</th><th>Fecha Ingreso</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (e of detalleTabla(); track $index) {
+                    <tr>
+                        <td class="cell-id">{{ e.noExpediente }}</td>
+                        <td>{{ e.cliente }}</td>
+                        <td>{{ e.rama }}</td>
+                        <td>
+                            <span class="pill" [style.background]="(e.estadoColor || '#358292') + '18'"
+                                [style.color]="e.estadoColor || '#358292'"
+                                [style.border]="'1px solid ' + (e.estadoColor || '#358292') + '40'">{{ e.estado }}</span>
+                        </td>
+                        <td>{{ e.abogado }}</td>
+                        <td class="rep-fecha">{{ e.fechaIngresoFormato }}</td>
+                    </tr>
+                }
+                @if (detalleTabla().length === 0) {
+                    <tr><td colspan="6" class="empty-state">No hay expedientes registrados</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<p class="rep-footnote">
+    Datos obtenidos de los endpoints <em>/api/reportes/expedientes-por-estado</em>,
+    <em>/expedientes-por-juzgado</em>, <em>/expedientes-por-rama</em> y <em>/antiguedad-expedientes</em>.
+</p>

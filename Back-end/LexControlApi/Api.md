@@ -335,11 +335,13 @@ public static string Sha256Hash(string input)
 - [ ] Necesita SPs de listar y obtener (crear)
 
 ### NotificacionesController
-- [ ] `GET /api/notificaciones` — listar con filtros
-- [ ] `POST /api/notificaciones` — `SP_NotificacionOJ_Insertar`
-- [ ] `PUT /api/notificaciones/{id:int}/atender` — `SP_NotificacionOJ_Atender`
-- [ ] `POST /api/notificaciones/verificar-duplicado` — `SP_NotificacionOJ_VerificarDuplicado`
-- [ ] Necesita SPs de listar y obtener (crear)
+- [x] `GET /api/notificaciones` — `SP_Notificacion_Listar`
+- [x] `GET /api/notificaciones/{id:int}` — `SP_Notificacion_ObtenerPorID`
+- [x] `POST /api/notificaciones` — `SP_NotificacionOJ_Insertar`
+- [x] `PUT /api/notificaciones/{id:int}` — `SP_NotificacionOJ_Actualizar`
+- [x] `PUT /api/notificaciones/{id:int}/atender` — `SP_NotificacionOJ_Atender`
+- [x] `POST /api/notificaciones/verificar-duplicado` — `SP_NotificacionOJ_VerificarDuplicado`
+- [x] `POST /api/notificaciones/{id:int}/pdf` — `SP_NotificacionOJ_AdjuntarPDF`
 
 ### EventosController (Agenda)
 - [ ] `GET /api/eventos/dia` — `SP_Evento_ObtenerDelDia` (params: Usuario_ID, Fecha)

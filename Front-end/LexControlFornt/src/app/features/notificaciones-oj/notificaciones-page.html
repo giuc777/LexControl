@@ -1,4 +1,7 @@
 <app-page-header titulo="Notificaciones OJ" subtitulo="Seguimiento de notificaciones del Organismo Judicial">
+    <button type="button" class="btn-primary" data-testid="btn-nueva-notificacion" (click)="abrirModal()">
+        Nueva Notificacion
+    </button>
 </app-page-header>
 
 <div class="notificaciones-toolbar">
@@ -6,6 +9,7 @@
         <div class="filtro-grupo">
             <label class="filtro-label">Tipo</label>
             <select class="filtro-select"
+                    data-testid="filtro-tipo"
                     [ngModel]="filtroTipoId()"
                     (ngModelChange)="filtroTipoId.set($event ? +$event : null)">
                 <option [value]="null">Todos</option>
@@ -17,6 +21,7 @@
         <div class="filtro-grupo">
             <label class="filtro-label">Estado</label>
             <select class="filtro-select"
+                    data-testid="filtro-estado"
                     [ngModel]="filtroEstadoId()"
                     (ngModelChange)="filtroEstadoId.set($event ? +$event : null)">
                 <option [value]="null">Todos</option>
@@ -67,7 +72,7 @@
         mensaje="No se encontraron notificaciones con los filtros seleccionados." />
 } @else {
     <div class="tabla-contenedor">
-        <table class="tabla-datos">
+        <table class="tabla-datos" data-testid="notificaciones-tabla">
             <thead>
                 <tr>
                     <th>No.</th>
@@ -94,6 +99,9 @@
                             <span class="pill-estado" [style.background-color]="colorEstado(n.estado)">
                                 {{ n.estado }}
                             </span>
+                            @if (esPendiente(n.estado)) {
+                                <span class="badge-oj" data-testid="badge-oj" title="Notificacion OJ pendiente">OJ</span>
+                            }
                         </td>
                         <td>{{ n.numeroResolucion ?? '--' }}</td>
                         <td>
@@ -111,4 +119,12 @@
             </tbody>
         </table>
     </div>
+}
+
+@if (mostrarModal()) {
+    <app-notificacion-modal
+        [expedientes]="expedientes()"
+        [juzgados]="juzgados()"
+        (cerrar)="cerrarModal()"
+        (alGuardar)="alGuardar()" />
 }

@@ -110,4 +110,20 @@ public class ReportesController : ControllerBase
         var resultado = await _service.EventosAgendaMesAsync(anio, mes, tipoEvento, estadoId, usuarioId);
         return Ok(ApiResponse<ReporteRespuesta<EventosAgendaMesResumen, EventosAgendaMesDetalle>>.Correcto(resultado));
     }
+
+    [HttpGet("clientes-por-tipo")]
+    public async Task<ActionResult<ApiResponse<ReporteRespuesta<ClientesPorTipoResumen, ClientesPorTipoDetalle>>>> ClientesPorTipo(
+        [FromQuery] string? tipoCliente, [FromQuery] bool? activo)
+    {
+        var resultado = await _service.ClientesPorTipoAsync(tipoCliente, activo);
+        return Ok(ApiResponse<ReporteRespuesta<ClientesPorTipoResumen, ClientesPorTipoDetalle>>.Correcto(resultado));
+    }
+
+    [HttpGet("carga-por-abogado")]
+    public async Task<ActionResult<ApiResponse<ReporteRespuesta<CargaPorAbogadoResumen, CargaPorAbogadoDetalle>>>> CargaPorAbogado(
+        [FromQuery] int? usuarioId, [FromQuery] int? ramaId, [FromQuery] int? estadoId)
+    {
+        var resultado = await _service.CargaPorAbogadoAsync(usuarioId, ramaId, estadoId);
+        return Ok(ApiResponse<ReporteRespuesta<CargaPorAbogadoResumen, CargaPorAbogadoDetalle>>.Correcto(resultado));
+    }
 }

@@ -263,10 +263,13 @@ Lista todos los catálogos maestros en un solo request (evita múltiples round-t
 
 | Método | Endpoint | SP | Descripción |
 |---|---|---|---|
-| GET | `/api/notificaciones` | — | Lista con filtros: Expediente_ID, Estado_ID, Tipo_ID |
+| GET | `/api/notificaciones` | `SP_Notificacion_Listar` | Lista con filtros: Expediente_ID, Estado_ID, Tipo_ID, Juzgado_ID, fechas |
+| GET | `/api/notificaciones/{id}` | `SP_Notificacion_ObtenerPorID` | Detalle |
 | POST | `/api/notificaciones` | `SP_NotificacionOJ_Insertar` | Registrar notificación |
+| PUT | `/api/notificaciones/{id}` | `SP_NotificacionOJ_Actualizar` | Editar notificación |
 | PUT | `/api/notificaciones/{id}/atender` | `SP_NotificacionOJ_Atender` | Marcar como atendida |
 | POST | `/api/notificaciones/verificar-duplicado` | `SP_NotificacionOJ_VerificarDuplicado` | Chequear duplicados |
+| POST | `/api/notificaciones/{id}/pdf` | `SP_NotificacionOJ_AdjuntarPDF` | Adjuntar archivo |
 
 ### 6.7 Eventos / Agenda (`EventosController`)
 

@@ -11,13 +11,13 @@
     <!-- Grid de categorías estilo Mantenimiento -->
     <section class="rep-cat-panels" data-testid="reportes-categorias" aria-label="Tipos de reporte">
         @for (r of reportes; track r.key) {
-            <article class="rep-cat-panel" [style.--cat]="r.color" (click)="seleccionarReporte(r.key)" tabindex="0"
-                (keydown.enter)="seleccionarReporte(r.key)">
+            <article class="rep-cat-panel" [attr.data-testid]="'reporte-' + r.key" [style.--cat]="r.color"
+                (click)="seleccionarReporte(r.key)" tabindex="0" (keydown.enter)="seleccionarReporte(r.key)">
                 <div class="rep-cat-icon" [style.background]="r.color + '14'" [style.color]="r.color">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path [attr.d]="r.icono" />
-                        @if (r.key === 'usuarios') {
+                        @if (r.key === 'usuarios' || r.key === 'clientes') {
                             <circle cx="9" cy="7" r="4" />
                             <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
@@ -48,19 +48,11 @@
                 <div class="rep-cat-body">
                     <div class="rep-cat-titulos">
                         <h3 class="rep-cat-titulo">{{ r.titulo }}</h3>
-                        @if (r.disponibles > 0) {
-                            <span class="rep-chip">{{ r.disponibles }} disponibles</span>
-                        } @else {
-                            <span class="rep-chip rep-chip-prox">Próximamente</span>
-                        }
+                        <span class="rep-chip">{{ r.disponibles }} disponibles</span>
                     </div>
                     <p class="rep-cat-texto">{{ r.descripcion }}</p>
                     <span class="rep-cat-ir">
-                        @if (r.disponibles > 0) {
-                            Ver reporte
-                        } @else {
-                            En desarrollo
-                        }
+                        Ver reporte
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <polyline points="9 18 15 12 9 6" />
@@ -72,7 +64,7 @@
     </section>
 } @else {
     <!-- Botón volver -->
-    <button class="rep-back-btn" (click)="volver()">
+    <button class="rep-back-btn" (click)="volver()" data-testid="btn-volver-reportes">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polyline points="15 18 9 12 15 6" />
@@ -84,7 +76,25 @@
     @if (reporteActivo() === 'usuarios') {
         <app-reportes-usuarios-page />
     }
+    @if (reporteActivo() === 'clientes') {
+        <app-reportes-clientes-page />
+    }
     @if (reporteActivo() === 'expedientes') {
-        <app-reportes-expedientes-rama-page />
+        <app-reportes-expedientes-page />
+    }
+    @if (reporteActivo() === 'agenda') {
+        <app-reportes-agenda-page />
+    }
+    @if (reporteActivo() === 'tramites') {
+        <app-reportes-tramites-page />
+    }
+    @if (reporteActivo() === 'notificaciones') {
+        <app-reportes-notificaciones-page />
+    }
+    @if (reporteActivo() === 'diligencias') {
+        <app-reportes-diligencias-page />
+    }
+    @if (reporteActivo() === 'rendimiento') {
+        <app-reportes-rendimiento-page />
     }
 }

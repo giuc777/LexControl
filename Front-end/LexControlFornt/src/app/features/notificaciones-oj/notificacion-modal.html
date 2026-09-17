@@ -1,8 +1,8 @@
 <div class="modal-overlay" (click)="onCerrar()">
     <div class="modal-contenido modal-amplio" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2>Nueva Notificacion OJ</h2>
-            <button class="btn-cerrar" (click)="onCerrar()">&times;</button>
+            <h2>{{ esEdicion() ? 'Editar Notificacion OJ' : 'Nueva Notificacion OJ' }}</h2>
+            <button class="btn-cerrar" (click)="onCerrar()" data-testid="btn-cerrar-modal">&times;</button>
         </div>
 
         <div class="modal-body">
@@ -12,6 +12,8 @@
                     <div class="form-grupo">
                         <label>Expediente <span class="obligatorio">*</span></label>
                         <select class="form-control"
+                                data-testid="select-expediente"
+                                [disabled]="esEdicion()"
                                 [ngModel]="expedienteId()"
                                 (ngModelChange)="expedienteId.set(+$event)">
                             <option [value]="0">Seleccione expediente</option>
@@ -23,6 +25,7 @@
                     <div class="form-grupo">
                         <label>Juzgado <span class="obligatorio">*</span></label>
                         <select class="form-control"
+                                data-testid="select-juzgado"
                                 [ngModel]="juzgadoId()"
                                 (ngModelChange)="juzgadoId.set(+$event)">
                             <option [value]="0">Seleccione juzgado</option>
@@ -34,6 +37,7 @@
                     <div class="form-grupo">
                         <label>Tipo <span class="obligatorio">*</span></label>
                         <select class="form-control"
+                                data-testid="select-tipo"
                                 [ngModel]="tipoId()"
                                 (ngModelChange)="tipoId.set(+$event)">
                             <option [value]="0">Seleccione tipo</option>
@@ -45,12 +49,14 @@
                     <div class="form-grupo">
                         <label>Fecha Recepcion <span class="obligatorio">*</span></label>
                         <input type="date" class="form-control"
+                               data-testid="input-fecha"
                                [ngModel]="fechaRecepcion()"
                                (ngModelChange)="fechaRecepcion.set($event)" />
                     </div>
                     <div class="form-grupo">
                         <label>Estado <span class="obligatorio">*</span></label>
                         <select class="form-control"
+                                data-testid="select-estado"
                                 [ngModel]="estadoId()"
                                 (ngModelChange)="estadoId.set(+$event)">
                             @for (e of estadosNotificacion(); track e.id) {
@@ -61,6 +67,7 @@
                     <div class="form-grupo">
                         <label>No. Expediente OJ</label>
                         <input type="text" class="form-control"
+                               data-testid="input-no-expediente-oj"
                                [ngModel]="numeroExpedienteOj()"
                                (ngModelChange)="numeroExpedienteOj.set($event)"
                                placeholder="Ej: OJ-2026-001" />
@@ -68,6 +75,7 @@
                     <div class="form-grupo">
                         <label>No. Resolucion</label>
                         <input type="text" class="form-control"
+                               data-testid="input-no-resolucion"
                                [ngModel]="numeroResolucion()"
                                (ngModelChange)="numeroResolucion.set($event)"
                                placeholder="Ej: RES-2026-001" />
@@ -117,13 +125,58 @@
                               (ngModelChange)="notas.set($event)"
                               placeholder="Notas internas..."></textarea>
                 </div>
+                <div class="form-grupo form-grupo-full">
+                    <label>Documento adjunto (PDF, Word, imagen o TXT)</label>
+                    <input type="file" class="form-control"
+                           data-testid="input-pdf"
+                           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
+                           (change)="onArchivoPdf($event)" />
+                    @if (nombreArchivoPdf()) {
+                        <div class="archivo-seleccionado">
+                            <span>{{ nombreArchivoPdf() }}</span>
+                            <button type="button" class="btn-link" (click)="quitarPdf()">Quitar</button>
+                        </div>
+                    }
+                </div>
+            </fieldset>
+
+            <fieldset class="fieldset-form">
+                <legend>Duplicados</legend>
+                <div class="duplicados-acciones">
+                    <button type="button" class="btn-secondary"
+                            data-testid="btn-verificar-duplicado"
+                            [disabled]="verificando()"
+                            (click)="verificarDuplicados()">
+                        @if (verificando()) { Verificando... } @else { Verificar duplicado }
+                    </button>
+                </div>
+                @if (duplicados().length > 0) {
+                    <div class="duplicados-lista" data-testid="lista-duplicados">
+                        <p class="duplicados-aviso">
+                            Se encontraron notificaciones similares no atendidas:
+                        </p>
+                        <ul>
+                            @for (d of duplicados(); track d.id) {
+                                <li>
+                                    <strong>#{{ d.id }}</strong> — {{ d.fechaRecepcion }}
+                                    @if (d.resumen) { — {{ d.resumen }} }
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
             </fieldset>
         </div>
 
         <div class="modal-footer">
             <button class="btn-secondary" (click)="onCerrar()" [disabled]="guardando()">Cancelar</button>
-            <button class="btn-primary" (click)="guardar()" [disabled]="guardando()">
-                @if (guardando()) { Guardando... } @else { Crear Notificacion }
+            <button class="btn-primary"
+                    data-testid="btn-guardar-notificacion"
+                    (click)="guardar()"
+                    [disabled]="guardando()">
+                @if (guardando()) { Guardando... }
+                @else if (esEdicion()) { Guardar cambios }
+                @else { Crear Notificacion }
             </button>
         </div>
     </div>

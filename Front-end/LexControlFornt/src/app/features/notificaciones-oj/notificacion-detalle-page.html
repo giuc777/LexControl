@@ -14,7 +14,8 @@
         <div class="detalle-header">
             <div class="detalle-titulo-fila">
                 <h1 class="page-title">Notificacion #{{ notificacion()!.id }}</h1>
-                <span class="pill-estado-lg" [style.background-color]="colorEstado(notificacion()!.estado)">
+                <span class="pill-estado-lg" data-testid="notificacion-estado"
+                      [style.background-color]="colorEstado(notificacion()!.estado)">
                     {{ notificacion()!.estado }}
                 </span>
             </div>
@@ -25,7 +26,7 @@
             <div class="detalle-grid">
                 <div class="detalle-campo">
                     <label class="campo-label">Expediente</label>
-                    <p class="campo-valor">{{ notificacion()!.noExpediente ?? '--' }}</p>
+                    <p class="campo-valor" data-testid="notificacion-expediente">{{ notificacion()!.noExpediente ?? '--' }}</p>
                 </div>
                 <div class="detalle-campo">
                     <label class="campo-label">Cliente</label>
@@ -37,7 +38,7 @@
                 </div>
                 <div class="detalle-campo">
                     <label class="campo-label">Tipo</label>
-                    <p class="campo-valor">{{ notificacion()!.tipo }}</p>
+                    <p class="campo-valor" data-testid="notificacion-tipo">{{ notificacion()!.tipo }}</p>
                 </div>
                 <div class="detalle-campo">
                     <label class="campo-label">Fecha Recepcion</label>
@@ -94,14 +95,28 @@
         }
 
         <div class="detalle-seccion">
+            <h3 class="seccion-titulo">Documento Adjunto</h3>
+            @if (notificacion()!.pdfRuta) {
+                <div class="acciones-fila">
+                    <button class="btn-secondary" data-testid="btn-ver-pdf" (click)="descargarPdf()">
+                        Ver PDF adjunto
+                    </button>
+                </div>
+            } @else {
+                <p class="campo-valor">Sin documento adjunto. Use "Editar" para adjuntar uno.</p>
+            }
+        </div>
+
+        <div class="detalle-seccion">
             <h3 class="seccion-titulo">Acciones</h3>
             <div class="acciones-fila">
                 @if (!esAtendida()) {
-                    <button class="btn-primary" (click)="toggleFormAtender()">
+                    <button class="btn-primary" data-testid="btn-atender" (click)="toggleFormAtender()">
                         Marcar como Atendida
                     </button>
                 }
-                <button class="btn-secondary" (click)="irAVolver()">Volver</button>
+                <button class="btn-secondary" data-testid="btn-editar-notificacion" (click)="abrirEditar()">Editar</button>
+                <button class="btn-secondary" data-testid="btn-volver" (click)="irAVolver()">Volver</button>
             </div>
 
             @if (mostrarFormAtender()) {
@@ -127,3 +142,12 @@
             mensaje="La notificacion solicitada no existe o fue eliminada." />
     }
 </div>
+
+@if (mostrarModal() && notificacion()) {
+    <app-notificacion-modal
+        [expedientes]="expedientes()"
+        [juzgados]="juzgados()"
+        [notificacion]="notificacion()"
+        (cerrar)="cerrarModal()"
+        (alGuardar)="alGuardar()" />
+}

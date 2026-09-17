@@ -299,3 +299,52 @@ public class EventosAgendaMesDetalle
     public string? FechaVencimiento { get; set; }
     public int? DiasRestantes { get; set; }
 }
+
+// ============================================================
+// 12. Clientes por Tipo
+// ============================================================
+
+public class ClientesPorTipoResumen
+{
+    public string Tipo { get; set; } = string.Empty;
+    public int Total { get; set; }
+    public int Activos { get; set; }
+    public int Inactivos { get; set; }
+    public decimal Porcentaje { get; set; }
+}
+
+public class ClientesPorTipoDetalle
+{
+    public string? Cliente { get; set; }
+    public string? Tipo { get; set; }
+    public bool Activo { get; set; }
+    public string? FechaCreacion { get; set; }
+    public int Expedientes { get; set; }
+}
+
+// ============================================================
+// 13. Carga por Abogado
+// ============================================================
+
+public class CargaPorAbogadoResumen
+{
+    public string Abogado { get; set; } = string.Empty;
+    public string? Rol { get; set; }
+    public int Total { get; set; }
+    public int Activos { get; set; }
+    public int EnEspera { get; set; }
+    public int Urgentes { get; set; }
+    public int Cerrados { get; set; }
+}
+
+public class CargaPorAbogadoDetalle
+{
+    public string? NoExpediente { get; set; }
+    public string? Cliente { get; set; }
+    public string? Rama { get; set; }
+    public string? Estado { get; set; }
+    public string? EstadoColor { get; set; }
+    public string? FechaIngreso { get; set; }
+    public string? Abogado { get; set; }
+    public string? Rol { get; set; }
+}

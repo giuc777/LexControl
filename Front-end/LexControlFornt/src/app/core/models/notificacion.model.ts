@@ -76,3 +76,18 @@ export interface NotificacionActualizar {
 export interface NotificacionAtender {
     notas: string | null;
 }
+
+/* Duplicado detectado por SP_NotificacionOJ_VerificarDuplicado. */
+export interface NotificacionDuplicado {
+    id: number;
+    resumen: string | null;
+    fechaRecepcion: string;
+}
+
+/* Respuesta del endpoint POST /api/notificaciones/{id}/pdf. */
+export interface NotificacionPdfResponse {
+    pdfRuta: string;
+    nombreArchivo: string;
+    tipoArchivo: string;
+    tamano: number;
+}

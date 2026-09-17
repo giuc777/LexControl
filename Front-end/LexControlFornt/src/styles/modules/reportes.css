@@ -552,3 +552,14 @@
         width: 18px;
     }
 }
+
+/* Pills de estado dentro de las tablas de reportes */
+.pill.ok {
+    background: #e5f4eb;
+    color: #1e7a3c;
+}
+
+.pill.no {
+    background: #fdeaea;
+    color: #b03030;
+}

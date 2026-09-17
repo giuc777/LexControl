@@ -1,0 +1,146 @@
+<div class="page-header">
+    <div>
+        <span class="page-overline">Reportes</span>
+        <h1 class="page-title">Diligencias y Alertas</h1>
+        <p class="page-subtitle">Actividad de diligencias y seguimiento de alertas pendientes</p>
+    </div>
+    <div class="page-actions">
+        <button class="rep-export-btn" (click)="exportarPDF()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Exportar PDF
+        </button>
+    </div>
+</div>
+
+<section class="rep-stats" data-testid="reporte-diligencias">
+    <article class="rep-stat">
+        <span class="rep-stat-label">Total Diligencias</span>
+        <span class="rep-stat-value">{{ totalDiligencias() }}</span>
+        <span class="rep-stat-badge info">Registradas</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Completadas</span>
+        <span class="rep-stat-value">{{ completadas() }}</span>
+        <span class="rep-stat-badge ok">Finalizadas</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Pendientes</span>
+        <span class="rep-stat-value">{{ pendientes() }}</span>
+        <span class="rep-stat-badge warn">En curso</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Alertas</span>
+        <span class="rep-stat-value">{{ totalAlertas() }}</span>
+        <span class="rep-stat-badge danger">Registradas</span>
+    </article>
+</section>
+
+<section class="rep-grid">
+    <article class="rep-panel rep-c6">
+        <div class="aj-card-head"><h2 class="aj-card-title">Diligencias por Tipo</h2></div>
+        <div class="rep-progress-list">
+            @for (d of resumenDiligencias(); track d.tipo) {
+                <div class="rep-progress-row">
+                    <div class="rep-progress-head">
+                        <span class="rep-progress-nombre">
+                            <span class="rep-dot" [style.background]="d.color || '#8b9aa0'"></span>{{ d.tipo }}
+                        </span>
+                        <span class="rep-progress-val">{{ d.cantidad }} <small>({{ d.completadas }} comp. · {{ d.pendientes }} pend.)</small></span>
+                    </div>
+                    <div class="rep-progress-track">
+                        <div class="rep-progress-fill" [style.width.%]="(d.cantidad / maxDiligencias()) * 100"
+                            [style.background]="d.color || '#8b9aa0'"></div>
+                    </div>
+                </div>
+            }
+            @if (resumenDiligencias().length === 0) { <div class="rep-empty">Sin datos disponibles</div> }
+        </div>
+    </article>
+
+    <article class="rep-panel rep-c6">
+        <div class="aj-card-head"><h2 class="aj-card-title">Alertas por Tipo</h2></div>
+        <div class="rep-progress-list">
+            @for (a of resumenAlertas(); track a.tipoAlerta) {
+                <div class="rep-progress-row">
+                    <div class="rep-progress-head">
+                        <span class="rep-progress-nombre">{{ a.tipoAlerta }}</span>
+                        <span class="rep-progress-val">{{ a.cantidad }} <small>({{ a.noLeidas }} no leídas)</small></span>
+                    </div>
+                    <div class="rep-progress-track">
+                        <div class="rep-progress-fill" [style.width.%]="totalAlertas() ? (a.cantidad / totalAlertas()) * 100 : 0"
+                            style="background: #e74c3c;"></div>
+                    </div>
+                </div>
+            }
+            @if (resumenAlertas().length === 0) { <div class="rep-empty">Sin datos disponibles</div> }
+        </div>
+    </article>
+</section>
+
+<section class="aj-card" style="margin-top: 22px;">
+    <div class="aj-card-head">
+        <h2 class="aj-card-title">Detalle de Diligencias</h2>
+        <span class="rep-chip">{{ detalleDiligencias().length }} registros</span>
+    </div>
+    <div style="overflow-x: auto;">
+        <table class="data-table rep-usuarios-table">
+            <thead>
+                <tr><th>Título</th><th>No. Expediente</th><th>Vinculado</th><th>Tipo</th><th>Estado</th>
+                    <th>Fecha</th><th>Ubicación</th><th>Encargado</th></tr>
+            </thead>
+            <tbody>
+                @for (d of detalleDiligenciasTabla(); track $index) {
+                    <tr>
+                        <td>{{ d.titulo }}</td>
+                        <td class="cell-id">{{ d.noExpediente ?? '—' }}</td>
+                        <td>{{ d.vinculado ?? '—' }}</td>
+                        <td>{{ d.tipo }}</td>
+                        <td>{{ d.estado }}</td>
+                        <td class="rep-fecha">{{ d.fechaFormato }}</td>
+                        <td>{{ d.ubicacion ?? '—' }}</td>
+                        <td>{{ d.encargado ?? '—' }}</td>
+                    </tr>
+                }
+                @if (detalleDiligenciasTabla().length === 0) {
+                    <tr><td colspan="8" class="empty-state">No hay diligencias registradas</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="aj-card" style="margin-top: 22px;">
+    <div class="aj-card-head">
+        <h2 class="aj-card-title">Detalle de Alertas</h2>
+        <span class="rep-chip">{{ detalleAlertas().length }} registros</span>
+    </div>
+    <div style="overflow-x: auto;">
+        <table class="data-table rep-usuarios-table">
+            <thead>
+                <tr><th>Título</th><th>Tipo</th><th>Descripción</th><th>Fecha</th><th>Leída</th><th>No. Expediente</th></tr>
+            </thead>
+            <tbody>
+                @for (a of detalleAlertasTabla(); track $index) {
+                    <tr>
+                        <td>{{ a.titulo }}</td>
+                        <td>{{ a.tipoAlerta }}</td>
+                        <td>{{ a.descripcion }}</td>
+                        <td class="rep-fecha">{{ a.fechaFormato }}</td>
+                        <td>
+                            @if (a.leida) { <span class="pill ok">Sí</span> } @else { <span class="pill no">No</span> }
+                        </td>
+                        <td class="cell-id">{{ a.noExpediente ?? '—' }}</td>
+                    </tr>
+                }
+                @if (detalleAlertasTabla().length === 0) {
+                    <tr><td colspan="6" class="empty-state">No hay alertas registradas</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

@@ -1,0 +1,108 @@
+<div class="page-header">
+    <div>
+        <span class="page-overline">Reportes</span>
+        <h1 class="page-title">Rendimiento del Bufete</h1>
+        <p class="page-subtitle">Carga de trabajo por responsable: expedientes activos, en espera y cerrados</p>
+    </div>
+    <div class="page-actions">
+        <button class="rep-export-btn" (click)="exportarPDF()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Exportar PDF
+        </button>
+    </div>
+</div>
+
+<section class="rep-stats" data-testid="reporte-rendimiento">
+    <article class="rep-stat">
+        <span class="rep-stat-label">Expedientes</span>
+        <span class="rep-stat-value">{{ totalExpedientes() }}</span>
+        <span class="rep-stat-badge info">Asignados</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Activos</span>
+        <span class="rep-stat-value">{{ activos() }}</span>
+        <span class="rep-stat-badge ok">En proceso</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Cerrados / Archivados</span>
+        <span class="rep-stat-value">{{ cerrados() }}</span>
+        <span class="rep-stat-badge info">Finalizados</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Responsables</span>
+        <span class="rep-stat-value">{{ resumen().length }}</span>
+        <span class="rep-stat-badge warn">Con carga</span>
+    </article>
+</section>
+
+<section class="rep-grid">
+    <article class="rep-panel rep-c12">
+        <div class="aj-card-head"><h2 class="aj-card-title">Carga por Responsable</h2></div>
+        <div class="rep-progress-list">
+            @for (r of resumen(); track r.abogado) {
+                <div class="rep-progress-row">
+                    <div class="rep-progress-head">
+                        <span class="rep-progress-nombre">
+                            <span class="rep-dot" [style.background]="colorRol(r.rol)"></span>
+                            {{ r.abogado }} <small>· {{ r.rol }}</small>
+                        </span>
+                        <span class="rep-progress-val">
+                            {{ r.total }}
+                            <small>({{ r.activos }} act. · {{ r.enEspera }} esp. · {{ r.urgentes }} urg. · {{ r.cerrados }} cerr.)</small>
+                        </span>
+                    </div>
+                    <div class="rep-progress-track">
+                        <div class="rep-progress-fill" [style.width.%]="(r.total / maxTotal()) * 100"
+                            [style.background]="colorRol(r.rol)"></div>
+                    </div>
+                </div>
+            }
+            @if (resumen().length === 0) { <div class="rep-empty">Sin datos disponibles</div> }
+        </div>
+    </article>
+</section>
+
+<section class="aj-card" style="margin-top: 22px;">
+    <div class="aj-card-head">
+        <h2 class="aj-card-title">Detalle de Expedientes por Responsable</h2>
+        <span class="rep-chip">{{ detalle().length }} registros</span>
+    </div>
+    <div style="overflow-x: auto;">
+        <table class="data-table rep-usuarios-table">
+            <thead>
+                <tr><th>No. Expediente</th><th>Cliente</th><th>Rama</th><th>Estado</th>
+                    <th>Responsable</th><th>Rol</th><th>Ingreso</th></tr>
+            </thead>
+            <tbody>
+                @for (d of detalleTabla(); track $index) {
+                    <tr>
+                        <td class="cell-id">{{ d.noExpediente }}</td>
+                        <td>{{ d.cliente }}</td>
+                        <td>{{ d.rama }}</td>
+                        <td>
+                            <span class="pill" [style.background]="d.colorEstado + '18'" [style.color]="d.colorEstado"
+                                [style.border]="'1px solid ' + d.colorEstado + '40'">{{ d.estado }}</span>
+                        </td>
+                        <td>
+                            <div class="rep-usuario-cell">
+                                <span class="rep-usuario-avatar" [style.background]="colorRol(d.rol) + '18'"
+                                    [style.color]="colorRol(d.rol)">{{ inicialesDe(d.abogado) }}</span>
+                                <span>{{ d.abogado }}</span>
+                            </div>
+                        </td>
+                        <td>{{ d.rol }}</td>
+                        <td class="rep-fecha">{{ d.fechaIngresoFormato }}</td>
+                    </tr>
+                }
+                @if (detalleTabla().length === 0) {
+                    <tr><td colspan="7" class="empty-state">No hay expedientes asignados</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

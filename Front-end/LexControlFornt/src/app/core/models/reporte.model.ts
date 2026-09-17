@@ -241,3 +241,42 @@ export interface EventosAgendaMesDetalle {
     fechaVencimiento: string | null;
     diasRestantes: number | null;
 }
+
+// 12. Clientes por Tipo
+export interface ClientesPorTipoResumen {
+    tipo: string;
+    total: number;
+    activos: number;
+    inactivos: number;
+    porcentaje: number;
+}
+
+export interface ClientesPorTipoDetalle {
+    cliente: string | null;
+    tipo: string | null;
+    activo: boolean;
+    fechaCreacion: string | null;
+    expedientes: number;
+}
+
+// 13. Carga por Abogado
+export interface CargaPorAbogadoResumen {
+    abogado: string;
+    rol: string | null;
+    total: number;
+    activos: number;
+    enEspera: number;
+    urgentes: number;
+    cerrados: number;
+}
+
+export interface CargaPorAbogadoDetalle {
+    noExpediente: string | null;
+    cliente: string | null;
+    rama: string | null;
+    estado: string | null;
+    estadoColor: string | null;
+    fechaIngreso: string | null;
+    abogado: string | null;
+    rol: string | null;
+}

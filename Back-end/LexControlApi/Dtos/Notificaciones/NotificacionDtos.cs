@@ -191,3 +191,37 @@ public class NotificacionAtenderDto
     [MaxLength(500)]
     public string? Notas { get; set; }
 }
+
+/// <summary>Datos de entrada para verificar duplicados de una notificación.</summary>
+public class DuplicadoVerificarDto
+{
+    [Required(ErrorMessage = "El expediente es obligatorio.")]
+    public int ExpedienteId { get; set; }
+    [MaxLength(100)]
+    public string? NumeroResolucion { get; set; }
+    [MaxLength(100)]
+    public string? NumeroExpedienteOJ { get; set; }
+}
+
+/// <summary>Fila cruda devuelta por SP_NotificacionOJ_VerificarDuplicado.</summary>
+public class DuplicadoFila
+{
+    public int ID { get; set; }
+    public string? Resumen { get; set; }
+    public DateTime FechaRecepcion { get; set; }
+}
+
+/// <summary>Duplicado expuesto al frontend.</summary>
+public class DuplicadoDto
+{
+    public int Id { get; set; }
+    public string? Resumen { get; set; }
+    public string FechaRecepcion { get; set; } = string.Empty;
+
+    public static DuplicadoDto Desde(DuplicadoFila f) => new()
+    {
+        Id = f.ID,
+        Resumen = f.Resumen,
+        FechaRecepcion = f.FechaRecepcion.ToString("yyyy-MM-dd")
+    };
+}

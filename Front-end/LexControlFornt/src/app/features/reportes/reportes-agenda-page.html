@@ -1,0 +1,157 @@
+<div class="page-header">
+    <div>
+        <span class="page-overline">Reportes</span>
+        <h1 class="page-title">Agenda y Audiencias</h1>
+        <p class="page-subtitle">Actividad de audiencias, eventos del mes y plazos próximos a vencer</p>
+    </div>
+    <div class="page-actions">
+        <button class="rep-export-btn" (click)="exportarPDF()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Exportar PDF
+        </button>
+    </div>
+</div>
+
+<section class="rep-stats" data-testid="reporte-agenda">
+    <article class="rep-stat">
+        <span class="rep-stat-label">Total Audiencias</span>
+        <span class="rep-stat-value">{{ totalAudiencias() }}</span>
+        <span class="rep-stat-badge info">Registradas</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Realizadas</span>
+        <span class="rep-stat-value">{{ realizadas() }}</span>
+        <span class="rep-stat-badge ok">Completadas</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Programadas</span>
+        <span class="rep-stat-value">{{ programadas() }}</span>
+        <span class="rep-stat-badge warn">Por realizar</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Plazos por vencer (30d)</span>
+        <span class="rep-stat-value">{{ plazosLista().length }}</span>
+        <span class="rep-stat-badge danger">Atención</span>
+    </article>
+</section>
+
+<section class="rep-grid">
+    <article class="rep-panel rep-c6">
+        <div class="aj-card-head"><h2 class="aj-card-title">Audiencias por Estado</h2></div>
+        <div class="rep-progress-list">
+            @for (e of resumenEstados(); track e.estado) {
+                <div class="rep-progress-row">
+                    <div class="rep-progress-head">
+                        <span class="rep-progress-nombre">
+                            <span class="rep-dot" [style.background]="e.color || '#8b9aa0'"></span>{{ e.estado }}
+                        </span>
+                        <span class="rep-progress-val">{{ e.cantidad }} <small>({{ e.porcentaje }}%)</small></span>
+                    </div>
+                    <div class="rep-progress-track">
+                        <div class="rep-progress-fill" [style.width.%]="e.porcentaje"
+                            [style.background]="e.color || '#8b9aa0'"></div>
+                    </div>
+                </div>
+            }
+            @if (resumenEstados().length === 0) { <div class="rep-empty">Sin datos disponibles</div> }
+        </div>
+    </article>
+
+    <article class="rep-panel rep-c6">
+        <div class="aj-card-head"><h2 class="aj-card-title">Resultados de Auditoría</h2></div>
+        <div class="rep-bars">
+            @for (r of resumenResultados(); track r.resultado) {
+                <div class="rep-bar-col">
+                    <span class="rep-bar-val">{{ r.cantidad }}</span>
+                    <div class="rep-bar-track">
+                        <div class="rep-bar-fill" [style.height.%]="(r.cantidad / maxResultado()) * 100"
+                            [style.background]="r.color || '#358292'"></div>
+                    </div>
+                    <span class="rep-bar-label">{{ r.resultado }}</span>
+                </div>
+            }
+            @if (resumenResultados().length === 0) { <div class="rep-empty">Sin datos disponibles</div> }
+        </div>
+    </article>
+
+    <article class="rep-panel rep-c6">
+        <div class="aj-card-head"><h2 class="aj-card-title">Eventos del Mes</h2></div>
+        <div class="rep-progress-list">
+            @for (ev of resumenEventos(); track ev.tipoEvento) {
+                <div class="rep-progress-row">
+                    <div class="rep-progress-head">
+                        <span class="rep-progress-nombre">{{ ev.tipoEvento }}</span>
+                        <span class="rep-progress-val">{{ ev.cantidad }} <small>({{ ev.pendientes }} pend.)</small></span>
+                    </div>
+                    <div class="rep-progress-track">
+                        <div class="rep-progress-fill" [style.width.%]="totalAudiencias() ? (ev.cantidad / (resumenEventos()[0].cantidad || 1)) * 100 : 0"
+                            style="background: #8e44ad;"></div>
+                    </div>
+                </div>
+            }
+            @if (resumenEventos().length === 0) { <div class="rep-empty">Sin datos disponibles</div> }
+        </div>
+    </article>
+
+    <article class="rep-panel rep-c6">
+        <div class="aj-card-head"><h2 class="aj-card-title">Plazos Próximos a Vencer</h2></div>
+        <div style="overflow-x: auto;">
+            <table class="data-table rep-usuarios-table">
+                <thead><tr><th>Título</th><th>Tipo</th><th>Vence</th><th>Días</th></tr></thead>
+                <tbody>
+                    @for (p of plazosLista().slice(0, 8); track p.id) {
+                        <tr>
+                            <td>{{ p.titulo }}</td>
+                            <td>{{ p.tipoPlazo }}</td>
+                            <td class="rep-fecha">{{ p.fechaVencimiento }}</td>
+                            <td>
+                                <span class="pill" [style.background]="(p.diasRestantes ?? 0) <= 3 ? '#e74c3c18' : '#f39c1218'"
+                                    [style.color]="(p.diasRestantes ?? 0) <= 3 ? '#e74c3c' : '#f39c12'">{{ p.diasRestantes }} d</span>
+                            </td>
+                        </tr>
+                    }
+                    @if (plazosLista().length === 0) {
+                        <tr><td colspan="4" class="empty-state">Sin plazos próximos</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+
+<section class="aj-card" style="margin-top: 22px;">
+    <div class="aj-card-head">
+        <h2 class="aj-card-title">Detalle de Audiencias</h2>
+        <span class="rep-chip">{{ detalle().length }} registros</span>
+    </div>
+    <div style="overflow-x: auto;">
+        <table class="data-table rep-usuarios-table">
+            <thead>
+                <tr><th>No. Expediente</th><th>Cliente</th><th>Tipo</th><th>Estado</th><th>Resultado</th>
+                    <th>Fecha</th><th>Juzgado</th><th>Sala</th></tr>
+            </thead>
+            <tbody>
+                @for (a of detalleTabla(); track $index) {
+                    <tr>
+                        <td class="cell-id">{{ a.noExpediente }}</td>
+                        <td>{{ a.cliente }}</td>
+                        <td>{{ a.tipo }}</td>
+                        <td>{{ a.estado }}</td>
+                        <td>{{ a.resultado ?? '—' }}</td>
+                        <td class="rep-fecha">{{ a.fechaFormato }}</td>
+                        <td>{{ a.juzgado }}</td>
+                        <td>{{ a.sala ?? '—' }}</td>
+                    </tr>
+                }
+                @if (detalleTabla().length === 0) {
+                    <tr><td colspan="8" class="empty-state">No hay audiencias registradas</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

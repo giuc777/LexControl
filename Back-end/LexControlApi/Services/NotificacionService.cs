@@ -12,6 +12,8 @@ public interface INotificacionService
     Task<int> CrearAsync(NotificacionCrearDto dto);
     Task ActualizarAsync(int id, NotificacionActualizarDto dto);
     Task AtenderAsync(int id, NotificacionAtenderDto dto);
+    Task<List<DuplicadoDto>> VerificarDuplicadoAsync(DuplicadoVerificarDto dto);
+    Task AdjuntarPdfAsync(int id, string ruta);
 }
 
 public class NotificacionService : INotificacionService
@@ -111,5 +113,33 @@ public class NotificacionService : INotificacionService
         await _repositorio.EjecutarRetornoAsync(
             "SP_NotificacionOJ_Atender",
             new { ID = id, Notas = dto.Notas });
+    }
+
+    public async Task<List<DuplicadoDto>> VerificarDuplicadoAsync(DuplicadoVerificarDto dto)
+    {
+        if (dto.ExpedienteId <= 0)
+            throw new ExcepcionNegocio(-2, "El expediente seleccionado no es válido.",
+                StatusCodes.Status400BadRequest);
+
+        var filas = await _repositorio.ConsultarListaAsync<DuplicadoFila>(
+            "SP_NotificacionOJ_VerificarDuplicado",
+            new
+            {
+                Expediente_ID = dto.ExpedienteId,
+                NumeroResolucion = dto.NumeroResolucion,
+                NumeroExpedienteOJ = dto.NumeroExpedienteOJ
+            });
+        return filas.Select(DuplicadoDto.Desde).ToList();
+    }
+
+    public async Task AdjuntarPdfAsync(int id, string ruta)
+    {
+        if (string.IsNullOrWhiteSpace(ruta))
+            throw new ExcepcionNegocio(-2, "La ruta del archivo no es válida.",
+                StatusCodes.Status400BadRequest);
+
+        await _repositorio.EjecutarRetornoAsync(
+            "SP_NotificacionOJ_AdjuntarPDF",
+            new { ID = id, PDF_Ruta = ruta });
     }
 }

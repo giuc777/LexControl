@@ -1,0 +1,95 @@
+<div class="page-header">
+    <div>
+        <span class="page-overline">Reportes</span>
+        <h1 class="page-title">Trámites en Curso</h1>
+        <p class="page-subtitle">Estado de trámites activos, tiempos de respuesta y resolución</p>
+    </div>
+    <div class="page-actions">
+        <button class="rep-export-btn" (click)="exportarPDF()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Exportar PDF
+        </button>
+    </div>
+</div>
+
+<section class="rep-stats" data-testid="reporte-tramites">
+    <article class="rep-stat">
+        <span class="rep-stat-label">Ingresados</span>
+        <span class="rep-stat-value">{{ totalIngresados() }}</span>
+        <span class="rep-stat-badge info">Total</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Resueltos</span>
+        <span class="rep-stat-value">{{ totalResueltos() }}</span>
+        <span class="rep-stat-badge ok">Finalizados</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Pendientes</span>
+        <span class="rep-stat-value">{{ totalPendientes() }}</span>
+        <span class="rep-stat-badge warn">En curso</span>
+    </article>
+</section>
+
+<section class="rep-grid">
+    <article class="rep-panel rep-c12">
+        <div class="aj-card-head"><h2 class="aj-card-title">Trámites por Tipo</h2></div>
+        <div class="rep-progress-list">
+            @for (t of resumen(); track t.tipo) {
+                <div class="rep-progress-row">
+                    <div class="rep-progress-head">
+                        <span class="rep-progress-nombre">
+                            <span class="rep-dot" [style.background]="t.color || '#8b9aa0'"></span>{{ t.tipo }}
+                        </span>
+                        <span class="rep-progress-val">
+                            {{ t.ingresados }} <small>({{ t.resueltos }} resueltos · {{ t.pendientes }} pend.)
+                            @if (t.promedioDiasResolucion != null) { · {{ t.promedioDiasResolucion }} d prom. }</small>
+                        </span>
+                    </div>
+                    <div class="rep-progress-track">
+                        <div class="rep-progress-fill" [style.width.%]="(t.ingresados / maxIngresados()) * 100"
+                            [style.background]="t.color || '#8b9aa0'"></div>
+                    </div>
+                </div>
+            }
+            @if (resumen().length === 0) { <div class="rep-empty">Sin datos disponibles</div> }
+        </div>
+    </article>
+</section>
+
+<section class="aj-card" style="margin-top: 22px;">
+    <div class="aj-card-head">
+        <h2 class="aj-card-title">Detalle de Trámites</h2>
+        <span class="rep-chip">{{ detalle().length }} registros</span>
+    </div>
+    <div style="overflow-x: auto;">
+        <table class="data-table rep-usuarios-table">
+            <thead>
+                <tr><th>No. Expediente</th><th>Cliente</th><th>Tipo</th><th>Institución</th><th>Estado</th>
+                    <th>Ingreso</th><th>Resolución</th><th>Días Gestión</th><th>Oficio</th></tr>
+            </thead>
+            <tbody>
+                @for (t of detalleTabla(); track $index) {
+                    <tr>
+                        <td class="cell-id">{{ t.noExpediente }}</td>
+                        <td>{{ t.cliente }}</td>
+                        <td>{{ t.tipo }}</td>
+                        <td>{{ t.institucion ?? '—' }}</td>
+                        <td>{{ t.estado }}</td>
+                        <td class="rep-fecha">{{ t.fechaIngresoFormato }}</td>
+                        <td class="rep-fecha">{{ t.fechaResolucionFormato }}</td>
+                        <td>{{ t.diasGestion ?? '—' }}</td>
+                        <td>{{ t.oficioReferencia ?? '—' }}</td>
+                    </tr>
+                }
+                @if (detalleTabla().length === 0) {
+                    <tr><td colspan="9" class="empty-state">No hay trámites registrados</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

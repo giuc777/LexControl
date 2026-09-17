@@ -9,7 +9,7 @@
 <ul class="nav-list" data-testid="sidebar">
     @for (item of items(); track item.ruta) {
         <li class="nav-item" routerLinkActive="active">
-            <a [routerLink]="'/' + item.ruta">
+            <a [routerLink]="item.ruta">
                 <svg appIcono [appIcono]="item.icon" class="nav-icon"></svg>
                 <span>{{ item.label }}</span>
             </a>

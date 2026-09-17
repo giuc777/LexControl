@@ -10,6 +10,10 @@ import {
     AlertasPendientesResumen,
     AntiguedadExpedientesDetalle,
     AntiguedadExpedientesResumen,
+    CargaPorAbogadoDetalle,
+    CargaPorAbogadoResumen,
+    ClientesPorTipoDetalle,
+    ClientesPorTipoResumen,
     DiligenciasDetalle,
     DiligenciasResumen,
     EventosAgendaMesDetalle,
@@ -138,5 +142,20 @@ export class ReportesService {
         if (filtros.estadoId != null) params = params.set('estadoId', String(filtros.estadoId));
         if (filtros.usuarioId != null) params = params.set('usuarioId', String(filtros.usuarioId));
         return this.http.get<RespuestaApi<ReporteRespuesta<EventosAgendaMesResumen, EventosAgendaMesDetalle>>>(`${this.base}/eventos-agenda-mes`, { params }).pipe(map(r => r.data));
+    }
+
+    clientesPorTipo(filtros: { tipoCliente?: string | null; activo?: boolean | null } = {}): Observable<ReporteRespuesta<ClientesPorTipoResumen, ClientesPorTipoDetalle>> {
+        let params = new HttpParams();
+        if (filtros.tipoCliente) params = params.set('tipoCliente', filtros.tipoCliente);
+        if (filtros.activo != null) params = params.set('activo', String(filtros.activo));
+        return this.http.get<RespuestaApi<ReporteRespuesta<ClientesPorTipoResumen, ClientesPorTipoDetalle>>>(`${this.base}/clientes-por-tipo`, { params }).pipe(map(r => r.data));
+    }
+
+    cargaPorAbogado(filtros: { usuarioId?: number | null; ramaId?: number | null; estadoId?: number | null } = {}): Observable<ReporteRespuesta<CargaPorAbogadoResumen, CargaPorAbogadoDetalle>> {
+        let params = new HttpParams();
+        if (filtros.usuarioId != null) params = params.set('usuarioId', String(filtros.usuarioId));
+        if (filtros.ramaId != null) params = params.set('ramaId', String(filtros.ramaId));
+        if (filtros.estadoId != null) params = params.set('estadoId', String(filtros.estadoId));
+        return this.http.get<RespuestaApi<ReporteRespuesta<CargaPorAbogadoResumen, CargaPorAbogadoDetalle>>>(`${this.base}/carga-por-abogado`, { params }).pipe(map(r => r.data));
     }
 }

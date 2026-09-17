@@ -1,0 +1,125 @@
+<div class="page-header">
+    <div>
+        <span class="page-overline">Reportes</span>
+        <h1 class="page-title">Clientes por Tipo</h1>
+        <p class="page-subtitle">Distribución de la cartera de clientes por tipo y estado</p>
+    </div>
+    <div class="page-actions">
+        <button class="rep-export-btn" (click)="exportarPDF()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Exportar PDF
+        </button>
+    </div>
+</div>
+
+<section class="rep-stats" data-testid="reporte-clientes">
+    <article class="rep-stat">
+        <span class="rep-stat-label">Total Clientes</span>
+        <span class="rep-stat-value">{{ total() }}</span>
+        <span class="rep-stat-badge info">Cartera</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Activos</span>
+        <span class="rep-stat-value">{{ activos() }}</span>
+        <span class="rep-stat-badge ok">Vigentes</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Inactivos</span>
+        <span class="rep-stat-value">{{ inactivos() }}</span>
+        <span class="rep-stat-badge warn">Históricos</span>
+    </article>
+    <article class="rep-stat">
+        <span class="rep-stat-label">Con Expedientes</span>
+        <span class="rep-stat-value">{{ conExpedientes() }}</span>
+        <span class="rep-stat-badge info">Con casos</span>
+    </article>
+</section>
+
+<section class="rep-grid">
+    <article class="rep-panel rep-c6">
+        <div class="aj-card-head"><h2 class="aj-card-title">Clientes por Tipo</h2></div>
+        <div class="rep-progress-list">
+            @for (t of resumen(); track t.tipo) {
+                <div class="rep-progress-row">
+                    <div class="rep-progress-head">
+                        <span class="rep-progress-nombre">
+                            <span class="rep-dot" [style.background]="colorTipo(t.tipo)"></span>{{ t.tipo }}
+                        </span>
+                        <span class="rep-progress-val">{{ t.total }} <small>({{ t.porcentaje }}%)</small></span>
+                    </div>
+                    <div class="rep-progress-track">
+                        <div class="rep-progress-fill" [style.width.%]="t.porcentaje"
+                            [style.background]="colorTipo(t.tipo)"></div>
+                    </div>
+                </div>
+            }
+            @if (resumen().length === 0) { <div class="rep-empty">Sin datos disponibles</div> }
+        </div>
+    </article>
+
+    <article class="rep-panel rep-c6">
+        <div class="aj-card-head"><h2 class="aj-card-title">Activos vs Inactivos</h2></div>
+        <div style="overflow-x: auto;">
+            <table class="data-table rep-usuarios-table">
+                <thead><tr><th>Tipo</th><th>Activos</th><th>Inactivos</th><th>Total</th></tr></thead>
+                <tbody>
+                    @for (t of resumen(); track t.tipo) {
+                        <tr>
+                            <td>{{ t.tipo }}</td>
+                            <td><strong>{{ t.activos }}</strong></td>
+                            <td>{{ t.inactivos }}</td>
+                            <td>{{ t.total }}</td>
+                        </tr>
+                    }
+                    @if (resumen().length === 0) {
+                        <tr><td colspan="4" class="empty-state">Sin datos disponibles</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+
+<section class="aj-card" style="margin-top: 22px;">
+    <div class="aj-card-head">
+        <h2 class="aj-card-title">Detalle de Clientes</h2>
+        <span class="rep-chip">{{ detalle().length }} registros</span>
+    </div>
+    <div style="overflow-x: auto;">
+        <table class="data-table rep-usuarios-table">
+            <thead>
+                <tr><th>Cliente</th><th>Tipo</th><th>Estado</th><th>Expedientes</th><th>Alta</th></tr>
+            </thead>
+            <tbody>
+                @for (c of detalleTabla(); track $index) {
+                    <tr>
+                        <td>
+                            <div class="rep-usuario-cell">
+                                <span class="rep-usuario-avatar" [style.background]="c.color + '18'"
+                                    [style.color]="c.color">{{ c.iniciales }}</span>
+                                <span>{{ c.cliente }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="pill" [style.background]="c.color + '18'" [style.color]="c.color"
+                                [style.border]="'1px solid ' + c.color + '40'">{{ c.tipo }}</span>
+                        </td>
+                        <td>
+                            @if (c.activo) { <span class="pill ok">Activo</span> } @else { <span class="pill no">Inactivo</span> }
+                        </td>
+                        <td>{{ c.expedientes }}</td>
+                        <td class="rep-fecha">{{ c.fechaCreacionFormato }}</td>
+                    </tr>
+                }
+                @if (detalleTabla().length === 0) {
+                    <tr><td colspan="5" class="empty-state">No hay clientes registrados</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

@@ -26,6 +26,10 @@ public interface IReporteService
         DateTime? fechaInicio, DateTime? fechaFin, string? tipoAlerta, bool? soloNoLeidas);
     Task<ReporteRespuesta<EventosAgendaMesResumen, EventosAgendaMesDetalle>> EventosAgendaMesAsync(
         int? anio, int? mes, string? tipoEvento, int? estadoId, int? usuarioId);
+    Task<ReporteRespuesta<ClientesPorTipoResumen, ClientesPorTipoDetalle>> ClientesPorTipoAsync(
+        string? tipoCliente, bool? activo);
+    Task<ReporteRespuesta<CargaPorAbogadoResumen, CargaPorAbogadoDetalle>> CargaPorAbogadoAsync(
+        int? usuarioId, int? ramaId, int? estadoId);
 }
 
 public class ReporteService : IReporteService
@@ -169,6 +173,32 @@ public class ReporteService : IReporteService
         {
             Resumen = (await grid.ReadAsync<EventosAgendaMesResumen>()).ToList(),
             Detalle = (await grid.ReadAsync<EventosAgendaMesDetalle>()).ToList()
+        };
+    }
+
+    public async Task<ReporteRespuesta<ClientesPorTipoResumen, ClientesPorTipoDetalle>> ClientesPorTipoAsync(
+        string? tipoCliente, bool? activo)
+    {
+        using var grid = await _repositorio.ConsultarMultiplesAsync(
+            "SP_Reporte_ClientesPorTipo",
+            new { TipoCliente = tipoCliente, Activo = activo });
+        return new ReporteRespuesta<ClientesPorTipoResumen, ClientesPorTipoDetalle>
+        {
+            Resumen = (await grid.ReadAsync<ClientesPorTipoResumen>()).ToList(),
+            Detalle = (await grid.ReadAsync<ClientesPorTipoDetalle>()).ToList()
+        };
+    }
+
+    public async Task<ReporteRespuesta<CargaPorAbogadoResumen, CargaPorAbogadoDetalle>> CargaPorAbogadoAsync(
+        int? usuarioId, int? ramaId, int? estadoId)
+    {
+        using var grid = await _repositorio.ConsultarMultiplesAsync(
+            "SP_Reporte_CargaPorAbogado",
+            new { Usuario_ID = usuarioId, Rama_ID = ramaId, Estado_ID = estadoId });
+        return new ReporteRespuesta<CargaPorAbogadoResumen, CargaPorAbogadoDetalle>
+        {
+            Resumen = (await grid.ReadAsync<CargaPorAbogadoResumen>()).ToList(),
+            Detalle = (await grid.ReadAsync<CargaPorAbogadoDetalle>()).ToList()
         };
     }
 }

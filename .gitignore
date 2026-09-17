@@ -33,3 +33,10 @@ Thumbs.db
 
 # Notas locales
 Linkgit.txt
+
+# Documentos subidos en runtime (storage de archivos)
+Back-end/LexControlApi/wwwroot/documentos/
+
+# Archivos temporales de errores
+ErrorCreacion.txt
+errorDBSP.txt

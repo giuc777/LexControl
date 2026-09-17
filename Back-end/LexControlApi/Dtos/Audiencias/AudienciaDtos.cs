@@ -52,7 +52,7 @@ public class AudienciaProximaFila
 {
     public int ID { get; set; }
     public DateTime Fecha { get; set; }
-    public string HoraInicio { get; set; } = string.Empty;
+    public TimeSpan HoraInicio { get; set; }
     public string NoExpediente { get; set; } = string.Empty;
     public string Cliente { get; set; } = string.Empty;
     public string Tipo { get; set; } = string.Empty;
@@ -99,7 +99,7 @@ public class AudienciaDto
         NoExpediente = f.NoExpediente,
         Cliente = f.Cliente,
         Fecha = f.Fecha.ToString("yyyy-MM-dd"),
-        HoraInicio = f.HoraInicio,
+        HoraInicio = f.HoraInicio.ToString(@"hh\:mm"),
         Tipo = f.Tipo,
         Juzgado = f.Juzgado,
         Sala = f.Sala,

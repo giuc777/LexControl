@@ -6,9 +6,10 @@ import { NotificacionesService } from '../../core/services/notificaciones-servic
 import { CatalogosService } from '../../core/services/catalogos-service';
 import { ExpedientesService } from '../../core/services/expedientes-service';
 import { NotificacionLista } from '../../core/models/notificacion.model';
-import { CatalogoItem } from '../../core/models/catalogo.model';
+import { CatalogoItem, JuzgadoItem } from '../../core/models/catalogo.model';
 import { PageHeader } from '../../shared/components/page-header/page-header';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
+import { NotificacionModal } from './notificacion-modal';
 
 const COLORES_ESTADO: Record<string, string> = {
     'Pendiente': '#f39c12',
@@ -21,7 +22,7 @@ const COLORES_ESTADO: Record<string, string> = {
 @Component({
     selector: 'app-notificaciones-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, PageHeader, EmptyState],
+    imports: [FormsModule, PageHeader, EmptyState, NotificacionModal],
     templateUrl: './notificaciones-page.html'
 })
 export class NotificacionesPage implements OnInit {
@@ -32,10 +33,12 @@ export class NotificacionesPage implements OnInit {
 
     protected readonly notificaciones = signal<NotificacionLista[]>([]);
     protected readonly cargando = signal(false);
+    protected readonly mostrarModal = signal(false);
 
     protected readonly tiposNotificacion = signal<CatalogoItem[]>([]);
     protected readonly estadosNotificacion = signal<CatalogoItem[]>([]);
     protected readonly expedientes = signal<{ id: number; noExpediente: string }[]>([]);
+    protected readonly juzgados = signal<{ id: number; nombre: string }[]>([]);
 
     protected readonly filtroTipoId = signal<number | null>(null);
     protected readonly filtroEstadoId = signal<number | null>(null);
@@ -46,6 +49,7 @@ export class NotificacionesPage implements OnInit {
     ngOnInit(): void {
         this.cargarCatalogos();
         this.cargarExpedientes();
+        this.cargarJuzgados();
         this.cargarNotificaciones();
     }
 
@@ -66,6 +70,16 @@ export class NotificacionesPage implements OnInit {
                         id: e.id,
                         noExpediente: e.noExpediente
                     }))
+                );
+            }
+        });
+    }
+
+    cargarJuzgados(): void {
+        this.catalogosSvc.buscarJuzgados({}).subscribe({
+            next: (data) => {
+                this.juzgados.set(
+                    data.items.map((j: JuzgadoItem) => ({ id: j.id, nombre: j.nombre }))
                 );
             }
         });
@@ -99,12 +113,29 @@ export class NotificacionesPage implements OnInit {
         this.cargarNotificaciones();
     }
 
+    abrirModal(): void {
+        this.mostrarModal.set(true);
+    }
+
+    cerrarModal(): void {
+        this.mostrarModal.set(false);
+    }
+
+    alGuardar(): void {
+        this.mostrarModal.set(false);
+        this.cargarNotificaciones();
+    }
+
     irADetalle(id: number): void {
         this.router.navigate(['/notificaciones-oj', id]);
     }
 
     colorEstado(estado: string): string {
         return COLORES_ESTADO[estado] ?? '#6c757d';
+    }
+
+    esPendiente(estado: string): boolean {
+        return estado !== 'Atendida';
     }
 
     textoFavorable(favorable: boolean | null): string {

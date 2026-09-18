@@ -29,6 +29,21 @@ public class EventosController : ControllerBase
         return Ok(ApiResponse<List<EventoDto>>.Correcto(resultado));
     }
 
+    [HttpGet("semana")]
+    public async Task<ActionResult<ApiResponse<List<EventoDto>>>> ObtenerDeLaSemana(
+        [FromQuery] DateTime? fechaInicio,
+        [FromQuery] DateTime? fechaFin)
+    {
+        var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(claim) || !int.TryParse(claim, out var usuarioId) || usuarioId <= 0)
+            return Unauthorized(ApiResponse<List<EventoDto>>.Fallo("No se pudo identificar al usuario."));
+
+        var inicio = fechaInicio ?? DateTime.Today;
+        var fin = fechaFin ?? inicio.AddDays(6);
+        var resultado = await _service.ObtenerDeLaSemanaAsync(inicio, fin, usuarioId);
+        return Ok(ApiResponse<List<EventoDto>>.Correcto(resultado));
+    }
+
     [HttpPost]
     [Authorize(Roles = "Administrador,Abogado,Secretaria")]
     public async Task<ActionResult<ApiResponse<int>>> Crear(EventoCrearDto dto)

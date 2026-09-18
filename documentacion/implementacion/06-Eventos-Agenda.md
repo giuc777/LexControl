@@ -1,6 +1,6 @@
 # Módulo 06 — Eventos / Agenda
 
-> **Estado:** SPs base existen. Faltan controller, service, frontend.
+> **Estado:** ✅ Backend implementado (`/dia` y `/semana`). Integrado en Dashboard y Agenda.
 > **Ruta frontend:** Se integra en Dashboard y Agenda (sin páginas propias)
 > **Orden de implementación:** FASE 1 (antes de Diligencias e Histórico Legal)
 
@@ -28,15 +28,23 @@ Backend de eventos de calendario (audiencias, plazos, diligencias, citas). Alime
 **SPs existentes:**
 - ✅ `SP_EventoBase_Insertar` (LexControlDB.sql)
 - ✅ `SP_EventoAudiencia_Insertar` (LexControlDB.sql)
-- ✅ `SP_Evento_ObtenerDelDia` (LexControlDB.sql)
+- ✅ `SP_Evento_ObtenerDelDia` (corregido en `ScriptsDB/16-Eventos-Agenda-Semanal.sql`)
+- ✅ `SP_Evento_ObtenerDeLaSemana` (`ScriptsDB/16-Eventos-Agenda-Semanal.sql`)
 
 ---
 
 ## 2. Procedimientos Almacenados
 
-**No se necesitan SPs nuevos.** Los 3 existentes son suficientes para el alcance actual.
+| SP | Parámetros | Descripción |
+|---|---|---|
+| `SP_Evento_ObtenerDelDia` | `@Usuario_ID, @Fecha` | Eventos de un usuario en una fecha |
+| `SP_Evento_ObtenerDeLaSemana` | `@Usuario_ID, @FechaInicio, @FechaFin` | Eventos de un usuario en un rango (vista semanal) |
+| `SP_EventoBase_Insertar` | … | Crea evento base |
+| `SP_EventoAudiencia_Insertar` | … | Crea evento de tipo audiencia |
 
-> **Nota:** `SP_Evento_ObtenerDelDia` retorna eventos del día para un usuario específico. Para el calendario de agenda con rango de fechas, se puede reutilizar o crear un SP futuro.
+> **Fix (migración 16):** `SP_Evento_ObtenerDelDia` hacía `INNER JOIN USUARIO u ON e.CreadoPor = u.ID`, pero `USUARIO` **no tiene** columna `CreadoPor`; el SP fallaba y el frontend devolvía una lista vacía. Ahora filtra directamente `EVENTO_BASE.CreadoPor = @Usuario_ID` (esa columna ya almacena el `Usuario_ID`) y enriquece el resultado con `LEFT JOIN` a `EXPEDIENTE`, `CLIENTE`/`PERSONA`, `EVENTO_AUDIENCIA`, `EVENTO_PLAZO`, `EVENTO_DILIGENCIA` y `ESTADO_EVENTO` para cumplir el contrato de `EventoFila`.
+>
+> **Nota:** `SP_Evento_ObtenerDeLaSemana` se creó para la vista semanal del Dashboard, en lugar de invocar el SP diario 5 veces.
 
 ---
 
@@ -98,9 +106,10 @@ namespace LexControlApi.Services;
 
 public interface IEventoService
 {
-    Task<List<EventoDto>> ObtenerDelDiaAsync(DateTime fecha, int usuarioId);
-    Task<int> CrearAsync(EventoCrearDto dto);
-    Task<int> CrearAudienciaAsync(EventoAudienciaCrearDto dto);
+    Task<List<EventoDto>> ObtenerDelDiaAsync(DateTime fecha, int? usuarioId);
+    Task<List<EventoDto>> ObtenerDeLaSemanaAsync(DateTime fechaInicio, DateTime fechaFin, int? usuarioId);
+    Task<int> CrearAsync(EventoCrearDto dto, int usuarioId);
+    Task<int> CrearAudienciaAsync(EventoAudienciaCrearDto dto, int usuarioId);
 }
 
 public class EventoService : IEventoService
@@ -108,12 +117,20 @@ public class EventoService : IEventoService
     private readonly Data.IRepositorio _repositorio;
     public EventoService(Data.IRepositorio repositorio) => _repositorio = repositorio;
 
-    public async Task<List<EventoDto>> ObtenerDelDiaAsync(DateTime fecha, int usuarioId)
+    public async Task<List<EventoDto>> ObtenerDelDiaAsync(DateTime fecha, int? usuarioId)
     {
-        var filas = await _repositorio.ConsultarAsync<EventoFila>(
+        var filas = await _repositorio.ConsultarListaAsync<EventoFila>(
             "SP_Evento_ObtenerDelDia",
             new { Fecha = fecha, Usuario_ID = usuarioId });
-        return filas.Select(Mapear).ToList();
+        return filas.Select(EventoDto.Desde).ToList();
+    }
+
+    public async Task<List<EventoDto>> ObtenerDeLaSemanaAsync(DateTime fechaInicio, DateTime fechaFin, int? usuarioId)
+    {
+        var filas = await _repositorio.ConsultarListaAsync<EventoFila>(
+            "SP_Evento_ObtenerDeLaSemana",
+            new { FechaInicio = fechaInicio, FechaFin = fechaFin, Usuario_ID = usuarioId });
+        return filas.Select(EventoDto.Desde).ToList();
     }
 
     public async Task<int> CrearAsync(EventoCrearDto dto)
@@ -173,6 +190,18 @@ public class EventosController : ControllerBase
         return Ok(ApiResponse<List<EventoDto>>.Correcto(r));
     }
 
+    [HttpGet("semana")]
+    public async Task<ActionResult<ApiResponse<List<EventoDto>>>> ObtenerDeLaSemana(
+        [FromQuery] DateTime? fechaInicio,
+        [FromQuery] DateTime? fechaFin)
+    {
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+        var inicio = fechaInicio ?? DateTime.Today;
+        var fin = fechaFin ?? inicio.AddDays(6);
+        var r = await _service.ObtenerDeLaSemanaAsync(inicio, fin, usuarioId);
+        return Ok(ApiResponse<List<EventoDto>>.Correcto(r));
+    }
+
     [HttpPost]
     [Authorize(Roles = "Administrador,Abogado,Secretaria")]
     public async Task<ActionResult<ApiResponse<int>>> Crear(EventoCrearDto dto)
@@ -206,6 +235,10 @@ builder.Services.AddScoped<IEventoService, EventoService>();
 GET http://localhost:5181/api/eventos/dia?fecha=2026-09-13
 Authorization: Bearer <token>
 
+### Eventos de la semana (vista semanal del Dashboard)
+GET http://localhost:5181/api/eventos/semana?fechaInicio=2026-09-14&fechaFin=2026-09-18
+Authorization: Bearer <token>
+
 ### Crear evento base
 POST http://localhost:5181/api/eventos
 Authorization: Bearer <token>
@@ -235,7 +268,7 @@ Content-Type: application/json
 ## 5. Frontend
 
 - **Modelo:** `core/models/evento.model.ts`
-- **Service:** `core/services/eventos-service.ts` (obtenerDelDia, crear, crearAudiencia)
+- **Service:** `core/services/eventos-service.ts` (`obtenerDelDia`, `obtenerDeLaSemana`, `crear`, `crearAudiencia`)
 - **Integración:** Conectar `DashboardPage` y `AgendaPage` con el service
 - **Sin páginas propias** — se integra en Dashboard y Agenda existentes
 
@@ -260,8 +293,9 @@ test('muestra eventos reales del API', async ({ page }) => {
 
 ## 7. Criterios de Aceptación
 
-- [ ] Los 3 SPs existentes funcionan correctamente
-- [ ] Controller compila con 3 endpoints
-- [ ] `GET /api/eventos/dia` retorna eventos del usuario autenticado
-- [ ] Dashboard muestra eventos reales (no seed)
-- [ ] `npx ng build` exitoso
+- [x] Los SPs de eventos funcionan correctamente (`delDia` corregido + `deLaSemana` nuevo)
+- [x] Controller compila con 4 endpoints (`dia`, `semana`, `POST`, `POST audiencia`)
+- [x] `GET /api/eventos/dia` retorna eventos del usuario autenticado
+- [x] `GET /api/eventos/semana` retorna eventos por rango de fechas
+- [x] Dashboard muestra eventos reales (no seed)
+- [x] `npx ng build` exitoso

@@ -276,6 +276,7 @@ Lista todos los catálogos maestros en un solo request (evita múltiples round-t
 | Método | Endpoint | SP | Descripción |
 |---|---|---|---|
 | GET | `/api/eventos/dia` | `SP_Evento_ObtenerDelDia` | Eventos del día (Usuario_ID, Fecha) |
+| GET | `/api/eventos/semana` | `SP_Evento_ObtenerDeLaSemana` | Eventos por rango de fechas (Usuario_ID, FechaInicio, FechaFin) |
 | POST | `/api/eventos` | `SP_EventoBase_Insertar` | Crear evento base |
 | POST | `/api/eventos/audiencia` | `SP_EventoAudiencia_Insertar` | Crear evento de tipo audiencia |
 

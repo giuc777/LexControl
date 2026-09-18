@@ -12,25 +12,28 @@ El Dashboard es la primera pantalla que ve el usuario. Muestra stat cards con da
 
 **Conexiones a API:**
 - ✅ `GET /api/expedientes` — Expedientes activos (conteo)
-- ✅ `GET /api/audiencias` — Audiencias próximas (conteo)
+- ✅ `GET /api/audiencias` — Audiencias próximas (conteo) + agenda semanal
 - ✅ `GET /api/tramites` — Trámites pendientes (conteo)
 - ✅ `GET /api/notificaciones` — Notificaciones OJ pendientes (conteo)
-- ✅ `GET /api/eventos/dia` — Agenda semanal (eventos del día)
+- ✅ `GET /api/eventos/semana` — Agenda semanal (eventos propios por rango de fechas)
+- ✅ `GET /api/diligencias` — Agenda semanal (diligencias por rango de fechas)
 
 ---
 
 ## 2. Procedimientos Almacenados
 
-**No se necesitan SPs nuevos.** Se reutilizan los SPs de Eventos, Reportes y Audiencias.
+- ✅ `SP_Evento_ObtenerDeLaSemana` — nuevo SP para la agenda semanal (rango de fechas). Ver Módulo 06 / `ScriptsDB/16-Eventos-Agenda-Semanal.sql`.
+- Se reutilizan los SPs de Eventos, Reportes, Audiencias, Diligencias y Expedientes.
 
 ---
 
 ## 3. Backend
 
 **No se necesita backend nuevo.** Los endpoints ya existen:
-- `GET /api/eventos/dia` (Módulo 06)
-- `GET /api/reportes/alertas-pendientes` (Módulo 07)
-- `GET /api/audiencias/proximas` (Módulo 02)
+- `GET /api/eventos/semana` (Módulo 06) — eventos propios por rango
+- `GET /api/audiencias` (Módulo 02) — audiencias por rango
+- `GET /api/diligencias` (Módulo 04) — diligencias por rango
+- `GET /api/expedientes`, `GET /api/tramites`, `GET /api/notificaciones` (stat cards)
 
 ---
 
@@ -38,63 +41,51 @@ El Dashboard es la primera pantalla que ve el usuario. Muestra stat cards con da
 
 ### 4.1 Eliminar seed data
 
-```typescript
-// ANTES:
-const ESTADISTICAS_SEED = [...];
-const EVENTOS_SEED = [...];
-
-// DESPUÉS: Eliminar estas constantes
-```
+Las constantes `ESTADISTICAS_SEED` / `EVENTOS_SEED` se eliminaron. Las stat cards se inicializan en un `signal` con valores `0` y detalle `"Cargando..."`, y se reemplazan al recibir la respuesta del API.
 
 ### 4.2 Inyectar servicios
 
 ```typescript
-export class DashboardPage {
-  private eventosService = inject(EventosService);
-  private reportesService = inject(ReportesService);
-  private audienciasService = inject(AudienciasService);
+export class DashboardPage implements OnInit {
+  private readonly eventosSvc = inject(EventosService);
+  private readonly expedientesSvc = inject(ExpedientesService);
+  private readonly audienciasSvc = inject(AudienciasService);
+  private readonly diligenciasSvc = inject(DiligenciasService);
+  private readonly tramitesSvc = inject(TramitesService);
+  private readonly notificacionesSvc = inject(NotificacionesService);
 
-  readonly estadisticas = signal<Estadistica[]>([]);
-  readonly eventos = signal<Evento[]>([]);
+  readonly estadisticas = signal<StatCard[]>([...placeholders...]);
+  private readonly agendaRaw = signal<EventoAgenda[]>([]);
 
-  constructor() {
-    this.cargarDatos();
-  }
-
-  private cargarDatos(): void {
-    // Cargar eventos del día
-    this.eventosService.obtenerDelDia(new Date()).subscribe({
-      next: r => { if (r.success) this.eventos.set(r.data); }
-    });
-
-    // Cargar alertas pendientes (stat cards)
-    this.reportesService.alertasPendientes().subscribe({
-      next: r => {
-        if (r.success) {
-          this.estadisticas.set(r.data.resumen.map(a => ({
-            titulo: a.tipo,
-            valor: a.cantidad,
-            icono: this.obtenerIcono(a.tipo),
-            color: this.obtenerColor(a.tipo)
-          })));
-        }
-      }
-    });
+  ngOnInit(): void {
+    this.cargarAgendaSemana();
+    this.cargarEstadisticas();
   }
 }
 ```
 
 ### 4.3 Stat cards dinámicas
 
-Reemplazar las stat cards hardcodeadas por datos del API:
-- Expedientes activos → `alertasPendientes` (tipo = "Expedientes")
-- Audiencias próximas → `audiencias.proximas(7)` (count)
-- Trámites pendientes → `alertasPendientes` (tipo = "Trámites")
-- Notificaciones pendientes → `alertasPendientes` (tipo = "Notificaciones")
+- Expedientes activos → `expedientesSvc.listar({ estadoId: 1 })` (`data.total`)
+- Audiencias próximas → `audienciasSvc.listar({})` filtrando `fecha >= hoy`
+- Trámites pendientes → `tramitesSvc.listar({})` filtrando estados distintos de `Resuelto`/`Rechazado`
+- Notificaciones OJ → `notificacionesSvc.listar({})` filtrando `estado === 'Pendiente'`
 
 ### 4.4 Agenda semanal
 
-Reemplazar `EVENTOS_SEED` por `eventosService.obtenerDelDia()` para cada día de la semana.
+La agenda se carga para la semana visible (lunes a viernes) combinando **tres fuentes** con `forkJoin`, igual que el módulo de Agenda:
+
+```typescript
+forkJoin({
+  eventos: this.eventosSvc.obtenerDeLaSemana(fechaInicio, fechaFin),
+  audiencias: this.audienciasSvc.listar({ fechaInicio, fechaFin }),
+  diligencias: this.diligenciasSvc.listar({ fechaInicio, fechaFin })
+}).subscribe(({ eventos, audiencias, diligencias }) => {
+  // Normaliza las tres fuentes a EventoAgenda y las combina en agendaRaw
+});
+```
+
+Los eventos se posicionan dentro de una jornada de **8:00 a 20:00** (12 filas horarias) y se limita la posición vertical para que ninguno se desborde de la columna. La cuadrícula usa `totalFilas = HORAS + 2` (cabecera + horas).
 
 ---
 
@@ -139,10 +130,10 @@ test.describe('Dashboard', () => {
 
 ## 6. Criterios de Aceptación
 
-- [ ] Las stat cards muestran datos reales del API
-- [ ] La agenda semanal muestra eventos reales
-- [ ] No hay datos seed hardcodeados
-- [ ] Loading states al cargar datos
-- [ ] Empty state cuando no hay datos
-- [ ] `npx ng build` exitoso
+- [x] Las stat cards muestran datos reales del API
+- [x] La agenda semanal muestra eventos reales (eventos + audiencias + diligencias)
+- [x] No hay datos seed hardcodeados
+- [x] Loading states al cargar datos
+- [x] Empty state cuando no hay datos
+- [x] `npx ng build` exitoso
 - [ ] Tests Playwright pasan

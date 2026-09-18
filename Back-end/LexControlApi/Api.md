@@ -344,9 +344,10 @@ public static string Sha256Hash(string input)
 - [x] `POST /api/notificaciones/{id:int}/pdf` — `SP_NotificacionOJ_AdjuntarPDF`
 
 ### EventosController (Agenda)
-- [ ] `GET /api/eventos/dia` — `SP_Evento_ObtenerDelDia` (params: Usuario_ID, Fecha)
-- [ ] `POST /api/eventos` — `SP_EventoBase_Insertar`
-- [ ] `POST /api/eventos/audiencia` — `SP_EventoAudiencia_Insertar`
+- [x] `GET /api/eventos/dia` — `SP_Evento_ObtenerDelDia` (params: Usuario_ID, Fecha)
+- [x] `GET /api/eventos/semana` — `SP_Evento_ObtenerDeLaSemana` (params: Usuario_ID, FechaInicio, FechaFin)
+- [x] `POST /api/eventos` — `SP_EventoBase_Insertar`
+- [x] `POST /api/eventos/audiencia` — `SP_EventoAudiencia_Insertar`
 
 ### ReportesController
 - [ ] 11 endpoints GET mapeados a `SP_Reporte_*`

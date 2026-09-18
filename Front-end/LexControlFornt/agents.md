@@ -228,7 +228,7 @@ Reglas de fechas: siempre ISO `yyyy-MM-dd` para fechas y `yyyy-MM-ddTHH:mm:ss` p
 | `clientes-service` | `GET/POST/PUT/DELETE /api/clientes` | DELETE lógico (`Activo=0`) |
 | `expedientes-service` | `/api/expedientes` + `/api/expedientes/{id}/notas` · `/documentos` · `/partes` | Cambio de estado vía `PUT /{id}/estado` |
 | `audiencias-service` | `/api/audiencias` · `/proximas` · `PUT /{id}/resultado` | Agenda mensual + registro de resultado |
-| `eventos-service` | `/api/eventos/dia` · `POST /api/eventos` | Agenda del día/semana del dashboard |
+| `eventos-service` | `/api/eventos/dia` · `/api/eventos/semana` · `POST /api/eventos` | Agenda del día/semana del dashboard |
 | `tramites-service` | `/api/tramites` · `PUT /{id}/estado` | |
 | `notificaciones-service` | `/api/notificaciones` · `PUT /{id}/atender` · `POST /verificar-duplicado` | Módulo OJ |
 | `reportes-service` | `/api/reportes/*` (11 endpoints) | Respuesta siempre `{resumen, detalle}` |

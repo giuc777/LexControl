@@ -6,6 +6,7 @@ namespace LexControlApi.Services;
 public interface IEventoService
 {
     Task<List<EventoDto>> ObtenerDelDiaAsync(DateTime fecha, int? usuarioId);
+    Task<List<EventoDto>> ObtenerDeLaSemanaAsync(DateTime fechaInicio, DateTime fechaFin, int? usuarioId);
     Task<int> CrearAsync(EventoCrearDto dto, int usuarioId);
     Task<int> CrearAudienciaAsync(EventoAudienciaCrearDto dto, int usuarioId);
 }
@@ -24,6 +25,15 @@ public class EventoService : IEventoService
         var filas = await _repositorio.ConsultarListaAsync<EventoFila>(
             "SP_Evento_ObtenerDelDia",
             new { Fecha = fecha, Usuario_ID = usuarioId });
+
+        return filas.Select(EventoDto.Desde).ToList();
+    }
+
+    public async Task<List<EventoDto>> ObtenerDeLaSemanaAsync(DateTime fechaInicio, DateTime fechaFin, int? usuarioId)
+    {
+        var filas = await _repositorio.ConsultarListaAsync<EventoFila>(
+            "SP_Evento_ObtenerDeLaSemana",
+            new { FechaInicio = fechaInicio, FechaFin = fechaFin, Usuario_ID = usuarioId });
 
         return filas.Select(EventoDto.Desde).ToList();
     }

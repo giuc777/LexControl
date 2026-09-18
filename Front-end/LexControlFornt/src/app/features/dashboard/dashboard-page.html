@@ -30,7 +30,7 @@
 
                 @if (h === 0) {
                     @for (dia of dias; track dia.etiqueta; let d = $index) {
-                        <div class="day-col" [style.gridRow]="'2 / 7'" [style.gridColumn]="d + 2"
+                        <div class="day-col" [style.gridRow]="'2 / ' + totalFilas" [style.gridColumn]="d + 2"
                             [attr.data-hoy]="dia.esHoy ? '1' : null">
                             @for (ev of eventosDeDia(d); track ev.id) {
                                 <div class="cal-event" [class.outline]="ev.outline"

@@ -17,7 +17,9 @@
 
     <button type="button" class="icon-btn" aria-label="Notificaciones" (click)="verNotificaciones()">
         <svg appIcono [appIcono]="iconoBell"></svg>
-        <span class="badge-dot">3</span>
+        @if (pendientes() > 0) {
+            <span class="badge-dot">{{ pendientes() }}</span>
+        }
     </button>
 
     <div class="user-chip">

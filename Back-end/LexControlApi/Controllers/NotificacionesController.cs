@@ -32,6 +32,13 @@ public class NotificacionesController : ControllerBase
         return Ok(ApiResponse<List<NotificacionDto>>.Correcto(resultado));
     }
 
+    [HttpGet("pendientes/count")]
+    public async Task<ActionResult<ApiResponse<int>>> ContarPendientes()
+    {
+        var count = await _service.ContarPendientesAsync();
+        return Ok(ApiResponse<int>.Correcto(count));
+    }
+
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ApiResponse<NotificacionDetalleDto>>> ObtenerPorId(int id)
     {

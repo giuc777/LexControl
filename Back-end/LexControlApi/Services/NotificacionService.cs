@@ -14,6 +14,7 @@ public interface INotificacionService
     Task AtenderAsync(int id, NotificacionAtenderDto dto);
     Task<List<DuplicadoDto>> VerificarDuplicadoAsync(DuplicadoVerificarDto dto);
     Task AdjuntarPdfAsync(int id, string ruta);
+    Task<int> ContarPendientesAsync();
 }
 
 public class NotificacionService : INotificacionService
@@ -141,5 +142,12 @@ public class NotificacionService : INotificacionService
         await _repositorio.EjecutarRetornoAsync(
             "SP_NotificacionOJ_AdjuntarPDF",
             new { ID = id, PDF_Ruta = ruta });
+    }
+
+    public async Task<int> ContarPendientesAsync()
+    {
+        var fila = await _repositorio.ConsultarPrimeroAsync<ConteoFila>(
+            "SP_Notificacion_ContarPendientes");
+        return fila?.Total ?? 0;
     }
 }

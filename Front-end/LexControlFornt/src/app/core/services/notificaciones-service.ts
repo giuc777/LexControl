@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, catchError, of } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { RespuestaApi } from '../api/respuesta-api';
@@ -87,5 +87,15 @@ export class NotificacionesService {
     descargar(rutaArchivo: string): string {
         const base = `${environment.apiBaseUrl}/api/documentos`;
         return `${base}/download/${encodeURIComponent(rutaArchivo)}`;
+    }
+
+    /* Cuenta notificaciones pendientes (no atendidas) para el badge del topbar. */
+    contarPendientes(): Observable<number> {
+        return this.http
+            .get<RespuestaApi<number>>(`${this.base}/pendientes/count`)
+            .pipe(
+                map(r => r.data),
+                catchError(() => of(0))
+            );
     }
 }

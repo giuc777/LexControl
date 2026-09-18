@@ -211,6 +211,12 @@ public class DuplicadoFila
     public DateTime FechaRecepcion { get; set; }
 }
 
+/// <summary>Fila cruda devuelta por SP_Notificacion_ContarPendientes (mapeo Dapper).</summary>
+public class ConteoFila
+{
+    public int Total { get; set; }
+}
+
 /// <summary>Duplicado expuesto al frontend.</summary>
 public class DuplicadoDto
 {

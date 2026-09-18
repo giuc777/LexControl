@@ -98,7 +98,7 @@
             <h3 class="seccion-titulo">Documento Adjunto</h3>
             @if (notificacion()!.pdfRuta) {
                 <div class="acciones-fila">
-                    <button class="btn-secondary" data-testid="btn-ver-pdf" (click)="descargarPdf()">
+                    <button class="btn-secondary" data-testid="btn-ver-pdf" (click)="abrirVisor()">
                         Ver PDF adjunto
                     </button>
                 </div>
@@ -150,4 +150,9 @@
         [notificacion]="notificacion()"
         (cerrar)="cerrarModal()"
         (alGuardar)="alGuardar()" />
+}
+
+@if (archivoPreview()) {
+    <app-visor-archivos [abierto]="true" [archivo]="archivoPreview()!"
+        (cerrado)="cerrarVisor()" />
 }

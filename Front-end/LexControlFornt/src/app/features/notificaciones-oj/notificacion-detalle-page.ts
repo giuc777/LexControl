@@ -9,6 +9,7 @@ import { NotificacionDetalle, NotificacionAtender } from '../../core/models/noti
 import { JuzgadoItem } from '../../core/models/catalogo.model';
 import { PageHeader } from '../../shared/components/page-header/page-header';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
+import { VisorArchivosComponent, ArchivoVisor } from '../../shared/components/visor-archivos/visor-archivos';
 import { ToastService } from '../../layout/toast/toast-service';
 import { NotificacionModal } from './notificacion-modal';
 
@@ -23,7 +24,7 @@ const COLORES_ESTADO: Record<string, string> = {
 @Component({
     selector: 'app-notificacion-detalle-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, PageHeader, EmptyState, NotificacionModal],
+    imports: [FormsModule, PageHeader, EmptyState, NotificacionModal, VisorArchivosComponent],
     templateUrl: './notificacion-detalle-page.html'
 })
 export class NotificacionDetallePage implements OnInit {
@@ -41,6 +42,7 @@ export class NotificacionDetallePage implements OnInit {
     protected readonly notasAtencion = signal('');
 
     protected readonly mostrarModal = signal(false);
+    protected readonly archivoPreview = signal<ArchivoVisor | null>(null);
     protected readonly expedientes = signal<{ id: number; noExpediente: string }[]>([]);
     protected readonly juzgados = signal<{ id: number; nombre: string }[]>([]);
 
@@ -110,6 +112,20 @@ export class NotificacionDetallePage implements OnInit {
         const ruta = this.notificacion()?.pdfRuta;
         if (!ruta) return;
         window.open(this.notificacionesSvc.descargar(ruta), '_blank');
+    }
+
+    abrirVisor(): void {
+        const ruta = this.notificacion()?.pdfRuta;
+        if (!ruta) return;
+        this.archivoPreview.set({
+            nombreArchivo: 'Documento adjunto',
+            rutaArchivo: ruta,
+            tipoArchivo: 'PDF'
+        });
+    }
+
+    cerrarVisor(): void {
+        this.archivoPreview.set(null);
     }
 
     toggleFormAtender(): void {

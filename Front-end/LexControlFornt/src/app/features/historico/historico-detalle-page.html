@@ -132,7 +132,7 @@
                 <h2>Documentos</h2>
                 <div class="documentos-lista">
                     @for (d of documentos(); track d.id) {
-                        <div class="documento-item">
+                        <div class="documento-item" (click)="abrirPreview(d)" style="cursor:pointer">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                  stroke="currentColor" stroke-width="2">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -147,7 +147,12 @@
         }
 
         <div class="detalle-footer">
-            <button class="btn-secondary" (click)="volver()">Volver al Histórico</button>
+            <button class="btn-secondary" (click)="volver()">Volver al Historico</button>
         </div>
     </div>
+
+    @if (archivoPreview()) {
+        <app-visor-archivos [abierto]="true" [archivo]="archivoPreview()!"
+            (cerrado)="cerrarPreview()" />
+    }
 }

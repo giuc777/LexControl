@@ -35,6 +35,10 @@ export class DocumentosService {
         return `${this.documentosBase}/download/${encodeURIComponent(rutaArchivo)}`;
     }
 
+    ver(rutaArchivo: string): string {
+        return `${this.documentosBase}/preview/${encodeURIComponent(rutaArchivo)}`;
+    }
+
     eliminar(documentoId: number): Observable<void> {
         return this.http.delete<void>(`${this.documentosBase}/${documentoId}`);
     }

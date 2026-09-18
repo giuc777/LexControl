@@ -1,0 +1,36 @@
+<app-modal [titulo]="archivo().nombreArchivo" [abierto]="abierto()"
+           ancho="min(800px,96vw)" (cerrado)="cerrado.emit()">
+
+    <div class="visor-contenido">
+        @if (esPdf()) {
+            <iframe class="visor-iframe" [src]="previewUrl()"
+                    frameborder="0" allowfullscreen></iframe>
+        } @else if (esImagen()) {
+            <div class="visor-imagen-wrap">
+                <img class="visor-imagen" [src]="previewUrl()"
+                     [alt]="archivo().nombreArchivo">
+            </div>
+        } @else if (esTexto()) {
+            <iframe class="visor-iframe" [src]="previewUrl()"
+                    frameborder="0"></iframe>
+        } @else {
+            <div class="visor-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12
+                             a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                <p>Vista previa no disponible para este tipo de archivo.</p>
+                <p class="visor-placeholder-sub">Use el boton de abajo para abrirlo en una nueva pestana.</p>
+            </div>
+        }
+    </div>
+
+    <footer class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="cerrado.emit()">Cerrar</button>
+        <button type="button" class="btn-primary" (click)="abrirEnNuevaVentana()">
+            Abrir en nueva ventana
+        </button>
+    </footer>
+</app-modal>

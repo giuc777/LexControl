@@ -16,6 +16,7 @@ import {
 } from '../../core/models/expediente.model';
 import { CatalogoItem } from '../../core/models/catalogo.model';
 import { Modal } from '../../shared/components/modal/modal';
+import { VisorArchivosComponent, ArchivoVisor } from '../../shared/components/visor-archivos/visor-archivos';
 import { ExpedienteModal } from './expediente-modal';
 
 const MESES_CORTO = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -23,7 +24,7 @@ const MESES_CORTO = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Se
 @Component({
     selector: 'app-expediente-detalle-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [RouterLink, FormsModule, Modal, ExpedienteModal],
+    imports: [RouterLink, FormsModule, Modal, ExpedienteModal, VisorArchivosComponent],
     templateUrl: './expediente-detalle-page.html'
 })
 export class ExpedienteDetallePage implements OnInit {
@@ -47,6 +48,7 @@ export class ExpedienteDetallePage implements OnInit {
     protected readonly modalParteAbierto = signal(false);
     protected readonly modalUploadAbierto = signal(false);
     protected readonly modalEditarAbierto = signal(false);
+    protected readonly archivoPreview = signal<ArchivoVisor | null>(null);
 
     private expedienteId = 0;
 
@@ -93,6 +95,18 @@ export class ExpedienteDetallePage implements OnInit {
         this.documentosSvc.eliminar(doc.id).subscribe({
             next: () => this.cargarDocumentos()
         });
+    }
+
+    abrirPreview(doc: DocExpediente): void {
+        this.archivoPreview.set({
+            nombreArchivo: doc.nombreArchivo,
+            rutaArchivo: doc.rutaArchivo,
+            tipoArchivo: doc.tipoArchivo
+        });
+    }
+
+    cerrarPreview(): void {
+        this.archivoPreview.set(null);
     }
 
     // ── Editar ───────────────────────────────────────────────

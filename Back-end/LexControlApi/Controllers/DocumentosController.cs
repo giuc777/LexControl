@@ -86,6 +86,22 @@ public class DocumentosController : ControllerBase
         return File(stream, contentType, nombre);
     }
 
+    /// <summary>Vista previa inline de un archivo (sin descarga).</summary>
+    [HttpGet("preview/{ruta}")]
+    [Authorize(Roles = "Administrador,Abogado,Secretaria")]
+    public IActionResult Preview(string ruta)
+    {
+        var rutaAbsoluta = _storage.ObtenerRutaAbsoluta(ruta);
+        if (!System.IO.File.Exists(rutaAbsoluta))
+            return NotFound();
+
+        var stream = new FileStream(rutaAbsoluta, FileMode.Open, FileAccess.Read, FileShare.Read);
+        var contentType = ObtenerContentType(ruta);
+
+        Response.Headers.Append("Content-Disposition", "inline");
+        return File(stream, contentType);
+    }
+
     /// <summary>Elimina un archivo del disco y su registro.</summary>
     [HttpDelete("{documentoId:int}")]
     [Authorize(Roles = "Administrador,Abogado")]

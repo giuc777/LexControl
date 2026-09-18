@@ -9,11 +9,12 @@ import {
     ParteProcesal,
     DocExpediente
 } from '../../core/models/expediente.model';
+import { VisorArchivosComponent, ArchivoVisor } from '../../shared/components/visor-archivos/visor-archivos';
 
 @Component({
     selector: 'app-historico-detalle-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [RouterLink],
+    imports: [RouterLink, VisorArchivosComponent],
     templateUrl: './historico-detalle-page.html'
 })
 export class HistoricoDetallePage implements OnInit {
@@ -27,6 +28,7 @@ export class HistoricoDetallePage implements OnInit {
     protected readonly notas = signal<NotaExpediente[]>([]);
     protected readonly documentos = signal<DocExpediente[]>([]);
     protected readonly cargando = signal(true);
+    protected readonly archivoPreview = signal<ArchivoVisor | null>(null);
 
     private expedienteId = 0;
 
@@ -73,6 +75,18 @@ export class HistoricoDetallePage implements OnInit {
 
     volver(): void {
         this.router.navigate(['/historico']);
+    }
+
+    abrirPreview(doc: DocExpediente): void {
+        this.archivoPreview.set({
+            nombreArchivo: doc.nombreArchivo,
+            rutaArchivo: doc.rutaArchivo,
+            tipoArchivo: doc.tipoArchivo
+        });
+    }
+
+    cerrarPreview(): void {
+        this.archivoPreview.set(null);
     }
 
     colorEstado(estado: string): string {

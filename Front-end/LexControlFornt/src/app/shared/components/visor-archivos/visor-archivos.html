@@ -2,27 +2,45 @@
            ancho="min(800px,96vw)" (cerrado)="cerrado.emit()">
 
     <div class="visor-contenido">
-        @if (esPdf()) {
-            <iframe class="visor-iframe" [src]="previewUrl()"
-                    frameborder="0" allowfullscreen></iframe>
-        } @else if (esImagen()) {
-            <div class="visor-imagen-wrap">
-                <img class="visor-imagen" [src]="previewUrl()"
-                     [alt]="archivo().nombreArchivo">
+        @if (cargandoPreview()) {
+            <div class="visor-loading">
+                <div class="visor-spinner"></div>
+                <p>Cargando vista previa...</p>
             </div>
-        } @else if (esTexto()) {
-            <iframe class="visor-iframe" [src]="previewUrl()"
-                    frameborder="0"></iframe>
+        } @else if (previewUrl()) {
+            @if (esPdf()) {
+                <iframe class="visor-iframe" [src]="previewUrl()!"
+                        frameborder="0" allowfullscreen></iframe>
+            } @else if (esImagen()) {
+                <div class="visor-imagen-wrap">
+                    <img class="visor-imagen" [src]="previewUrl()!"
+                         [alt]="archivo().nombreArchivo">
+                </div>
+            } @else if (esTexto()) {
+                <iframe class="visor-iframe" [src]="previewUrl()!"
+                        frameborder="0"></iframe>
+            } @else {
+                <div class="visor-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12
+                                 a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <p>Vista previa no disponible para este tipo de archivo.</p>
+                    <p class="visor-placeholder-sub">Use el boton de abajo para abrirlo en una nueva pestana.</p>
+                </div>
+            }
         } @else {
             <div class="visor-placeholder">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12
-                             a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
                 </svg>
-                <p>Vista previa no disponible para este tipo de archivo.</p>
-                <p class="visor-placeholder-sub">Use el boton de abajo para abrirlo en una nueva pestana.</p>
+                <p>No se pudo cargar la vista previa.</p>
+                <p class="visor-placeholder-sub">Intente abrir el archivo en una nueva pestana.</p>
             </div>
         }
     </div>

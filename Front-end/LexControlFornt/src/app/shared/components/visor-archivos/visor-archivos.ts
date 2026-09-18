@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, OnDestroy, OnInit, output, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { DocumentosService } from '../../../core/services/documentos-service';
 import { Modal } from '../modal/modal';
@@ -15,28 +17,60 @@ export interface ArchivoVisor {
     imports: [Modal],
     templateUrl: './visor-archivos.html'
 })
-export class VisorArchivosComponent {
+export class VisorArchivosComponent implements OnInit, OnDestroy {
+    private readonly http = inject(HttpClient);
+    private readonly sanitizer = inject(DomSanitizer);
     private readonly documentosSvc = inject(DocumentosService);
+
+    private blobUrl: string | null = null;
 
     readonly abierto = input.required<boolean>();
     readonly cerrado = output<void>();
     readonly archivo = input.required<ArchivoVisor>();
 
-    readonly previewUrl = computed(() =>
-        this.documentosSvc.ver(this.archivo().rutaArchivo)
-    );
+    readonly previewUrl = signal<SafeResourceUrl | null>(null);
+    readonly cargandoPreview = signal(true);
 
-    readonly esPdf = computed(() =>
-        this.archivo().tipoArchivo.toUpperCase() === 'PDF'
-    );
+    readonly esPdf = signal(false);
+    readonly esImagen = signal(false);
+    readonly esTexto = signal(false);
 
-    readonly esImagen = computed(() =>
-        this.archivo().tipoArchivo.toUpperCase() === 'IMAGEN'
-    );
+    ngOnInit(): void {
+        this.esPdf.set(this.archivo().tipoArchivo.toUpperCase() === 'PDF');
+        this.esImagen.set(this.archivo().tipoArchivo.toUpperCase() === 'IMAGEN');
+        this.esTexto.set(this.archivo().nombreArchivo.toLowerCase().endsWith('.txt'));
+        this.cargarPreview();
+    }
 
-    readonly esTexto = computed(() =>
-        this.archivo().nombreArchivo.toLowerCase().endsWith('.txt')
-    );
+    ngOnDestroy(): void {
+        this.limpiarBlob();
+    }
+
+    private cargarPreview(): void {
+        this.cargandoPreview.set(true);
+        this.limpiarBlob();
+
+        const url = this.documentosSvc.ver(this.archivo().rutaArchivo);
+        this.http.get(url, { responseType: 'blob' }).subscribe({
+            next: (blob) => {
+                this.blobUrl = URL.createObjectURL(blob);
+                this.previewUrl.set(
+                    this.sanitizer.bypassSecurityTrustResourceUrl(this.blobUrl)
+                );
+                this.cargandoPreview.set(false);
+            },
+            error: () => {
+                this.cargandoPreview.set(false);
+            }
+        });
+    }
+
+    private limpiarBlob(): void {
+        if (this.blobUrl) {
+            URL.revokeObjectURL(this.blobUrl);
+            this.blobUrl = null;
+        }
+    }
 
     abrirEnNuevaVentana(): void {
         window.open(this.documentosSvc.descargar(this.archivo().rutaArchivo), '_blank');

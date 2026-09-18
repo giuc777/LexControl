@@ -3,7 +3,9 @@ import { Router } from '@angular/router';
 
 import { AuthService } from '../../core/auth/auth-service';
 import { PermisosService } from '../../core/permisos/permisos';
+import { BuscarService } from '../../core/services/buscar-service';
 import { NotificacionesService } from '../../core/services/notificaciones-service';
+import { BusquedaResultado } from '../../core/models/busqueda.model';
 import { IconoSvg } from '../../shared/components/icono-svg/icono-svg';
 
 const ICONO_SEARCH = 'M11 11a7 7 0 1 0 0-2M21 21l-4.35-4.35';
@@ -20,6 +22,7 @@ const ICONO_MENU = 'M4 6h16M4 12h16M4 18h16';
 export class Topbar implements OnInit, OnDestroy {
     private readonly permisos = inject(PermisosService);
     private readonly router = inject(Router);
+    private readonly buscarSvc = inject(BuscarService);
     private readonly notificacionesSvc = inject(NotificacionesService);
 
     readonly auth = inject(AuthService);
@@ -32,7 +35,13 @@ export class Topbar implements OnInit, OnDestroy {
     readonly mostrarOj = computed(() => this.permisos.tiene('notificaciones'));
     readonly iniciales = computed(() => obtenerIniciales(this.auth.nombre() || 'Administrador del Sistema'));
 
-    /* Conteo real de notificaciones pendientes (no atendidas). */
+    /* --- Búsqueda --- */
+    readonly busquedaQuery = signal('');
+    readonly resultadosBusqueda = signal<BusquedaResultado | null>(null);
+    readonly mostrarResultados = signal(false);
+    private busquedaTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    /* --- Notificaciones --- */
     readonly pendientes = signal(0);
 
     private intervalo: ReturnType<typeof setInterval> | null = null;
@@ -43,9 +52,36 @@ export class Topbar implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        if (this.busquedaTimeout) clearTimeout(this.busquedaTimeout);
         if (this.intervalo) clearInterval(this.intervalo);
     }
 
+    /* Búsqueda con debounce de 300ms. */
+    onBusquedaInput(valor: string): void {
+        this.busquedaQuery.set(valor);
+        this.mostrarResultados.set(valor.length >= 2);
+
+        if (this.busquedaTimeout) clearTimeout(this.busquedaTimeout);
+        if (valor.length < 2) {
+            this.resultadosBusqueda.set(null);
+            return;
+        }
+        this.busquedaTimeout = setTimeout(() => {
+            this.buscarSvc.buscar(valor).subscribe(r => this.resultadosBusqueda.set(r));
+        }, 300);
+    }
+
+    cerrarResultados(): void {
+        setTimeout(() => this.mostrarResultados.set(false), 200);
+    }
+
+    navegarResultado(ruta: string): void {
+        this.mostrarResultados.set(false);
+        this.busquedaQuery.set('');
+        this.router.navigateByUrl(ruta);
+    }
+
+    /* Notificaciones */
     verNotificaciones(): void {
         this.router.navigateByUrl('/notificaciones-oj');
     }

@@ -5,7 +5,93 @@
 
     <div class="search-box">
         <svg appIcono [appIcono]="iconoSearch"></svg>
-        <input type="search" placeholder="Buscar expedientes, clientes o audiencias..." aria-label="Buscar">
+        <input type="search"
+               placeholder="Buscar expedientes, clientes o audiencias..."
+               aria-label="Buscar"
+               [value]="busquedaQuery()"
+               (input)="onBusquedaInput($any($event.target).value)"
+               (blur)="cerrarResultados()"
+               autocomplete="off">
+
+        @if (mostrarResultados() && resultadosBusqueda()) {
+            <div class="search-results">
+                @if (resultadosBusqueda()!.expedientes.length > 0) {
+                    @for (item of resultadosBusqueda()!.expedientes; track item.id) {
+                        <a class="search-item" (mousedown)="navegarResultado(item.ruta)">
+                            <span class="search-item-label">Expediente</span>
+                            <span class="search-item-titulo">{{ item.titulo }}</span>
+                            @if (item.subtitulo) {
+                                <span class="search-item-sub">{{ item.subtitulo }}</span>
+                            }
+                        </a>
+                    }
+                }
+                @if (resultadosBusqueda()!.clientes.length > 0) {
+                    @for (item of resultadosBusqueda()!.clientes; track item.id) {
+                        <a class="search-item" (mousedown)="navegarResultado(item.ruta)">
+                            <span class="search-item-label">Cliente</span>
+                            <span class="search-item-titulo">{{ item.titulo }}</span>
+                            @if (item.subtitulo) {
+                                <span class="search-item-sub">{{ item.subtitulo }}</span>
+                            }
+                        </a>
+                    }
+                }
+                @if (resultadosBusqueda()!.audiencias.length > 0) {
+                    @for (item of resultadosBusqueda()!.audiencias; track item.id) {
+                        <a class="search-item" (mousedown)="navegarResultado(item.ruta)">
+                            <span class="search-item-label">Audiencia</span>
+                            <span class="search-item-titulo">{{ item.titulo }}</span>
+                            @if (item.subtitulo) {
+                                <span class="search-item-sub">{{ item.subtitulo }}</span>
+                            }
+                        </a>
+                    }
+                }
+                @if (resultadosBusqueda()!.tramites.length > 0) {
+                    @for (item of resultadosBusqueda()!.tramites; track item.id) {
+                        <a class="search-item" (mousedown)="navegarResultado(item.ruta)">
+                            <span class="search-item-label">Trámite</span>
+                            <span class="search-item-titulo">{{ item.titulo }}</span>
+                            @if (item.subtitulo) {
+                                <span class="search-item-sub">{{ item.subtitulo }}</span>
+                            }
+                        </a>
+                    }
+                }
+                @if (resultadosBusqueda()!.notificaciones.length > 0) {
+                    @for (item of resultadosBusqueda()!.notificaciones; track item.id) {
+                        <a class="search-item" (mousedown)="navegarResultado(item.ruta)">
+                            <span class="search-item-label">Notificación</span>
+                            <span class="search-item-titulo">{{ item.titulo }}</span>
+                            @if (item.subtitulo) {
+                                <span class="search-item-sub">{{ item.subtitulo }}</span>
+                            }
+                        </a>
+                    }
+                }
+                @if (resultadosBusqueda()!.diligencias.length > 0) {
+                    @for (item of resultadosBusqueda()!.diligencias; track item.id) {
+                        <a class="search-item" (mousedown)="navegarResultado(item.ruta)">
+                            <span class="search-item-label">Diligencia</span>
+                            <span class="search-item-titulo">{{ item.titulo }}</span>
+                            @if (item.subtitulo) {
+                                <span class="search-item-sub">{{ item.subtitulo }}</span>
+                            }
+                        </a>
+                    }
+                }
+
+                @if (resultadosBusqueda()!.expedientes.length === 0 &&
+                     resultadosBusqueda()!.clientes.length === 0 &&
+                     resultadosBusqueda()!.audiencias.length === 0 &&
+                     resultadosBusqueda()!.tramites.length === 0 &&
+                     resultadosBusqueda()!.notificaciones.length === 0 &&
+                     resultadosBusqueda()!.diligencias.length === 0) {
+                    <div class="search-empty">Sin resultados para "{{ busquedaQuery() }}"</div>
+                }
+            </div>
+        }
     </div>
 </div>
 

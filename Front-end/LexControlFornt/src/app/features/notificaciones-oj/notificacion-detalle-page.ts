@@ -109,18 +109,19 @@ export class NotificacionDetallePage implements OnInit {
     }
 
     descargarPdf(): void {
-        const ruta = this.notificacion()?.pdfRuta;
-        if (!ruta) return;
-        this.notificacionesSvc.descargar(ruta, 'Documento_adjunto.pdf');
+        const id = this.notificacion()?.id;
+        if (!id) return;
+        this.notificacionesSvc.descargarPdf(id, 'Documento_adjunto.pdf');
     }
 
     abrirVisor(): void {
-        const ruta = this.notificacion()?.pdfRuta;
-        if (!ruta) return;
+        const notif = this.notificacion();
+        if (!notif?.pdfRuta) return;
         this.archivoPreview.set({
             nombreArchivo: 'Documento adjunto',
-            rutaArchivo: ruta,
-            tipoArchivo: 'PDF'
+            tipoArchivo: 'PDF',
+            previewUrl: this.notificacionesSvc.verPdf(notif.id),
+            downloadUrl: this.notificacionesSvc.descargarPdfUrl(notif.id)
         });
     }
 

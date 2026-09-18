@@ -70,36 +70,28 @@ public class DocumentosController : ControllerBase
         });
     }
 
-    /// <summary>Descarga un archivo por su ruta.</summary>
-    [HttpGet("download/{ruta}")]
+    /// <summary>Descarga un documento por su ID (resuelve la ruta en el servidor).</summary>
+    [HttpGet("{documentoId:int}/download")]
     [Authorize(Roles = "Administrador,Abogado,Secretaria")]
-    public IActionResult Descargar(string ruta)
+    public async Task<IActionResult> Descargar(int documentoId)
     {
-        var rutaAbsoluta = _storage.ObtenerRutaAbsoluta(ruta);
-        if (!System.IO.File.Exists(rutaAbsoluta))
+        var doc = await _expedienteService.ObtenerDocumentoPorIdAsync(documentoId);
+        if (doc is null)
             return NotFound();
 
-        var stream = new FileStream(rutaAbsoluta, FileMode.Open, FileAccess.Read);
-        var contentType = ObtenerContentType(ruta);
-        var nombre = Path.GetFileName(rutaAbsoluta);
-
-        return File(stream, contentType, nombre);
+        return ServirArchivo(doc.RutaArchivo, inline: false, nombre: doc.NombreArchivo);
     }
 
-    /// <summary>Vista previa inline de un archivo (sin descarga).</summary>
-    [HttpGet("preview/{ruta}")]
+    /// <summary>Vista previa inline de un documento por su ID.</summary>
+    [HttpGet("{documentoId:int}/preview")]
     [Authorize(Roles = "Administrador,Abogado,Secretaria")]
-    public IActionResult Preview(string ruta)
+    public async Task<IActionResult> Preview(int documentoId)
     {
-        var rutaAbsoluta = _storage.ObtenerRutaAbsoluta(ruta);
-        if (!System.IO.File.Exists(rutaAbsoluta))
+        var doc = await _expedienteService.ObtenerDocumentoPorIdAsync(documentoId);
+        if (doc is null)
             return NotFound();
 
-        var stream = new FileStream(rutaAbsoluta, FileMode.Open, FileAccess.Read, FileShare.Read);
-        var contentType = ObtenerContentType(ruta);
-
-        Response.Headers.Append("Content-Disposition", "inline");
-        return File(stream, contentType);
+        return ServirArchivo(doc.RutaArchivo, inline: true);
     }
 
     /// <summary>Elimina un archivo del disco y su registro.</summary>
@@ -112,14 +104,22 @@ public class DocumentosController : ControllerBase
         return NoContent();
     }
 
-    private static string ObtenerContentType(string ruta) => Path.GetExtension(ruta).ToLowerInvariant() switch
+    /// <summary>Sirve un archivo validando que la ruta permanezca en el directorio base.</summary>
+    private IActionResult ServirArchivo(string rutaRelativa, bool inline, string? nombre = null)
     {
-        ".pdf"  => "application/pdf",
-        ".doc"  => "application/msword",
-        ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        ".jpg" or ".jpeg" => "image/jpeg",
-        ".png"  => "image/png",
-        ".txt"  => "text/plain",
-        _       => "application/octet-stream"
-    };
+        var rutaAbsoluta = _storage.ResolverRutaSegura(rutaRelativa);
+        if (rutaAbsoluta is null || !System.IO.File.Exists(rutaAbsoluta))
+            return NotFound();
+
+        var stream = new FileStream(rutaAbsoluta, FileMode.Open, FileAccess.Read, FileShare.Read);
+        var contentType = ArchivoContentType.Obtener(rutaAbsoluta);
+
+        if (inline)
+        {
+            Response.Headers.Append("Content-Disposition", "inline");
+            return File(stream, contentType);
+        }
+
+        return File(stream, contentType, nombre ?? Path.GetFileName(rutaAbsoluta));
+    }
 }

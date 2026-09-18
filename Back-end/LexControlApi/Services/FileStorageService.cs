@@ -59,14 +59,22 @@ public class FileStorageService : IFileStorageService
         [".txt"]  = ".txt",
     };
 
-    public FileStorageService(IConfiguration configuracion, ILogger<FileStorageService> logger)
+    public FileStorageService(IConfiguration configuracion, IWebHostEnvironment entorno, ILogger<FileStorageService> logger)
     {
         _logger = logger;
-        _basePath = configuracion["FileStorage:BasePath"]
-            ?? Path.Combine(AppContext.BaseDirectory, "wwwroot", "documentos");
 
-        if (!Directory.Exists(_basePath))
-            Directory.CreateDirectory(_basePath);
+        // La ruta base se ancla al ContentRoot (no al directorio de trabajo)
+        // para que el almacenamiento sea determinista sin importar cómo se
+        // inicie la aplicación (dotnet run, exe directo, publicado).
+        var rutaConfig = configuracion["FileStorage:BasePath"];
+        _basePath = string.IsNullOrWhiteSpace(rutaConfig)
+            ? Path.Combine(entorno.ContentRootPath, "wwwroot", "documentos")
+            : Path.IsPathRooted(rutaConfig)
+                ? rutaConfig
+                : Path.Combine(entorno.ContentRootPath, rutaConfig);
+
+        Directory.CreateDirectory(_basePath);
+        _logger.LogInformation("Almacenamiento de documentos en: {BasePath}", Path.GetFullPath(_basePath));
     }
 
     public async Task<ArchivoGuardado> GuardarAsync(IFormFile archivo, int expedienteId, string? descripcion = null)
@@ -108,8 +116,8 @@ public class FileStorageService : IFileStorageService
 
     public Task<bool> EliminarAsync(string rutaRelativa)
     {
-        var rutaCompleta = Path.Combine(_basePath, rutaRelativa.Replace("/", "\\"));
-        if (!File.Exists(rutaCompleta))
+        var rutaCompleta = ResolverRutaSegura(rutaRelativa);
+        if (rutaCompleta is null || !File.Exists(rutaCompleta))
             return Task.FromResult(false);
 
         File.Delete(rutaCompleta);
@@ -117,8 +125,33 @@ public class FileStorageService : IFileStorageService
         return Task.FromResult(true);
     }
 
-    public string ObtenerRutaAbsoluta(string rutaRelativa)
-        => Path.Combine(_basePath, rutaRelativa.Replace("/", "\\"));
+    public string? ResolverRutaSegura(string rutaRelativa)
+    {
+        if (string.IsNullOrWhiteSpace(rutaRelativa))
+            return null;
+
+        var baseCompleta = Path.GetFullPath(_basePath);
+
+        // Normaliza separadores y resuelve la ruta candidata.
+        var normalizada = rutaRelativa
+            .Replace('/', Path.DirectorySeparatorChar)
+            .Replace('\\', Path.DirectorySeparatorChar);
+
+        var candidata = Path.GetFullPath(Path.Combine(baseCompleta, normalizada));
+
+        var prefijo = baseCompleta.EndsWith(Path.DirectorySeparatorChar)
+            ? baseCompleta
+            : baseCompleta + Path.DirectorySeparatorChar;
+
+        // Debe permanecer dentro del directorio base (bloquea ../ y rutas absolutas).
+        if (!candidata.StartsWith(prefijo, StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogWarning("Intento de acceso fuera del directorio base: {Ruta}", rutaRelativa);
+            return null;
+        }
+
+        return candidata;
+    }
 
     private static string LimpiarNombre(string nombre)
     {

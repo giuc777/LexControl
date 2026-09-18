@@ -184,7 +184,8 @@ public interface IExpedienteService
 | Metodo | Ruta | Auth | Body | Retorna |
 |---|---|---|---|---|
 | POST | `/api/documentos/upload` | Admin, Abogado, Secretaria | multipart/form-data: file, expedienteId, descripcion | 201 |
-| GET | `/api/documentos/download/{ruta}` | Admin, Abogado, Secretaria | — | Archivo binario |
+| GET | `/api/documentos/{id}/download` | Admin, Abogado, Secretaria | — | Archivo binario |
+| GET | `/api/documentos/{id}/preview` | Admin, Abogado, Secretaria | — | Archivo binario (inline) |
 | DELETE | `/api/documentos/{id}` | Admin, Abogado | — | 204 |
 
 **Upload - Detalles:**

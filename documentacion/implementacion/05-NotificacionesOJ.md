@@ -79,8 +79,9 @@ Registro DI en `Program.cs`: `AddScoped<INotificacionService, NotificacionServic
 
 El endpoint reutiliza `IFileStorageService.GuardarAsync` (validación por extensión y magic
 bytes) usando la carpeta del expediente de la notificación. La ruta se persiste con
-`SP_NotificacionOJ_AdjuntarPDF`. La descarga usa el endpoint genérico
-`GET /api/documentos/download/{ruta}`.
+`SP_NotificacionOJ_AdjuntarPDF`. La vista previa y descarga usan endpoints por ID que
+resuelven la ruta en el servidor:
+`GET /api/notificaciones/{id}/pdf/preview` y `GET /api/notificaciones/{id}/pdf/download`.
 
 ---
 

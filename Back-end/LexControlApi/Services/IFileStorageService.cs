@@ -16,6 +16,10 @@ public interface IFileStorageService
     /// <summary>Elimina un archivo del disco.</summary>
     Task<bool> EliminarAsync(string rutaRelativa);
 
-    /// <summary>Obtiene la ruta absoluta de un archivo.</summary>
-    string ObtenerRutaAbsoluta(string rutaRelativa);
+    /// <summary>
+    /// Resuelve la ruta absoluta de un archivo validando que permanezca
+    /// dentro del directorio base (previene path traversal). Devuelve null
+    /// si la ruta es inválida o intenta salir del directorio base.
+    /// </summary>
+    string? ResolverRutaSegura(string rutaRelativa);
 }

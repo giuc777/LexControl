@@ -2,13 +2,16 @@ import { ChangeDetectionStrategy, Component, inject, input, OnDestroy, OnInit, o
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
-import { DocumentosService } from '../../../core/services/documentos-service';
+import { ToastService } from '../../../layout/toast/toast-service';
 import { Modal } from '../modal/modal';
 
 export interface ArchivoVisor {
     nombreArchivo: string;
-    rutaArchivo: string;
     tipoArchivo: string;
+    /** URL de vista previa inline (ya resuelta por el backend). */
+    previewUrl: string;
+    /** URL de descarga (ya resuelta por el backend). */
+    downloadUrl: string;
 }
 
 @Component({
@@ -20,7 +23,7 @@ export interface ArchivoVisor {
 export class VisorArchivosComponent implements OnInit, OnDestroy {
     private readonly http = inject(HttpClient);
     private readonly sanitizer = inject(DomSanitizer);
-    private readonly documentosSvc = inject(DocumentosService);
+    private readonly toast = inject(ToastService);
 
     private blobUrl: string | null = null;
 
@@ -50,8 +53,8 @@ export class VisorArchivosComponent implements OnInit, OnDestroy {
         this.cargandoPreview.set(true);
         this.limpiarBlob();
 
-        const url = this.documentosSvc.ver(this.archivo().rutaArchivo);
-        this.http.get(url, { responseType: 'blob' }).subscribe({
+        // Se obtiene vía HttpClient para que el interceptor adjunte el JWT.
+        this.http.get(this.archivo().previewUrl, { responseType: 'blob' }).subscribe({
             next: (blob) => {
                 this.blobUrl = URL.createObjectURL(blob);
                 this.previewUrl.set(
@@ -61,6 +64,7 @@ export class VisorArchivosComponent implements OnInit, OnDestroy {
             },
             error: () => {
                 this.cargandoPreview.set(false);
+                this.toast.mostrar('No se pudo cargar la vista previa del archivo.');
             }
         });
     }
@@ -72,7 +76,15 @@ export class VisorArchivosComponent implements OnInit, OnDestroy {
         }
     }
 
+    /** Abre el archivo en una nueva pestaña (autenticado vía blob). */
     abrirEnNuevaVentana(): void {
-        this.documentosSvc.descargar(this.archivo().rutaArchivo, this.archivo().nombreArchivo);
+        this.http.get(this.archivo().previewUrl, { responseType: 'blob' }).subscribe({
+            next: (blob) => {
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+                setTimeout(() => URL.revokeObjectURL(url), 60_000);
+            },
+            error: () => this.toast.mostrar('No se pudo abrir el archivo en una nueva ventana.')
+        });
     }
 }

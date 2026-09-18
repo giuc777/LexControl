@@ -87,7 +87,7 @@ export class ExpedienteDetallePage implements OnInit {
     }
 
     descargarDocumento(doc: DocExpediente): void {
-        this.documentosSvc.descargar(doc.rutaArchivo, doc.nombreArchivo);
+        this.documentosSvc.descargar(doc.id, doc.nombreArchivo);
     }
 
     eliminarDocumento(doc: DocExpediente): void {
@@ -100,8 +100,9 @@ export class ExpedienteDetallePage implements OnInit {
     abrirPreview(doc: DocExpediente): void {
         this.archivoPreview.set({
             nombreArchivo: doc.nombreArchivo,
-            rutaArchivo: doc.rutaArchivo,
-            tipoArchivo: doc.tipoArchivo
+            tipoArchivo: doc.tipoArchivo,
+            previewUrl: this.documentosSvc.ver(doc.id),
+            downloadUrl: this.documentosSvc.descargarUrl(doc.id)
         });
     }
 

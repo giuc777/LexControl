@@ -118,4 +118,37 @@ public class NotificacionesController : ControllerBase
             resultado.Tamano
         }));
     }
+
+    /// <summary>Vista previa inline del PDF adjunto a una notificación.</summary>
+    [HttpGet("{id:int}/pdf/preview")]
+    [Authorize(Roles = "Administrador,Abogado,Secretaria")]
+    public async Task<IActionResult> PreviewPdf(int id) => await ServirPdf(id, inline: true);
+
+    /// <summary>Descarga el PDF adjunto a una notificación.</summary>
+    [HttpGet("{id:int}/pdf/download")]
+    [Authorize(Roles = "Administrador,Abogado,Secretaria")]
+    public async Task<IActionResult> DescargarPdf(int id) => await ServirPdf(id, inline: false);
+
+    /// <summary>Sirve el PDF de una notificación validando la ruta en el directorio base.</summary>
+    private async Task<IActionResult> ServirPdf(int id, bool inline)
+    {
+        var notificacion = await _service.ObtenerPorIdAsync(id);
+        if (notificacion is null || string.IsNullOrWhiteSpace(notificacion.PdfRuta))
+            return NotFound();
+
+        var rutaAbsoluta = _storage.ResolverRutaSegura(notificacion.PdfRuta);
+        if (rutaAbsoluta is null || !System.IO.File.Exists(rutaAbsoluta))
+            return NotFound();
+
+        var stream = new FileStream(rutaAbsoluta, FileMode.Open, FileAccess.Read, FileShare.Read);
+        var contentType = ArchivoContentType.Obtener(rutaAbsoluta);
+
+        if (inline)
+        {
+            Response.Headers.Append("Content-Disposition", "inline");
+            return File(stream, contentType);
+        }
+
+        return File(stream, contentType, Path.GetFileName(rutaAbsoluta));
+    }
 }

@@ -4,6 +4,7 @@ import { Observable, map, catchError, of } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { RespuestaApi } from '../api/respuesta-api';
+import { ToastService } from '../../layout/toast/toast-service';
 import {
     NotificacionActualizar,
     NotificacionAtender,
@@ -18,6 +19,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class NotificacionesService {
     private readonly http = inject(HttpClient);
+    private readonly toast = inject(ToastService);
     private readonly base = `${environment.apiBaseUrl}/api/notificaciones`;
 
     listar(filtros: {
@@ -83,21 +85,33 @@ export class NotificacionesService {
             .pipe(map(r => r.data));
     }
 
-    /* Descarga un archivo por su ruta relativa como blob (con auth). */
-    descargarBlob(rutaArchivo: string): Observable<Blob> {
-        const url = `${environment.apiBaseUrl}/api/documentos/download/${encodeURIComponent(rutaArchivo)}`;
-        return this.http.get(url, { responseType: 'blob' });
+    /* URL de vista previa inline del PDF adjunto (resuelta por ID). */
+    verPdf(id: number): string {
+        return `${this.base}/${id}/pdf/preview`;
     }
 
-    /* Descarga un archivo y lo guarda como descarga del navegador. */
-    descargar(rutaArchivo: string, nombreArchivo?: string): void {
-        this.descargarBlob(rutaArchivo).subscribe(blob => {
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = nombreArchivo ?? rutaArchivo.split('/').pop() ?? 'archivo';
-            a.click();
-            URL.revokeObjectURL(blobUrl);
+    /* URL de descarga del PDF adjunto (resuelta por ID). */
+    descargarPdfUrl(id: number): string {
+        return `${this.base}/${id}/pdf/download`;
+    }
+
+    /* Obtiene el PDF adjunto como blob (pasa por el interceptor con JWT). */
+    descargarPdfBlob(id: number): Observable<Blob> {
+        return this.http.get(this.descargarPdfUrl(id), { responseType: 'blob' });
+    }
+
+    /* Descarga el PDF adjunto y lo guarda mediante el navegador. */
+    descargarPdf(id: number, nombreArchivo = 'Documento_adjunto.pdf'): void {
+        this.descargarPdfBlob(id).subscribe({
+            next: blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = nombreArchivo;
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            },
+            error: () => this.toast.mostrar('No se pudo descargar el documento adjunto.')
         });
     }
 

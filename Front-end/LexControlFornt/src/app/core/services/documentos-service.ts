@@ -5,13 +5,15 @@ import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { RespuestaApi } from '../api/respuesta-api';
 import { DocExpediente, DocumentoUploadResponse } from '../models/expediente.model';
+import { ToastService } from '../../layout/toast/toast-service';
 
 /* Servicio HTTP para documentos de expedientes. Consume los endpoints de
-   DocumentosController.cs (upload/download/delete/preview) y el endpoint anidado
-   de ExpedientesController.cs (listar). */
+   DocumentosController.cs. La descarga/vista previa se hace por ID, de modo
+   que el backend resuelve la ruta en el servidor (no se exponen rutas). */
 @Injectable({ providedIn: 'root' })
 export class DocumentosService {
     private readonly http = inject(HttpClient);
+    private readonly toast = inject(ToastService);
     private readonly expedientesBase = `${environment.apiBaseUrl}/api/expedientes`;
     private readonly documentosBase = `${environment.apiBaseUrl}/api/documentos`;
 
@@ -31,28 +33,39 @@ export class DocumentosService {
             .post<DocumentoUploadResponse>(`${this.documentosBase}/upload`, formData);
     }
 
-    ver(rutaArchivo: string): string {
-        return `${this.documentosBase}/preview/${encodeURIComponent(rutaArchivo)}`;
+    /** URL de vista previa inline (resuelta por ID en el backend). */
+    ver(documentoId: number): string {
+        return `${this.documentosBase}/${documentoId}/preview`;
     }
 
-    descargarBlob(rutaArchivo: string): Observable<Blob> {
-        const url = `${this.documentosBase}/download/${encodeURIComponent(rutaArchivo)}`;
-        return this.http.get(url, { responseType: 'blob' });
+    /** URL de descarga (resuelta por ID en el backend). */
+    descargarUrl(documentoId: number): string {
+        return `${this.documentosBase}/${documentoId}/download`;
+    }
+
+    /** Obtiene el archivo como blob (pasa por el interceptor con JWT). */
+    descargarBlob(documentoId: number): Observable<Blob> {
+        return this.http.get(this.descargarUrl(documentoId), { responseType: 'blob' });
+    }
+
+    /** Descarga el archivo y lo guarda mediante el navegador. */
+    descargar(documentoId: number, nombreArchivo?: string): void {
+        this.descargarBlob(documentoId).subscribe({
+            next: blob => this.guardarBlob(blob, nombreArchivo),
+            error: () => this.toast.mostrar('No se pudo descargar el archivo.')
+        });
     }
 
     eliminar(documentoId: number): Observable<void> {
         return this.http.delete<void>(`${this.documentosBase}/${documentoId}`);
     }
 
-    /** Descarga un archivo y lo guarda como descarga del navegador. */
-    descargar(rutaArchivo: string, nombreArchivo?: string): void {
-        this.descargarBlob(rutaArchivo).subscribe(blob => {
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = nombreArchivo ?? rutaArchivo.split('/').pop() ?? 'archivo';
-            a.click();
-            URL.revokeObjectURL(blobUrl);
-        });
+    private guardarBlob(blob: Blob, nombreArchivo?: string): void {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombreArchivo ?? 'archivo';
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 }

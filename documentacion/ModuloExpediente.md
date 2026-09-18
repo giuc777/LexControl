@@ -459,7 +459,8 @@ EXEC SP_DocExpediente_ObtenerPorExpediente @Expediente_ID = 10;
 | Método | Endpoint | Autorización | Descripción |
 |---|---|---|---|
 | POST | `/upload` | Admin, Abogado, Secretaria | Subir archivo (multipart) |
-| GET | `/download/{ruta}` | Autenticado | Descargar archivo |
+| GET | `/{id}/download` | Admin, Abogado, Secretaria | Descargar archivo (ruta resuelta por ID en el servidor) |
+| GET | `/{id}/preview` | Admin, Abogado, Secretaria | Vista previa inline (ruta resuelta por ID) |
 | DELETE | `/{id}` | Admin, Abogado | Eliminar archivo |
 
 **Upload - Detalles**:

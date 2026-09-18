@@ -80,8 +80,9 @@ export class HistoricoDetallePage implements OnInit {
     abrirPreview(doc: DocExpediente): void {
         this.archivoPreview.set({
             nombreArchivo: doc.nombreArchivo,
-            rutaArchivo: doc.rutaArchivo,
-            tipoArchivo: doc.tipoArchivo
+            tipoArchivo: doc.tipoArchivo,
+            previewUrl: this.documentosSvc.ver(doc.id),
+            downloadUrl: this.documentosSvc.descargarUrl(doc.id)
         });
     }
 

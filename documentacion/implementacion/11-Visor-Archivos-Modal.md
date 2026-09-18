@@ -1,5 +1,18 @@
 # 11 – Visor de Archivos (Vista Previa en Modal)
 
+> **Nota de implementación final (posterior al plan original):** la primera versión pasaba la
+> ruta relativa del archivo en el parámetro de ruta (`/download/{ruta}`), lo que fallaba porque
+> ASP.NET Core **no decodifica `%2F`** en valores de ruta (el controlador recibía `24%2Farchivo.pdf`
+> y `File.Exists` devolvía 404). La versión final es **por ID**: el backend resuelve la ruta en el
+> servidor y nunca se expone ni se acepta una ruta desde el cliente.
+>
+> - `GET /api/documentos/{id}/preview` y `GET /api/documentos/{id}/download`
+> - `GET /api/notificaciones/{id}/pdf/preview` y `GET /api/notificaciones/{id}/pdf/download`
+> - `FileStorageService.ResolverRutaSegura()` valida que la ruta resuelta permanezca dentro del
+>   directorio base (bloquea path traversal) y la ruta base se ancla a `ContentRootPath`.
+> - El `VisorArchivosComponent` recibe `previewUrl` y `downloadUrl` ya construidas y obtiene el
+>   archivo vía `HttpClient` (blob) para que el interceptor adjunte el JWT.
+
 ## Objetivo
 
 Crear un componente compartido `VisorArchivosComponent` que muestre una vista previa de archivos subidos (PDF, imagen, DOC, TXT) dentro de un modal, con un botón para abrir el archivo en una nueva pestaña.

@@ -37,6 +37,7 @@ public interface IExpedienteService
 
     // ── Documentos ──────────────────────────────────────────────
     Task<List<DocExpedienteDto>> ObtenerDocumentosAsync(int expedienteId);
+    Task<DocExpedienteDto?> ObtenerDocumentoPorIdAsync(int documentoId);
     Task<DocExpedienteDto> CrearDocumentoAsync(int expedienteId, DocExpedienteCrearDto datos, int usuarioId);
     Task EliminarDocumentoAsync(int documentoId);
 }
@@ -304,6 +305,14 @@ public class ExpedienteService : IExpedienteService
             "SP_DocExpediente_ObtenerPorExpediente",
             new { Expediente_ID = expedienteId });
         return filas.Select(DocExpedienteDto.Desde).ToList();
+    }
+
+    public async Task<DocExpedienteDto?> ObtenerDocumentoPorIdAsync(int documentoId)
+    {
+        var fila = await _repositorio.ConsultarPrimeroAsync<DocExpedienteFila>(
+            "SP_DocExpediente_ObtenerPorID",
+            new { ID = documentoId });
+        return fila is null ? null : DocExpedienteDto.Desde(fila);
     }
 
     public async Task<DocExpedienteDto> CrearDocumentoAsync(int expedienteId, DocExpedienteCrearDto datos, int usuarioId)

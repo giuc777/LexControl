@@ -500,3 +500,27 @@ internal static class MagicBytes
 | Backend (magic bytes) | `El contenido del archivo no coincide con la extension {ext} indicada.` |
 | Frontend (extensión) | `Tipo de archivo no permitido. Solo se aceptan PDF, Word, JPG, PNG y TXT.` |
 | Frontend (magic bytes) | `El contenido del archivo no coincide con la extension {ext} indicada.` |
+
+### 11.6 Servido de archivos por ID (vista previa / descarga)
+
+La vista previa y la descarga **nunca aceptan una ruta desde el cliente**. Se resuelven por ID y
+el backend obtiene la ruta desde la BD:
+
+| Endpoint | Descripción |
+|---|---|
+| `GET /api/documentos/{id}/preview` | Vista previa inline (`Content-Disposition: inline`) |
+| `GET /api/documentos/{id}/download` | Descarga (`Content-Disposition: attachment`) |
+| `GET /api/notificaciones/{id}/pdf/preview` | Vista previa del PDF adjunto |
+| `GET /api/notificaciones/{id}/pdf/download` | Descarga del PDF adjunto |
+
+Reglas de seguridad:
+
+- **No usar rutas en el segmento de URL**: ASP.NET Core no decodifica `%2F` en valores de ruta,
+  por lo que `/download/{ruta}` recibía `24%2Farchivo.pdf` y fallaba con 404.
+- `FileStorageService.ResolverRutaSegura()` normaliza y valida que la ruta resuelta permanezca
+  **dentro del directorio base** (bloquea `../`, rutas absolutas y path traversal). Devuelve `null`
+  si es inválida.
+- La ruta base de almacenamiento se ancla a `IWebHostEnvironment.ContentRootPath` (no al directorio
+  de trabajo), de modo que el almacenamiento es determinista.
+- El frontend obtiene el archivo vía `HttpClient` (`responseType: 'blob'`) para que el interceptor
+  adjunte el JWT; nunca se usa `window.open()` con la URL del endpoint protegido.

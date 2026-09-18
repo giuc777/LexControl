@@ -111,7 +111,7 @@ export class NotificacionDetallePage implements OnInit {
     descargarPdf(): void {
         const ruta = this.notificacion()?.pdfRuta;
         if (!ruta) return;
-        window.open(this.notificacionesSvc.descargar(ruta), '_blank');
+        this.notificacionesSvc.descargar(ruta, 'Documento_adjunto.pdf');
     }
 
     abrirVisor(): void {

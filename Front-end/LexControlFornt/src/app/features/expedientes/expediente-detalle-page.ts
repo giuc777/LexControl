@@ -86,8 +86,8 @@ export class ExpedienteDetallePage implements OnInit {
         return 'otro';
     }
 
-    descargarDocumento(ruta: string): void {
-        window.open(this.documentosSvc.descargar(ruta), '_blank');
+    descargarDocumento(doc: DocExpediente): void {
+        this.documentosSvc.descargar(doc.rutaArchivo, doc.nombreArchivo);
     }
 
     eliminarDocumento(doc: DocExpediente): void {

@@ -83,10 +83,22 @@ export class NotificacionesService {
             .pipe(map(r => r.data));
     }
 
-    /* URL de descarga de un archivo por su ruta relativa. */
-    descargar(rutaArchivo: string): string {
-        const base = `${environment.apiBaseUrl}/api/documentos`;
-        return `${base}/download/${encodeURIComponent(rutaArchivo)}`;
+    /* Descarga un archivo por su ruta relativa como blob (con auth). */
+    descargarBlob(rutaArchivo: string): Observable<Blob> {
+        const url = `${environment.apiBaseUrl}/api/documentos/download/${encodeURIComponent(rutaArchivo)}`;
+        return this.http.get(url, { responseType: 'blob' });
+    }
+
+    /* Descarga un archivo y lo guarda como descarga del navegador. */
+    descargar(rutaArchivo: string, nombreArchivo?: string): void {
+        this.descargarBlob(rutaArchivo).subscribe(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = nombreArchivo ?? rutaArchivo.split('/').pop() ?? 'archivo';
+            a.click();
+            URL.revokeObjectURL(blobUrl);
+        });
     }
 
     /* Cuenta notificaciones pendientes (no atendidas) para el badge del topbar. */

@@ -73,6 +73,6 @@ export class VisorArchivosComponent implements OnInit, OnDestroy {
     }
 
     abrirEnNuevaVentana(): void {
-        window.open(this.documentosSvc.descargar(this.archivo().rutaArchivo), '_blank');
+        this.documentosSvc.descargar(this.archivo().rutaArchivo, this.archivo().nombreArchivo);
     }
 }

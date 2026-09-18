@@ -7,7 +7,7 @@ import { RespuestaApi } from '../api/respuesta-api';
 import { DocExpediente, DocumentoUploadResponse } from '../models/expediente.model';
 
 /* Servicio HTTP para documentos de expedientes. Consume los endpoints de
-   DocumentosController.cs (upload/download/delete) y el endpoint anidado
+   DocumentosController.cs (upload/download/delete/preview) y el endpoint anidado
    de ExpedientesController.cs (listar). */
 @Injectable({ providedIn: 'root' })
 export class DocumentosService {
@@ -31,15 +31,28 @@ export class DocumentosService {
             .post<DocumentoUploadResponse>(`${this.documentosBase}/upload`, formData);
     }
 
-    descargar(rutaArchivo: string): string {
-        return `${this.documentosBase}/download/${encodeURIComponent(rutaArchivo)}`;
-    }
-
     ver(rutaArchivo: string): string {
         return `${this.documentosBase}/preview/${encodeURIComponent(rutaArchivo)}`;
     }
 
+    descargarBlob(rutaArchivo: string): Observable<Blob> {
+        const url = `${this.documentosBase}/download/${encodeURIComponent(rutaArchivo)}`;
+        return this.http.get(url, { responseType: 'blob' });
+    }
+
     eliminar(documentoId: number): Observable<void> {
         return this.http.delete<void>(`${this.documentosBase}/${documentoId}`);
+    }
+
+    /** Descarga un archivo y lo guarda como descarga del navegador. */
+    descargar(rutaArchivo: string, nombreArchivo?: string): void {
+        this.descargarBlob(rutaArchivo).subscribe(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = nombreArchivo ?? rutaArchivo.split('/').pop() ?? 'archivo';
+            a.click();
+            URL.revokeObjectURL(blobUrl);
+        });
     }
 }

@@ -11,6 +11,7 @@ public interface IDiligenciaService
     Task<DiligenciaDetalleDto?> ObtenerPorIdAsync(int id);
     Task<int> CrearAsync(DiligenciaCrearDto dto, int usuarioId);
     Task ActualizarAsync(int id, DiligenciaActualizarDto dto);
+    Task RegistrarResultadoAsync(int id, DiligenciaResultadoDto dto, int usuarioId);
     Task EliminarAsync(int id);
 }
 
@@ -121,6 +122,23 @@ public class DiligenciaService : IDiligenciaService
                 Notas = dto.Notas,
                 TiempoDedicado = dto.TiempoDedicado,
                 RecordatorioMinutos = dto.RecordatorioMinutos
+            });
+    }
+
+    public async Task RegistrarResultadoAsync(int id, DiligenciaResultadoDto dto, int usuarioId)
+    {
+        if (dto.ResultadoId <= 0)
+            throw new ExcepcionNegocio(-2, "El resultado seleccionado no es válido.",
+                StatusCodes.Status400BadRequest);
+
+        await _repositorio.EjecutarRetornoAsync(
+            "SP_Diligencia_RegistrarResultado",
+            new
+            {
+                ID = id,
+                Resultado_ID = dto.ResultadoId,
+                DescripcionResultado = dto.DescripcionResultado,
+                UsuarioModificacion_ID = usuarioId
             });
     }
 

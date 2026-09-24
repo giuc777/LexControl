@@ -63,6 +63,16 @@ export class AgendaDetallePage implements OnInit {
         return estado === 'Programada' || estado === 'Reprogramada';
     }
 
+    puedeGestionarResultado(): boolean {
+        const aud = this.audiencia();
+        if (!aud) return false;
+        return this.esPendiente() || !!aud.resultado;
+    }
+
+    tieneResultado(): boolean {
+        return !!this.audiencia()?.resultado;
+    }
+
     colorEstado(estado: string): string {
         const colores: Record<string, string> = {
             'Programada': '#3498db',

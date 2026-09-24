@@ -162,6 +162,7 @@ Lista todos los catálogos maestros en un solo request (evita múltiples round-t
 | EstadosTramite | ESTADO_TRAMITE |
 | TiposDiligencia | TIPO_DILIGENCIA |
 | EstadosDiligencia | ESTADO_DILIGENCIA |
+| ResultadosDiligencia | RESULTADO_DILIGENCIA |
 | TiposNotificacionOJ | TIPO_NOTIFICACION_OJ |
 | EstadosNotificacionOJ | ESTADO_NOTIFICACION_OJ |
 | TiposProceso | TIPO_PROCESO |
@@ -248,10 +249,21 @@ Lista todos los catálogos maestros en un solo request (evita múltiples round-t
 | GET | `/api/audiencias` | (nuevo) | Lista con filtros: Expediente_ID, Fecha, Estado |
 | GET | `/api/audiencias/{id}` | — | Obtener por ID |
 | POST | `/api/audiencias` | `SP_Audiencia_Insertar` | Registrar audiencia |
-| PUT | `/api/audiencias/{id}/resultado` | `SP_Audiencia_RegistrarResultado` | Registrar resultado y estado = Realizada |
+| PUT | `/api/audiencias/{id}/resultado` | `SP_Audiencia_RegistrarResultado` | Registrar o editar resultado (sobreescribe; estado = Realizada) |
 | GET | `/api/audiencias/proximas` | `SP_Audiencia_Proximas` | Audiencias próximas (default 30 días) |
 
-### 6.5 Trámites (`TramitesController`)
+### 6.5 Diligencias (`DiligenciasController`)
+
+| Método | Endpoint | SP | Descripción |
+|---|---|---|---|
+| GET | `/api/diligencias` | `SP_Diligencia_Listar` | Lista con filtros: Expediente_ID, Cliente_ID, Tipo_ID, Estado_ID, Usuario_ID, fechas |
+| GET | `/api/diligencias/{id}` | `SP_Diligencia_ObtenerPorID` | Detalle con joins (incluye Resultado_ID/Resultado/DescripcionResultado) |
+| POST | `/api/diligencias` | `SP_Diligencia_Insertar` | Registrar diligencia (Administrador, Abogado) |
+| PUT | `/api/diligencias/{id}` | `SP_Diligencia_Actualizar` | Actualizar campos (incluye cambio de estado) |
+| PUT | `/api/diligencias/{id}/resultado` | `SP_Diligencia_RegistrarResultado` | Registrar o editar resultado (catálogo `RESULTADO_DILIGENCIA` + descripción; no cambia Estado) |
+| DELETE | `/api/diligencias/{id}` | `SP_Diligencia_Eliminar` | Cancelar diligencia (borrado lógico) |
+
+### 6.6 Trámites (`TramitesController`)
 
 | Método | Endpoint | SP | Descripción |
 |---|---|---|---|
@@ -259,7 +271,7 @@ Lista todos los catálogos maestros en un solo request (evita múltiples round-t
 | POST | `/api/tramites` | `SP_Tramite_Insertar` | Registrar trámite |
 | PUT | `/api/tramites/{id}/estado` | `SP_Tramite_ActualizarEstado` | Cambiar estado y registrar resolución |
 
-### 6.6 Notificaciones OJ (`NotificacionesController`)
+### 6.7 Notificaciones OJ (`NotificacionesController`)
 
 | Método | Endpoint | SP | Descripción |
 |---|---|---|---|
@@ -271,7 +283,7 @@ Lista todos los catálogos maestros en un solo request (evita múltiples round-t
 | POST | `/api/notificaciones/verificar-duplicado` | `SP_NotificacionOJ_VerificarDuplicado` | Chequear duplicados |
 | POST | `/api/notificaciones/{id}/pdf` | `SP_NotificacionOJ_AdjuntarPDF` | Adjuntar archivo |
 
-### 6.7 Eventos / Agenda (`EventosController`)
+### 6.8 Eventos / Agenda (`EventosController`)
 
 | Método | Endpoint | SP | Descripción |
 |---|---|---|---|
@@ -280,7 +292,7 @@ Lista todos los catálogos maestros en un solo request (evita múltiples round-t
 | POST | `/api/eventos` | `SP_EventoBase_Insertar` | Crear evento base |
 | POST | `/api/eventos/audiencia` | `SP_EventoAudiencia_Insertar` | Crear evento de tipo audiencia |
 
-### 6.8 Notas y Documentos
+### 6.9 Notas y Documentos
 
 Endpoints CRUD genéricos anidados bajo su entidad padre:
 - `POST /api/expedientes/{id}/notas` → `SP_NotaExpediente_Insertar`
@@ -289,7 +301,7 @@ Endpoints CRUD genéricos anidados bajo su entidad padre:
 
 Los demás (notas/documentos de cliente, audiencia, trámite, diligencia, notificación) siguen el mismo patrón y usarán SPs similares a crearse.
 
-### 6.9 Reportes (`ReportesController`)
+### 6.10 Reportes (`ReportesController`)
 
 | Método | Endpoint | SP | Descripción |
 |---|---|---|---|
@@ -307,7 +319,7 @@ Los demás (notas/documentos de cliente, audiencia, trámite, diligencia, notifi
 
 > Cada reporte devuelve **dos conjuntos de resultados**: un **resumen** (agrupado) y un **detalle** (filas individuales). El DTO de respuesta contendrá `Resumen` y `Detalle` como listas.
 
-### 6.10 Configuración (`ConfiguracionController`)
+### 6.11 Configuración (`ConfiguracionController`)
 
 | Método | Endpoint | SP | Descripción |
 |---|---|---|---|
@@ -316,7 +328,7 @@ Los demás (notas/documentos de cliente, audiencia, trámite, diligencia, notifi
 | PUT | `/api/configuracion/perfil` | — | Actualiza nombre/email/teléfono del usuario |
 | PUT | `/api/configuracion/cambiocontrasena` | — | Cambio de contraseña |
 
-### 6.11 Mantenimiento de Catálogos (`CatalogosController`)
+### 6.12 Mantenimiento de Catálogos (`CatalogosController`)
 
 CRUD genérico para catálogos del sistema. Solo accesible para Administrador (Rol_ID = 1).
 
@@ -328,7 +340,7 @@ CRUD genérico para catálogos del sistema. Solo accesible para Administrador (R
 | PUT | `/api/catalogos/{tabla}/{id}` | `SP_Catalogo_Actualizar` | Actualizar fila (valida unicidad de Nombre) |
 | PUT | `/api/catalogos/{tabla}/{id}/estado` | `SP_Catalogo_CambiarEstado` | Activar/desactivar fila (verifica integridad referencial antes de desactivar) |
 
-**Tablas soportadas** (whitelist): RAMA, ESTADO_EXPEDIENTE, TIPO_PROCESO, ROL_PROCESAL, TIPO_JUZGADO, ETIQUETA_NOTA.
+**Tablas soportadas** (whitelist): RAMA, ESTADO_EXPEDIENTE, TIPO_PROCESO, ROL_PROCESAL, TIPO_JUZGADO, ETIQUETA_NOTA, RESULTADO_DILIGENCIA.
 
 **Endpoints dedicados para Juzgado** (por complejidad con FKs):
 

@@ -213,6 +213,52 @@
     display: flex;
     gap: 12px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+/* ============ Resultado de la diligencia ============ */
+
+.resultado-panel {
+    border-left: 4px solid var(--brand);
+}
+
+.resultado-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.resultado-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.btn-editar-resultado {
+    margin-left: auto;
+    padding: 6px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.resultado-grid {
+    margin-bottom: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+.detalle-valor-resultado {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--brand);
+}
+
+.detalle-campo-full {
+    grid-column: 1 / -1;
 }
 
 /* ============ Meta del detalle ============ */

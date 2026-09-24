@@ -8,7 +8,8 @@ import {
     Diligencia,
     DiligenciaDetalle,
     DiligenciaCrear,
-    DiligenciaActualizar
+    DiligenciaActualizar,
+    DiligenciaResultado
 } from '../models/diligencia.model';
 
 @Injectable({ providedIn: 'root' })
@@ -48,6 +49,10 @@ export class DiligenciasService {
 
     actualizar(id: number, dto: DiligenciaActualizar): Observable<void> {
         return this.http.put<void>(`${this.base}/${id}`, dto);
+    }
+
+    registrarResultado(id: number, dto: DiligenciaResultado): Observable<void> {
+        return this.http.put<void>(`${this.base}/${id}/resultado`, dto);
     }
 
     eliminar(id: number): Observable<void> {

@@ -1,5 +1,5 @@
 <div class="modal-overlay" (click)="onCerrar()">
-    <div class="modal-contenido modal-amplio" (click)="$event.stopPropagation()">
+    <div class="modal-contenido modal-amplio" data-testid="modal-diligencia" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2>Nueva Diligencia</h2>
             <button class="btn-cerrar" (click)="onCerrar()">&times;</button>

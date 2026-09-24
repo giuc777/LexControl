@@ -57,6 +57,18 @@ public class DiligenciasController : ControllerBase
         return NoContent();
     }
 
+    [HttpPut("{id:int}/resultado")]
+    [Authorize(Roles = "Administrador,Abogado")]
+    public async Task<IActionResult> RegistrarResultado(int id, DiligenciaResultadoDto dto)
+    {
+        var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(claim) || !int.TryParse(claim, out var usuarioId) || usuarioId <= 0)
+            return Unauthorized(ApiResponse<object>.Fallo("No se pudo identificar al usuario."));
+
+        await _service.RegistrarResultadoAsync(id, dto, usuarioId);
+        return NoContent();
+    }
+
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "Administrador,Abogado")]
     public async Task<IActionResult> Eliminar(int id)

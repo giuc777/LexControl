@@ -15,6 +15,8 @@ export interface Diligencia {
     ubicacion: string | null;
     oficina: string | null;
     estado: string;
+    resultado: string | null;
+    descripcionResultado: string | null;
     tiempoDedicado: string | null;
     abogado: string | null;
 }
@@ -38,6 +40,9 @@ export interface DiligenciaDetalle {
     estadoId: number;
     estado: string;
     estadoColor: string | null;
+    resultadoId: number | null;
+    resultado: string | null;
+    descripcionResultado: string | null;
     notas: string | null;
     tiempoDedicado: string | null;
     recordatorioMinutos: number | null;
@@ -78,4 +83,9 @@ export interface DiligenciaActualizar {
     notas: string | null;
     tiempoDedicado: string | null;
     recordatorioMinutos: number | null;
+}
+
+export interface DiligenciaResultado {
+    resultadoId: number;
+    descripcionResultado: string;
 }

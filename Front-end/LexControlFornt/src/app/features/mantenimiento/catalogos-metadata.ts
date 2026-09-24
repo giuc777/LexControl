@@ -13,6 +13,7 @@ export const CATALOGOS: CatalogoDef[] = [
     { key: 'estado-tramite', titulo: 'Estados de Trámite', tabla: 'ESTADO_TRAMITE', texto: 'Situación de cada trámite.', color: '#3498DB', tipo: 'estandar' },
     { key: 'tipo-diligencia', titulo: 'Tipos de Diligencia', tabla: 'TIPO_DILIGENCIA', texto: 'Clases de gestión o diligencia del despacho.', color: '#3498DB', tipo: 'estandar' },
     { key: 'estado-diligencia', titulo: 'Estados de Diligencia', tabla: 'ESTADO_DILIGENCIA', texto: 'Situación de una diligencia.', color: '#F39C12', tipo: 'estandar' },
+    { key: 'resultado-diligencia', titulo: 'Resultados de Diligencia', tabla: 'RESULTADO_DILIGENCIA', texto: 'Desenlace registrado de una diligencia.', color: '#2ECC71', tipo: 'estandar' },
     { key: 'tipo-notificacion-oj', titulo: 'Tipos de Notificación OJ', tabla: 'TIPO_NOTIFICACION_OJ', texto: 'Clases de notificación del Organismo Judicial.', color: '#3498DB', tipo: 'estandar' },
     { key: 'estado-notificacion-oj', titulo: 'Estados de Notificación OJ', tabla: 'ESTADO_NOTIFICACION_OJ', texto: 'Situación de cada notificación recibida.', color: '#3498DB', tipo: 'estandar' },
     { key: 'tipo-proceso', titulo: 'Tipos de Proceso', tabla: 'TIPO_PROCESO', texto: 'Clases de proceso judicial.', color: '#3498DB', tipo: 'estandar' },

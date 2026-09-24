@@ -18,6 +18,9 @@ public class DiligenciaFila
     public string? Ubicacion { get; set; }
     public string? Oficina { get; set; }
     public string Estado { get; set; } = string.Empty;
+    public string? Resultado { get; set; }
+    public int? Resultado_ID { get; set; }
+    public string? DescripcionResultado { get; set; }
     public string? TiempoDedicado { get; set; }
     public int? RecordatorioMinutos { get; set; }
     public int Usuario_ID { get; set; }
@@ -46,6 +49,9 @@ public class DiligenciaDetalleFila
     public int Estado_ID { get; set; }
     public string Estado { get; set; } = string.Empty;
     public string? EstadoColor { get; set; }
+    public int? Resultado_ID { get; set; }
+    public string? Resultado { get; set; }
+    public string? DescripcionResultado { get; set; }
     public string? Notas { get; set; }
     public string? TiempoDedicado { get; set; }
     public int? RecordatorioMinutos { get; set; }
@@ -70,6 +76,8 @@ public class DiligenciaDto
     public string? Ubicacion { get; set; }
     public string? Oficina { get; set; }
     public string Estado { get; set; } = string.Empty;
+    public string? Resultado { get; set; }
+    public string? DescripcionResultado { get; set; }
     public string? TiempoDedicado { get; set; }
     public string? Abogado { get; set; }
 
@@ -88,6 +96,8 @@ public class DiligenciaDto
         Ubicacion = f.Ubicacion,
         Oficina = f.Oficina,
         Estado = f.Estado,
+        Resultado = f.Resultado,
+        DescripcionResultado = f.DescripcionResultado,
         TiempoDedicado = f.TiempoDedicado,
         Abogado = f.Abogado
     };
@@ -114,6 +124,9 @@ public class DiligenciaDetalleDto
     public int EstadoId { get; set; }
     public string Estado { get; set; } = string.Empty;
     public string? EstadoColor { get; set; }
+    public int? ResultadoId { get; set; }
+    public string? Resultado { get; set; }
+    public string? DescripcionResultado { get; set; }
     public string? Notas { get; set; }
     public string? TiempoDedicado { get; set; }
     public int? RecordatorioMinutos { get; set; }
@@ -141,6 +154,9 @@ public class DiligenciaDetalleDto
         EstadoId = f.Estado_ID,
         Estado = f.Estado,
         EstadoColor = f.EstadoColor,
+        ResultadoId = f.Resultado_ID,
+        Resultado = f.Resultado,
+        DescripcionResultado = f.DescripcionResultado,
         Notas = f.Notas,
         TiempoDedicado = f.TiempoDedicado,
         RecordatorioMinutos = f.RecordatorioMinutos,
@@ -229,4 +245,15 @@ public class DiligenciaActualizarDto
     public string? TiempoDedicado { get; set; }
 
     public int? RecordatorioMinutos { get; set; }
+}
+
+/// <summary>Datos de entrada para registrar o editar el resultado de una diligencia.</summary>
+public class DiligenciaResultadoDto
+{
+    [Required(ErrorMessage = "El resultado es obligatorio.")]
+    public int ResultadoId { get; set; }
+
+    [Required(ErrorMessage = "La descripción del resultado es obligatoria.")]
+    [MaxLength(1000)]
+    public string DescripcionResultado { get; set; } = string.Empty;
 }

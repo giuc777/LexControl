@@ -9,11 +9,12 @@ import { CatalogoItem } from '../../core/models/catalogo.model';
 import { PageHeader } from '../../shared/components/page-header/page-header';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { ToastService } from '../../layout/toast/toast-service';
+import { ResultadoDiligenciaModal } from './resultado-diligencia-modal';
 
 @Component({
     selector: 'app-diligencia-detalle-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, PageHeader, EmptyState],
+    imports: [FormsModule, PageHeader, EmptyState, ResultadoDiligenciaModal],
     templateUrl: './diligencia-detalle-page.html'
 })
 export class DiligenciaDetallePage implements OnInit {
@@ -29,6 +30,7 @@ export class DiligenciaDetallePage implements OnInit {
 
     protected readonly mostrarFormEstado = signal(false);
     protected readonly nuevoEstadoId = signal<number>(0);
+    protected readonly modalResultadoAbierto = signal(false);
 
     ngOnInit(): void {
         const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -120,5 +122,34 @@ export class DiligenciaDetallePage implements OnInit {
 
     esCancelada(): boolean {
         return this.diligencia()?.estado === 'Cancelada';
+    }
+
+    puedeGestionarResultado(): boolean {
+        const d = this.diligencia();
+        if (!d) return false;
+        return !this.esCancelada() && (this.esPendiente() || !!d.resultado);
+    }
+
+    esPendiente(): boolean {
+        const estado = this.diligencia()?.estado;
+        return estado === 'Pendiente' || estado === 'En Progreso';
+    }
+
+    tieneResultado(): boolean {
+        return !!this.diligencia()?.resultado;
+    }
+
+    abrirModalResultado(): void {
+        this.modalResultadoAbierto.set(true);
+    }
+
+    cerrarModalResultado(): void {
+        this.modalResultadoAbierto.set(false);
+    }
+
+    alRegistrarResultado(): void {
+        this.cerrarModalResultado();
+        const id = this.diligencia()?.id;
+        if (id) this.cargarDetalle(id);
     }
 }

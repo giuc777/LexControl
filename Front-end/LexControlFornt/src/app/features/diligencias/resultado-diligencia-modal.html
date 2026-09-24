@@ -2,41 +2,41 @@
     <form class="modal-form" (submit)="alEnviar($event)" novalidate>
 
         <fieldset>
-            <legend>Información de la audiencia</legend>
+            <legend>Información de la diligencia</legend>
             <div class="resumen-audiencia">
                 <div class="resumen-item">
+                    <span class="resumen-label">Título</span>
+                    <span class="resumen-valor">{{ diligencia().titulo }}</span>
+                </div>
+                <div class="resumen-item">
                     <span class="resumen-label">Expediente</span>
-                    <span class="resumen-valor">{{ audiencia().noExpediente }}</span>
+                    <span class="resumen-valor">{{ diligencia().noExpediente || '—' }}</span>
                 </div>
                 <div class="resumen-item">
                     <span class="resumen-label">Cliente</span>
-                    <span class="resumen-valor">{{ audiencia().cliente || '—' }}</span>
+                    <span class="resumen-valor">{{ diligencia().cliente || '—' }}</span>
                 </div>
                 <div class="resumen-item">
                     <span class="resumen-label">Fecha</span>
-                    <span class="resumen-valor">{{ audiencia().fecha }}</span>
-                </div>
-                <div class="resumen-item">
-                    <span class="resumen-label">Hora</span>
-                    <span class="resumen-valor">{{ audiencia().horaInicio }}</span>
+                    <span class="resumen-valor">{{ diligencia().fecha }}</span>
                 </div>
                 <div class="resumen-item">
                     <span class="resumen-label">Tipo</span>
-                    <span class="resumen-valor">{{ audiencia().tipo }}</span>
+                    <span class="resumen-valor">{{ diligencia().tipo }}</span>
                 </div>
                 <div class="resumen-item">
-                    <span class="resumen-label">Juzgado</span>
-                    <span class="resumen-valor">{{ audiencia().juzgado }}</span>
+                    <span class="resumen-label">Estado</span>
+                    <span class="resumen-valor">{{ diligencia().estado }}</span>
                 </div>
             </div>
         </fieldset>
 
         <fieldset>
-            <legend>Resultado de la audiencia</legend>
+            <legend>Resultado de la diligencia</legend>
             <div class="form-grid">
                 <div class="field full">
-                    <label for="resResultado">Resultado <span class="req">*</span></label>
-                    <select id="resResultado" data-testid="select-resultado"
+                    <label for="resDiligResultado">Resultado <span class="req">*</span></label>
+                    <select id="resDiligResultado" data-testid="select-resultado-diligencia"
                         [(ngModel)]="resultadoSeleccionado" name="resultadoId" required>
                         <option value="0" disabled>Seleccionar resultado...</option>
                         @for (res of resultados(); track res.id) {
@@ -46,20 +46,11 @@
                 </div>
 
                 <div class="field full">
-                    <label for="resDescripcion">Descripción del resultado <span class="req">*</span></label>
-                    <textarea id="resDescripcion" data-testid="input-descripcion"
+                    <label for="resDiligDescripcion">Descripción del resultado <span class="req">*</span></label>
+                    <textarea id="resDiligDescripcion" data-testid="input-descripcion-diligencia"
                         [(ngModel)]="descripcionResultado" name="descripcionResultado"
                         rows="4" maxlength="1000" required
-                        placeholder="Describa el resultado de la audiencia, conclusiones, decisiones tomadas..."></textarea>
-                </div>
-
-                <div class="field full">
-                    <label for="resProxima">Próxima actuación</label>
-                    <input type="text" id="resProxima" data-testid="input-proxima-actuacion"
-                        [(ngModel)]="proximaActuacion" name="proximaActuacion"
-                        maxlength="200"
-                        placeholder="Ej: Audiencia de pruebas para el 15/10/2026" />
-                    <span class="field-help">Opcional. Indique la siguiente acción programada.</span>
+                        placeholder="Describa el resultado de la diligencia, acciones realizadas, observaciones..."></textarea>
                 </div>
             </div>
         </fieldset>
@@ -70,7 +61,7 @@
 
         <footer class="modal-footer">
             <button type="button" class="btn-secondary" (click)="alCerrar()">Cancelar</button>
-            <button type="submit" class="btn-primary" data-testid="btn-guardar-resultado"
+            <button type="submit" class="btn-primary" data-testid="btn-guardar-resultado-diligencia"
                 [disabled]="guardando()">
                 @if (guardando()) {
                     @if (esEdicion) {

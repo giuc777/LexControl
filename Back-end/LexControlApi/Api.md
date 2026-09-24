@@ -325,8 +325,16 @@ public static string Sha256Hash(string input)
 - [ ] `GET /api/audiencias` — listar con filtros
 - [ ] `GET /api/audiencias/proximas` — `SP_Audiencia_Proximas`
 - [ ] `POST /api/audiencias` — `SP_Audiencia_Insertar`
-- [ ] `PUT /api/audiencias/{id:int}/resultado` — `SP_Audiencia_RegistrarResultado`
+- [x] `PUT /api/audiencias/{id:int}/resultado` — `SP_Audiencia_RegistrarResultado` (registra o edita resultado)
 - [ ] Necesita `SP_Audiencia_Listar` y `SP_Audiencia_ObtenerPorID` (no existen → crear)
+
+### DiligenciasController
+- [x] `GET /api/diligencias` — `SP_Diligencia_Listar` (con Resultado_ID/Resultado/DescripcionResultado)
+- [x] `GET /api/diligencias/{id:int}` — `SP_Diligencia_ObtenerPorID`
+- [x] `POST /api/diligencias` — `SP_Diligencia_Insertar`
+- [x] `PUT /api/diligencias/{id:int}` — `SP_Diligencia_Actualizar`
+- [x] `PUT /api/diligencias/{id:int}/resultado` — `SP_Diligencia_RegistrarResultado` (catálogo RESULTADO_DILIGENCIA + descripción; no cambia Estado)
+- [x] `DELETE /api/diligencias/{id:int}` — `SP_Diligencia_Eliminar`
 
 ### TramitesController
 - [ ] `GET /api/tramites` — listar con filtros
@@ -437,8 +445,10 @@ Estos stored procedures no existen aún y son necesarios para completar el CRUD:
 | `SP_Tramite_Listar` | TRAMITE | SELECT | Con filtros |
 | `SP_Tramite_ObtenerPorID` | TRAMITE | SELECT | Con joins |
 | `SP_Notificacion_Listar` | NOTIFICACION_OJ | SELECT | Con filtros |
-| `SP_Diligencia_Listar` | DILIGENCIA | SELECT | Con filtros |
-| `SP_Diligencia_Insertar` | DILIGENCIA | INSERT | (no existe aún) |
+| `SP_Diligencia_Listar` | DILIGENCIA | SELECT | Con filtros + join RESULTADO_DILIGENCIA |
+| `SP_Diligencia_ObtenerPorID` | DILIGENCIA | SELECT | Detalle con resultado |
+| `SP_Diligencia_RegistrarResultado` | DILIGENCIA | UPDATE | Resultado_ID + DescripcionResultado (script 19) |
+| `SP_Diligencia_Actualizar` | DILIGENCIA | UPDATE | Incluye cambio de estado |
 | `SP_Permiso_ObtenerPorRol` | — | SELECT | Para la matriz de permisos del mock `permisos-comun.js` |
 | `SP_Configuracion_ObtenerTodas` | CONFIGURACION | SELECT | Lista todas las claves |
 | `SP_Configuracion_Actualizar` | CONFIGURACION | UPDATE | Upsert de clave/valor |

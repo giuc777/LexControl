@@ -1,7 +1,14 @@
 <app-page-header
     [titulo]="diligencia()?.titulo ?? 'Diligencia'"
-    [subtitulo]="'Detalle de la tarea del abogado'"
-    (volver)="irAVolver()" />
+    [subtitulo]="'Detalle de la tarea del abogado'">
+    <button type="button" class="btn-secondary" data-testid="btn-volver" (click)="irAVolver()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Volver
+    </button>
+</app-page-header>
 
 @if (cargando()) {
     <div class="loading-spinner">
@@ -75,8 +82,44 @@
         </div>
     }
 
+    @if (diligencia()?.resultado) {
+        <div class="detalle-seccion resultado-panel">
+            <div class="resultado-header">
+                <h3>Resultado de la Diligencia</h3>
+                @if (puedeGestionarResultado()) {
+                    <button type="button" class="btn-secondary btn-editar-resultado"
+                        data-testid="btn-editar-resultado" (click)="abrirModalResultado()">
+                        Editar
+                    </button>
+                }
+            </div>
+            <div class="detalle-grid resultado-grid">
+                <div class="detalle-campo">
+                    <span class="detalle-label">Resultado</span>
+                    <span class="detalle-valor detalle-valor-resultado">{{ diligencia()?.resultado }}</span>
+                </div>
+                @if (diligencia()?.descripcionResultado) {
+                    <div class="detalle-campo detalle-campo-full">
+                        <span class="detalle-label">Descripción</span>
+                        <p class="detalle-valor">{{ diligencia()?.descripcionResultado }}</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
     <div class="detalle-acciones">
         @if (!esCancelada()) {
+            @if (puedeGestionarResultado()) {
+                <button class="btn-primary" data-testid="btn-registrar-resultado"
+                    (click)="abrirModalResultado()">
+                    @if (tieneResultado()) {
+                        Editar Resultado
+                    } @else {
+                        Registrar Resultado
+                    }
+                </button>
+            }
             <button class="btn-primary" (click)="toggleFormEstado()">
                 Cambiar Estado
             </button>
@@ -111,4 +154,9 @@
     <div class="detalle-meta">
         <span>Creado: {{ diligencia()?.fechaCreacion }}</span>
     </div>
+
+    @if (modalResultadoAbierto() && diligencia(); as d) {
+        <app-resultado-diligencia-modal [diligencia]="d"
+            (cerrar)="cerrarModalResultado()" (registrado)="alRegistrarResultado()" />
+    }
 }

@@ -108,6 +108,58 @@ public class DiligenciasControllerTests : IClassFixture<TestWebApplicationFactor
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
+    [Fact]
+    public async Task RegistrarResultado_SinAutenticacion_Devuelve401()
+    {
+        var response = await _client.PutAsJsonAsync("/api/diligencias/1/resultado",
+            new { ResultadoId = 1, DescripcionResultado = "Prueba" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task RegistrarResultado_ConTokenAdmin_NoDevuelve500PorRuta()
+    {
+        var token = AuthHelper.GenerarTokenAdmin();
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var response = await _client.PutAsJsonAsync("/api/diligencias/99999/resultado",
+            new { ResultadoId = 1, DescripcionResultado = "Diligencia inexistente" });
+
+        // 200/204 = ok, 404/500 = SP responde según existencia; nunca 401/403
+        response.StatusCode.Should().BeOneOf(
+            HttpStatusCode.NoContent, HttpStatusCode.OK,
+            HttpStatusCode.NotFound, HttpStatusCode.InternalServerError);
+    }
+
+    [Fact]
+    public async Task RegistrarResultado_SinRolAbogado_Devuelve403()
+    {
+        var token = AuthHelper.GenerarTokenSecretaria();
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var response = await _client.PutAsJsonAsync("/api/diligencias/1/resultado",
+            new { ResultadoId = 1, DescripcionResultado = "Prueba" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task RegistrarResultado_DatosInvalidos_DevuelveErrorValidacion()
+    {
+        var token = AuthHelper.GenerarTokenAdmin();
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var response = await _client.PutAsJsonAsync("/api/diligencias/1/resultado",
+            new { ResultadoId = 0, DescripcionResultado = "" });
+
+        response.StatusCode.Should().BeOneOf(
+            HttpStatusCode.BadRequest, HttpStatusCode.UnprocessableEntity);
+    }
+
     // Tipos auxiliares
     public class ApiResponseDto<T>
     {

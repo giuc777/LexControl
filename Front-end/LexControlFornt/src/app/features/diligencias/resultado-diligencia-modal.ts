@@ -2,24 +2,24 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Output, input, inject
 import { FormsModule } from '@angular/forms';
 
 import { Modal } from '../../shared/components/modal/modal';
-import { AudienciasService } from '../../core/services/audiencias-service';
+import { DiligenciasService } from '../../core/services/diligencias-service';
 import { CatalogosService } from '../../core/services/catalogos-service';
 import { ToastService } from '../../layout/toast/toast-service';
-import { AudienciaDetalle, AudienciaResultado } from '../../core/models/audiencia.model';
+import { DiligenciaDetalle, DiligenciaResultado } from '../../core/models/diligencia.model';
 
 @Component({
-    selector: 'app-resultado-modal',
+    selector: 'app-resultado-diligencia-modal',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [FormsModule, Modal],
-    templateUrl: './resultado-modal.html'
+    templateUrl: './resultado-diligencia-modal.html'
 })
-export class ResultadoModal implements OnInit {
+export class ResultadoDiligenciaModal implements OnInit {
     @Output() cerrar = new EventEmitter<void>();
     @Output() registrado = new EventEmitter<void>();
 
-    readonly audiencia = input.required<AudienciaDetalle>();
+    readonly diligencia = input.required<DiligenciaDetalle>();
 
-    private readonly audienciasSvc = inject(AudienciasService);
+    private readonly diligenciasSvc = inject(DiligenciasService);
     private readonly catalogosSvc = inject(CatalogosService);
     private readonly toast = inject(ToastService);
 
@@ -29,17 +29,15 @@ export class ResultadoModal implements OnInit {
 
     protected resultadoSeleccionado = 0;
     protected descripcionResultado = '';
-    protected proximaActuacion = '';
 
     ngOnInit(): void {
-        const aud = this.audiencia();
-        if (aud.resultadoId) {
-            this.resultadoSeleccionado = aud.resultadoId;
-            this.descripcionResultado = aud.descripcionResultado ?? '';
-            this.proximaActuacion = aud.proximaActuacion ?? '';
+        const d = this.diligencia();
+        if (d.resultadoId) {
+            this.resultadoSeleccionado = d.resultadoId;
+            this.descripcionResultado = d.descripcionResultado ?? '';
         }
 
-        this.catalogosSvc.buscarCatalogo('RESULTADO_AUDIENCIA').subscribe({
+        this.catalogosSvc.buscarCatalogo('RESULTADO_DILIGENCIA').subscribe({
             next: (datos) => this.resultados.set(
                 datos.items.map(i => ({ id: i.id, nombre: i.nombre, color: i.color ?? '#6c757d' }))
             )
@@ -47,7 +45,7 @@ export class ResultadoModal implements OnInit {
     }
 
     get esEdicion(): boolean {
-        return !!this.audiencia().resultadoId;
+        return !!this.diligencia().resultadoId;
     }
 
     alCerrar(): void {
@@ -68,13 +66,12 @@ export class ResultadoModal implements OnInit {
         }
 
         this.guardando.set(true);
-        const dto: AudienciaResultado = {
+        const dto: DiligenciaResultado = {
             resultadoId: this.resultadoSeleccionado,
-            descripcionResultado: this.descripcionResultado.trim(),
-            proximaActuacion: this.proximaActuacion.trim() || null
+            descripcionResultado: this.descripcionResultado.trim()
         };
 
-        this.audienciasSvc.registrarResultado(this.audiencia().id, dto).subscribe({
+        this.diligenciasSvc.registrarResultado(this.diligencia().id, dto).subscribe({
             next: () => {
                 this.guardando.set(false);
                 this.toast.mostrar(
@@ -85,7 +82,7 @@ export class ResultadoModal implements OnInit {
             },
             error: () => {
                 this.guardando.set(false);
-                this.error.set('Error al registrar el resultado.');
+                this.error.set('Error al guardar el resultado.');
                 this.toast.mostrar(this.error(), 3000);
             }
         });

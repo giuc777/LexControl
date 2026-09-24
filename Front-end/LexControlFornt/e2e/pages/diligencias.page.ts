@@ -30,4 +30,17 @@ export class DiligenciasPage {
     async openNewDiligenciaModal(): Promise<void> {
         await this.btnNuevaDiligencia.click();
     }
+
+    async openDetalle(fila: number): Promise<void> {
+        await this.clickDiligencia(fila);
+        await this.page.waitForURL('**/diligencias/**', { timeout: 10000 });
+    }
+
+    get btnRegistrarResultado(): Locator {
+        return this.page.locator('[data-testid="btn-registrar-resultado"]');
+    }
+
+    get modalResultado(): Locator {
+        return this.page.locator('[data-testid="select-resultado-diligencia"]');
+    }
 }

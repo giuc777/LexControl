@@ -229,3 +229,6 @@ GO
 
 PRINT 'OK SP_Diligencia_* creados correctamente.';
 GO
+
+-- NOTA: SP_Diligencia_RegistrarResultado y las columnas de resultado
+-- se encuentran en 19-Diligencias-Resultado.sql.

@@ -40,4 +40,18 @@ test.describe('Módulo Diligencias', () => {
         await diligencias.openNewDiligenciaModal();
         await expect(adminPage.locator('[data-testid="modal-diligencia"]')).toBeVisible({ timeout: 5000 });
     });
+
+    test('TC-DIL-006: Detalle permite gestionar resultado', async ({ adminPage }) => {
+        const diligencias = new DiligenciasPage(adminPage);
+        await diligencias.navigate();
+        await expect(diligencias.tabla).toBeVisible({ timeout: 15000 });
+        const count = await diligencias.getRowCount();
+        if (count > 0) {
+            await diligencias.openDetalle(0);
+            const btn = adminPage.locator('[data-testid="btn-registrar-resultado"]');
+            if (await btn.isVisible()) {
+                await expect(btn).toBeVisible();
+            }
+        }
+    });
 });

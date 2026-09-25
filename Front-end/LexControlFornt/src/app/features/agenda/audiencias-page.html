@@ -1,0 +1,132 @@
+<app-page-header titulo="Audiencias" subtitulo="Listado completo de audiencias del bufete">
+    <button type="button" class="btn-secondary" data-testid="btn-volver-agenda" (click)="irAAgenda()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Volver a Agenda
+    </button>
+    <button type="button" class="btn-primary" data-testid="btn-nueva-audiencia" (click)="abrirModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Nueva Audiencia
+    </button>
+</app-page-header>
+
+<div class="diligencias-toolbar">
+    <div class="filtros-grid">
+        <div class="filtro-grupo">
+            <label class="filtro-label">Tipo</label>
+            <select class="filtro-select" data-testid="filtro-tipo"
+                    [ngModel]="filtroTipoId()"
+                    (ngModelChange)="filtroTipoId.set($event ? +$event : null)">
+                <option [value]="null">Todos</option>
+                @for (t of tiposAudiencia(); track t.id) {
+                    <option [value]="t.id">{{ t.nombre }}</option>
+                }
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Estado</label>
+            <select class="filtro-select" data-testid="filtro-estado"
+                    [ngModel]="filtroEstadoId()"
+                    (ngModelChange)="filtroEstadoId.set($event ? +$event : null)">
+                <option [value]="null">Todos</option>
+                @for (e of estadosAudiencia(); track e.id) {
+                    <option [value]="e.id">{{ e.nombre }}</option>
+                }
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Expediente</label>
+            <select class="filtro-select"
+                    [ngModel]="filtroExpedienteId()"
+                    (ngModelChange)="filtroExpedienteId.set($event ? +$event : null)">
+                <option [value]="null">Todos</option>
+                @for (e of expedientes(); track e.id) {
+                    <option [value]="e.id">{{ e.noExpediente }}</option>
+                }
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Inicio</label>
+            <input type="date" class="filtro-input"
+                   [ngModel]="filtroFechaInicio()"
+                   (ngModelChange)="filtroFechaInicio.set($event)" />
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Fin</label>
+            <input type="date" class="filtro-input"
+                   [ngModel]="filtroFechaFin()"
+                   (ngModelChange)="filtroFechaFin.set($event)" />
+        </div>
+        <div class="filtro-acciones">
+            <button class="btn-primary" (click)="cargarAudiencias()">Buscar</button>
+            <button class="btn-secondary" (click)="limpiarFiltros()">Limpiar</button>
+        </div>
+    </div>
+</div>
+
+@if (cargando()) {
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Cargando audiencias...</p>
+    </div>
+} @else if (audiencias().length === 0) {
+    <app-empty-state
+        icono="calendar"
+        titulo="No hay audiencias"
+        mensaje="No se encontraron audiencias con los filtros seleccionados." />
+} @else {
+    <div class="tabla-contenedor">
+        <table class="tabla-datos" data-testid="audiencias-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Tipo</th>
+                    <th>Expediente</th>
+                    <th>Cliente</th>
+                    <th>Juzgado</th>
+                    <th>Sala</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (a of audiencias(); track a.id) {
+                    <tr class="fila-clickeable" (click)="irADetalle(a.id)">
+                        <td>{{ a.fecha }}</td>
+                        <td>{{ formatearHora(a.horaInicio) }}</td>
+                        <td>{{ a.tipo }}</td>
+                        <td>{{ a.noExpediente }}</td>
+                        <td>{{ a.cliente ?? '—' }}</td>
+                        <td>{{ a.juzgado }}</td>
+                        <td>{{ a.sala ?? '—' }}</td>
+                        <td>
+                            <span class="pill-estado" [style.background-color]="colorEstado(a.estado)">
+                                {{ a.estado }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-icon" title="Ver detalle"
+                                    (click)="irADetalle(a.id); $event.stopPropagation()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (modalAbierto()) {
+    <app-audiencia-modal (cerrar)="cerrarModal()" (creado)="alCrearAudiencia()" />
+}

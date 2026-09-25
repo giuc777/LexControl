@@ -60,7 +60,7 @@ export class DiligenciaDetallePage implements OnInit {
     }
 
     irAVolver(): void {
-        this.router.navigate(['/diligencias']);
+        this.router.navigate(['/agenda']);
     }
 
     toggleFormEstado(): void {

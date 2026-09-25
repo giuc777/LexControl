@@ -1,8 +1,9 @@
 # Módulo 04 — Diligencias (Tareas del Abogado)
 
-> **Estado:** Implementado. SPs, Backend, Frontend completos + integración con Agenda.
+> **Estado:** Implementado. SPs, Backend, Frontend completos + integración con Agenda + resultado de diligencia.
 > **Ruta frontend:** `/diligencias` (lista) + `/diligencias/:id` (detalle)
 > **Guard:** Usa `moduloGuard('audiencias')` — las diligencias son sub-módulo de Agenda.
+> **Última actualización:** 25 Sep 2026 (resultado de diligencia, accesos desde Agenda y botón Volver a Agenda).
 
 ---
 
@@ -27,12 +28,14 @@ Gestión de tareas unitarias del abogado: asesorías, redacciones, revisiones, l
 ```
 ID, Expediente_ID (nullable), Cliente_ID (nullable), Tipo_ID, Titulo,
 Descripcion, Fecha, HoraInicio, DiaCompleto, Ubicacion, Oficina,
-Estado_ID, Notas, TiempoDedicado, RecordatorioMinutos, Usuario_ID,
+Estado_ID, Resultado_ID (nullable), DescripcionResultado (nullable),
+Notas, TiempoDedicado, RecordatorioMinutos, Usuario_ID,
 FechaCreacion
 ```
 
 **Constraint:** `CHK_DILIGENCIA_ENTIDAD` — al menos `Expediente_ID` o `Cliente_ID` debe ser NOT NULL.
 **Nota:** No existe columna `Activo`. La "eliminación" se hace cambiando estado a `Cancelada`.
+**Resultado:** `Resultado_ID` referencia el catálogo `RESULTADO_DILIGENCIA` (script `19`); `DescripcionResultado` guarda el texto libre opcional.
 
 ---
 
@@ -47,6 +50,9 @@ FechaCreacion
 | `SP_Diligencia_Insertar` | Crear nueva | Todos los campos + @NuevoID OUTPUT |
 | `SP_Diligencia_Actualizar` | Actualizar parcial | @ID + campos opcionales (NULL = sin cambio) |
 | `SP_Diligencia_Eliminar` | Cancelar (cambia estado) | @ID → Estado_ID = Cancelada |
+| `SP_Diligencia_RegistrarResultado` | Registrar/editar resultado | @ID, @Resultado_ID, @DescripcionResultado, @UsuarioModificacion_ID |
+
+**Resultado:** El SP `SP_Diligencia_RegistrarResultado` y las columnas de resultado se crean en `ScriptsDB/19-Diligencias-Resultado.sql` (tabla y seeds del catálogo `RESULTADO_DILIGENCIA`, whitelist en los SPs de catálogo). El script `11` es autocontenido y no depende del `19`.
 
 **Patrón:**
 - `CREATE OR ALTER` para idempotencia
@@ -77,6 +83,7 @@ FechaCreacion
 | GET | `/api/diligencias/{id}` | Authenticated | Detalle completo |
 | POST | `/api/diligencias` | Admin, Abogado | Crear (Usuario_ID del JWT) |
 | PUT | `/api/diligencias/{id}` | Admin, Abogado | Actualizar parcial |
+| PUT | `/api/diligencias/{id}/resultado` | Admin, Abogado | Registrar/editar resultado |
 | DELETE | `/api/diligencias/{id}` | Admin, Abogado | Cancelar (cambia estado) |
 
 ---
@@ -88,8 +95,9 @@ FechaCreacion
 | `core/models/diligencia.model.ts` | Diligencia, DiligenciaDetalle, DiligenciaCrear, DiligenciaActualizar |
 | `core/services/diligencias-service.ts` | listar, obtenerPorId, crear, actualizar, eliminar |
 | `features/diligencias/diligencias-page.ts/html` | Lista con filtros (tipo, estado, expediente, fechas) |
-| `features/diligencias/diligencia-detalle-page.ts/html` | Detalle + cambio de estado + cancelar |
+| `features/diligencias/diligencia-detalle-page.ts/html` | Detalle + panel de resultado + cambio de estado + cancelar (Volver → `/agenda`) |
 | `features/diligencias/diligencia-modal.ts/html` | Modal de creación |
+| `features/diligencias/resultado-diligencia-modal.ts/html` | Modal de registro/edición de resultado (catálogo `RESULTADO_DILIGENCIA`) |
 | `styles/modules/diligencias.css` | Estilos (~300 líneas) |
 | `styles.css` | +1 línea import |
 | `app.routes.ts` | Rutas `/diligencias` y `/diligencias/:id` |
@@ -125,9 +133,11 @@ Las diligencias con fecha se muestran en el calendario de Agenda junto con audie
 
 ### Comportamiento:
 - Header de Agenda: "Nueva Diligencia" (btn-secondary) + "Nueva Audiencia" (btn-primary)
+- Apartado `.agenda-accesos` en la Agenda con dos tarjetas: **Todas las audiencias** → `/audiencias` y **Todas las diligencias** → `/diligencias`
 - Cada evento en la lista muestra pill de tipo con color (audiencia=azul, diligencia=morado)
 - Al crear diligencia desde Agenda, la fecha se pre-llenla con el día seleccionado
 - Navegación: audiencias → `/agenda/:id`, diligencias → `/diligencias/:id`
+- Botón Volver del detalle de diligencia → `/agenda`
 - Bug fix: audiencias se filtraban por `fechaStr` correctamente (faltaba `.filter()` en el computed)
 
 ---

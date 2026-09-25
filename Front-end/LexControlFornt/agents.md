@@ -86,6 +86,8 @@ Rutas autenticadas (todas bajo un `ShellComponent` con sidebar+topbar, lazy load
 | `/clientes` · `/clientes/:id` | clientes | `clientes.html` · `clientes-detalle.html` |
 | `/expedientes` · `/expedientes/:id` | expedientes | `expedientes.html` · `expedientes-detalle.html` |
 | `/agenda` · `/agenda/:id` | audiencias | `agenda.html` · `agenda-detalle.html` |
+| `/audiencias` | audiencias | — (listado completo; sub-vista de Agenda) |
+| `/diligencias` · `/diligencias/:id` | audiencias | — (sub-módulo de Agenda) |
 | `/tramites` · `/tramites/:id` | tramites | `tramites.html` · `tramites-detalle.html` |
 | `/historico` · `/historico/:id` | historico | `historico.html` · `historico-detalle.html` |
 | `/notificaciones-oj` · `/notificaciones-oj/:id` | notificaciones | `notificaciones-oj.html` · `notificacion-oj.html` |
@@ -150,7 +152,8 @@ src/
 │       ├── dashboard/
 │       ├── clientes/               // lista + detalle (+ modales CRUD)
 │       ├── expedientes/            // lista + detalle con tabs (partes, notas, documentos)
-│       ├── agenda/
+│       ├── agenda/                 // calendario + listado de audiencias + detalle + modales
+│       ├── diligencias/            // lista + detalle + modal + resultado
 │       ├── tramites/
 │       ├── historico/
 │       ├── notificaciones-oj/

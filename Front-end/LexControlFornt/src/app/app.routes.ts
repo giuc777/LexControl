@@ -68,6 +68,11 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/agenda/agenda-page').then(m => m.AgendaPage)
             },
             {
+                path: 'audiencias',
+                canActivate: [moduloGuard('audiencias')],
+                loadComponent: () => import('./features/agenda/audiencias-page').then(m => m.AudienciasPage)
+            },
+            {
                 path: 'agenda/:id',
                 canActivate: [moduloGuard('audiencias')],
                 loadComponent: () => import('./features/agenda/agenda-detalle-page').then(m => m.AgendaDetallePage)

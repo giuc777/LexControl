@@ -16,6 +16,31 @@
     </button>
 </app-page-header>
 
+<section class="agenda-accesos" aria-label="Listados de audiencias y diligencias">
+    <a class="agenda-acceso" routerLink="/audiencias" data-testid="acceso-audiencias">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+        </svg>
+        <span class="acceso-texto">
+            <span class="acceso-titulo">Todas las audiencias</span>
+            <span class="acceso-desc">Consulte el listado completo de audiencias</span>
+        </span>
+    </a>
+    <a class="agenda-acceso" routerLink="/diligencias" data-testid="acceso-diligencias">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+            <rect x="9" y="3" width="6" height="4" rx="1"/>
+        </svg>
+        <span class="acceso-texto">
+            <span class="acceso-titulo">Todas las diligencias</span>
+            <span class="acceso-desc">Consulte el listado completo de diligencias</span>
+        </span>
+    </a>
+</section>
+
 <section class="agenda-layout" data-testid="calendario">
     <div class="panel calendario-panel">
         <div class="calendario-header">

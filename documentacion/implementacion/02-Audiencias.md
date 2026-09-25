@@ -1,9 +1,9 @@
 # Módulo 02 — Audiencias (Agenda)
 
 > **Estado:** ✅ COMPLETADO — SPs + Backend + Frontend + Correcciones
-> **Ruta frontend:** `/agenda` (calendario), `/agenda/:id` (detalle)
+> **Ruta frontend:** `/agenda` (calendario), `/agenda/:id` (detalle), `/audiencias` (listado completo)
 > **Fecha implementación:** 14 Sep 2026
-> **Última actualización:** 15 Sep 2026 (correcciones + modal de resultado)
+> **Última actualización:** 25 Sep 2026 (listado `/audiencias`, accesos desde Agenda y botón Volver a Agenda)
 
 ---
 
@@ -115,6 +115,7 @@ builder.Services.AddScoped<IAudienciaService, AudienciaService>();
 | `features/agenda/agenda-page.ts` + `.html` | Calendario mensual navegable + lista de eventos del día |
 | `features/agenda/audiencia-modal.ts` + `.html` | Modal de creación con catálogos dinámicos (TIPO_AUDIENCIA, ESTADO_AUDIENCIA, JUZGADO) |
 | `features/agenda/agenda-detalle-page.ts` + `.html` | Detalle de audiencia con botón de registro de resultado |
+| `features/agenda/audiencias-page.ts` + `.html` | **[NUEVO]** Listado completo de audiencias con filtros (tipo, estado, expediente, fechas) y botón "Nueva Audiencia" |
 | `features/agenda/resultado-modal.ts` + `.html` | **[NUEVO]** Modal de registro de resultado con resumen de audiencia + formulario |
 
 ### 4.4 Estilos
@@ -127,6 +128,7 @@ builder.Services.AddScoped<IAudienciaService, AudienciaService>();
 - Botón "Registrar Resultado" con icono SVG
 - Panel de resultado registrado con borde lateral y icono de check
 - Modal de resultado con resumen de audiencia (fondo gris) y formulario
+- Apartado de accesos `.agenda-accesos` (tarjetas a "Todas las audiencias" y "Todas las diligencias")
 - Loading spinner animado
 - Responsive mobile (≤640px)
 
@@ -141,11 +143,26 @@ builder.Services.AddScoped<IAudienciaService, AudienciaService>();
     loadComponent: () => import('./features/agenda/agenda-page').then(m => m.AgendaPage)
 },
 {
+    path: 'audiencias',
+    canActivate: [moduloGuard('audiencias')],
+    loadComponent: () => import('./features/agenda/audiencias-page').then(m => m.AudienciasPage)
+},
+{
     path: 'agenda/:id',
     canActivate: [moduloGuard('audiencias')],
     loadComponent: () => import('./features/agenda/agenda-detalle-page').then(m => m.AgendaDetallePage)
 }
 ```
+
+### 4.6 Accesos desde la Agenda y botón Volver
+
+**Archivos:** `features/agenda/agenda-page.html`, `features/agenda/agenda-page.ts`, `styles/modules/agenda.css`
+
+- La Agenda incluye un apartado `.agenda-accesos` con dos tarjetas:
+  - **Todas las audiencias** → `/audiencias`
+  - **Todas las diligencias** → `/diligencias`
+- El botón "Volver a Agenda" del listado `/audiencias` y el botón Volver del detalle de diligencia navegan a `/agenda`.
+- El detalle de audiencia (`/agenda/:id`) también vuelve a `/agenda`.
 
 ---
 

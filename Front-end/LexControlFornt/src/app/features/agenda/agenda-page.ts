@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { AudienciasService } from '../../core/services/audiencias-service';
@@ -47,7 +47,7 @@ const COLORES_TIPO_DILIGENCIA: Record<string, string> = {
 @Component({
     selector: 'app-agenda-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, PageHeader, EmptyState, AudienciaModal, DiligenciaModal],
+    imports: [FormsModule, RouterLink, PageHeader, EmptyState, AudienciaModal, DiligenciaModal],
     templateUrl: './agenda-page.html'
 })
 export class AgendaPage implements OnInit {

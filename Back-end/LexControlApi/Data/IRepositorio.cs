@@ -21,6 +21,15 @@ public interface IRepositorio
     Task<int> EjecutarRetornoAsync(string procedimiento, object? parametros = null);
 
     /// <summary>
+    /// Ejecuta un SP de acción y devuelve su RETURN junto con el mensaje de
+    /// negocio que el SP haya expuesto en su result set (columnas
+    /// ErrorNumber/ErrorMessage). Permite mostrar el texto real del SP
+    /// (p. ej. "Ya existe un registro con ese nombre") en lugar del código.
+    /// </summary>
+    Task<(int Retorno, string? Mensaje)> EjecutarRetornoConMensajeAsync(
+        string procedimiento, object? parametros = null);
+
+    /// <summary>
     /// Ejecuta un SP de inserción con parámetro OUTPUT del nuevo ID.
     /// Lanza ExcepcionNegocio si el retorno no es 0 o el ID es inválido.
     /// </summary>
@@ -66,6 +75,38 @@ public class RepositorioSql : IRepositorio
         await conexion.ExecuteAsync(
             new CommandDefinition(procedimiento, dp, commandType: CommandType.StoredProcedure));
         return dp.Get<int?>("@RETURN_VALUE") ?? -1;
+    }
+
+    /* Fila para leer el result set de error que devuelven los SPs en su CATCH
+       (SELECT ERROR_NUMBER() AS ErrorNumber, ERROR_MESSAGE() AS ErrorMessage). */
+    private sealed class FilaError
+    {
+        public int? ErrorNumber { get; set; }
+        public string? ErrorMessage { get; set; }
+    }
+
+    public async Task<(int Retorno, string? Mensaje)> EjecutarRetornoConMensajeAsync(
+        string procedimiento, object? parametros = null)
+    {
+        using var conexion = _fabrica.CrearConexion();
+        var dp = CrearParametros(parametros);
+
+        string? mensaje = null;
+        try
+        {
+            using var grid = await conexion.QueryMultipleAsync(
+                new CommandDefinition(procedimiento, dp, commandType: CommandType.StoredProcedure));
+            var filas = (await grid.ReadAsync<FilaError>()).ToList();
+            mensaje = filas.FirstOrDefault()?.ErrorMessage;
+        }
+        catch
+        {
+            // El SP no devolvió un result set legible; se usa el mensaje genérico.
+            mensaje = null;
+        }
+
+        var retorno = dp.Get<int?>("@RETURN_VALUE") ?? -1;
+        return (retorno, mensaje);
     }
 
     public async Task<int> InsertarAsync(string procedimiento, object parametros, string parametroNuevoId)

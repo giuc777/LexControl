@@ -94,7 +94,7 @@ public class CatalogoService : ICatalogoService
 
         try
         {
-            var retorno = await _repositorio.EjecutarRetornoAsync(
+            var (retorno, mensajeBd) = await _repositorio.EjecutarRetornoConMensajeAsync(
                 "SP_Catalogo_Insertar",
                 new
                 {
@@ -107,7 +107,7 @@ public class CatalogoService : ICatalogoService
                 });
 
             if (retorno != 0)
-                throw new ExcepcionNegocio(retorno, MensajeError(retorno, tabla),
+                throw new ExcepcionNegocio(retorno, mensajeBd ?? MensajeError(retorno, tabla),
                     StatusCodes.Status400BadRequest);
         }
         catch (ExcepcionNegocio)
@@ -142,7 +142,7 @@ public class CatalogoService : ICatalogoService
 
         try
         {
-            var retorno = await _repositorio.EjecutarRetornoAsync(
+            var (retorno, mensajeBd) = await _repositorio.EjecutarRetornoConMensajeAsync(
                 "SP_Catalogo_Actualizar",
                 new
                 {
@@ -156,7 +156,7 @@ public class CatalogoService : ICatalogoService
                 });
 
             if (retorno != 0)
-                throw new ExcepcionNegocio(retorno, MensajeError(retorno, tabla),
+                throw new ExcepcionNegocio(retorno, mensajeBd ?? MensajeError(retorno, tabla),
                     StatusCodes.Status400BadRequest);
         }
         catch (ExcepcionNegocio)
@@ -178,12 +178,12 @@ public class CatalogoService : ICatalogoService
 
         try
         {
-            var retorno = await _repositorio.EjecutarRetornoAsync(
+            var (retorno, mensajeBd) = await _repositorio.EjecutarRetornoConMensajeAsync(
                 "SP_Catalogo_CambiarEstado",
                 new { Tabla = tabla, ID = id, Activo = activo });
 
             if (retorno != 0)
-                throw new ExcepcionNegocio(retorno, MensajeError(retorno, tabla),
+                throw new ExcepcionNegocio(retorno, mensajeBd ?? MensajeError(retorno, tabla),
                     StatusCodes.Status400BadRequest);
         }
         catch (ExcepcionNegocio)
@@ -242,8 +242,8 @@ public class CatalogoService : ICatalogoService
                 new
                 {
                     datos.Nombre,
-                    TipoJuzgadoID = datos.TipoJuzgadoId,
-                    MunicipioID = datos.MunicipioId,
+                    Tipo_Juzgado_ID = datos.TipoJuzgadoId,
+                    Municipio_ID = datos.MunicipioId,
                     datos.Direccion,
                     datos.Telefono,
                     datos.Email
@@ -287,8 +287,8 @@ public class CatalogoService : ICatalogoService
                 {
                     ID = id,
                     datos.Nombre,
-                    TipoJuzgadoID = datos.TipoJuzgadoId,
-                    MunicipioID = datos.MunicipioId,
+                    Tipo_Juzgado_ID = datos.TipoJuzgadoId,
+                    Municipio_ID = datos.MunicipioId,
                     datos.Direccion,
                     datos.Telefono,
                     datos.Email

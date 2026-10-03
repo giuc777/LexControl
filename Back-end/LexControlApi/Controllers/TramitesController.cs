@@ -50,4 +50,36 @@ public class TramitesController : ControllerBase
         await _service.ActualizarEstadoAsync(id, dto);
         return NoContent();
     }
+
+    // ════════════════════════════════════════════════════════════
+    // NOTAS INTERNAS
+    // ════════════════════════════════════════════════════════════
+
+    [HttpGet("{id:int}/notas")]
+    [ProducesResponseType(typeof(ApiResponse<List<NotaTramiteDto>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<List<NotaTramiteDto>>>> ObtenerNotas(int id)
+    {
+        var notas = await _service.ObtenerNotasAsync(id);
+        return Ok(ApiResponse<List<NotaTramiteDto>>.Correcto(notas));
+    }
+
+    [HttpPost("{id:int}/notas")]
+    [Authorize(Roles = "Administrador,Abogado")]
+    [ProducesResponseType(typeof(ApiResponse<NotaTramiteDto>), StatusCodes.Status201Created)]
+    public async Task<ActionResult<ApiResponse<NotaTramiteDto>>> CrearNota(int id, NotaTramiteCrearDto datos)
+    {
+        var usuarioId = User.ObtenerUsuarioId();
+        var nota = await _service.CrearNotaAsync(id, datos, usuarioId);
+        return CreatedAtAction(nameof(ObtenerNotas), new { id },
+            ApiResponse<NotaTramiteDto>.Correcto(nota));
+    }
+
+    [HttpDelete("notas/{notaId:int}")]
+    [Authorize(Roles = "Administrador,Abogado")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> EliminarNota(int notaId)
+    {
+        await _service.EliminarNotaAsync(notaId);
+        return NoContent();
+    }
 }

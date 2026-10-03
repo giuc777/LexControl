@@ -3,13 +3,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { TramitesService } from '../../core/services/tramites-service';
-import { TramiteDetalle, TramiteActualizarEstado } from '../../core/models/tramite.model';
+import { TramiteDetalle, TramiteActualizarEstado, NotaTramite } from '../../core/models/tramite.model';
 import { CatalogosService } from '../../core/services/catalogos-service';
 import { CatalogoItem } from '../../core/models/catalogo.model';
 import { PageHeader } from '../../shared/components/page-header/page-header';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { Modal } from '../../shared/components/modal/modal';
 import { ToastService } from '../../layout/toast/toast-service';
+
+const MESES_CORTO = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
 @Component({
     selector: 'app-tramite-detalle-page',
@@ -35,6 +37,13 @@ export class TramiteDetallePage implements OnInit {
     protected readonly cambiando = signal(false);
     protected readonly error = signal('');
 
+    protected readonly notas = signal<NotaTramite[]>([]);
+    protected readonly cargandoNotas = signal(false);
+    protected readonly modalNotaAbierto = signal(false);
+    protected readonly notaContenido = signal('');
+    protected readonly guardandoNota = signal(false);
+    protected readonly errorNota = signal('');
+
     ngOnInit(): void {
         const id = Number(this.route.snapshot.paramMap.get('id'));
         if (id) this.cargarDetalle(id);
@@ -50,6 +59,7 @@ export class TramiteDetallePage implements OnInit {
                 this.fechaResolucion.set(datos.fechaResolucion ?? '');
                 this.resumenResolucion.set(datos.resumenResolucion ?? '');
                 this.cargando.set(false);
+                this.cargarNotas(id);
             },
             error: () => {
                 this.toast.mostrar('Error al cargar el trámite.', 3000);
@@ -119,6 +129,85 @@ export class TramiteDetallePage implements OnInit {
                 this.error.set(err.error?.error || 'Error al actualizar el estado.');
             }
         });
+    }
+
+    // ── Notas internas ───────────────────────────────────────
+
+    cargarNotas(tramiteId: number): void {
+        this.cargandoNotas.set(true);
+        this.tramitesSvc.listarNotas(tramiteId).subscribe({
+            next: (notas) => {
+                this.notas.set(notas);
+                this.cargandoNotas.set(false);
+            },
+            error: () => {
+                this.cargandoNotas.set(false);
+                this.toast.mostrar('Error al cargar las notas.', 3000);
+            }
+        });
+    }
+
+    abrirModalNota(): void {
+        this.notaContenido.set('');
+        this.errorNota.set('');
+        this.modalNotaAbierto.set(true);
+    }
+
+    cerrarModalNota(): void {
+        this.modalNotaAbierto.set(false);
+        this.errorNota.set('');
+    }
+
+    guardarNota(): void {
+        const tramiteId = this.tramite()?.id;
+        const contenido = this.notaContenido().trim();
+        if (!tramiteId || this.guardandoNota()) return;
+
+        if (!contenido) {
+            this.errorNota.set('Escriba el contenido de la nota.');
+            return;
+        }
+
+        this.guardandoNota.set(true);
+        this.errorNota.set('');
+        this.tramitesSvc.crearNota(tramiteId, {
+            contenido,
+            etiquetaId: null,
+            fijado: false,
+            prioritario: false
+        }).subscribe({
+            next: () => {
+                this.guardandoNota.set(false);
+                this.cerrarModalNota();
+                this.cargarNotas(tramiteId);
+                this.toast.mostrar('Nota agregada correctamente.', 3000);
+            },
+            error: (err) => {
+                this.guardandoNota.set(false);
+                this.errorNota.set(err.error?.error || 'Error al guardar la nota.');
+            }
+        });
+    }
+
+    eliminarNota(nota: NotaTramite): void {
+        if (!confirm('¿Eliminar esta nota?')) return;
+        this.tramitesSvc.eliminarNota(nota.id).subscribe({
+            next: () => {
+                const tramiteId = this.tramite()?.id;
+                if (tramiteId) this.cargarNotas(tramiteId);
+                this.toast.mostrar('Nota eliminada.', 3000);
+            },
+            error: (err) => {
+                this.toast.mostrar(err.error?.error || 'Error al eliminar la nota.', 3000);
+            }
+        });
+    }
+
+    formatearFecha(iso: string | null): string {
+        if (!iso) return '—';
+        const partes = iso.split('T')[0].split('-');
+        if (partes.length !== 3) return iso;
+        return `${parseInt(partes[2], 10)} ${MESES_CORTO[parseInt(partes[1], 10) - 1]} ${partes[0]}`;
     }
 
     colorEstado(estado: string): string {

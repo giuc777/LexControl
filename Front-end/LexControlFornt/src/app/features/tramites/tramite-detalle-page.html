@@ -57,12 +57,62 @@
         </div>
     }
 
-    @if (tramite()?.notasInternas) {
-        <div class="detalle-seccion">
-            <h3>Notas Internas</h3>
-            <p class="detalle-texto">{{ tramite()?.notasInternas }}</p>
+    <div class="detalle-seccion" aria-label="Notas internas">
+        <div class="detalle-seccion-head">
+            <h3>Notas internas</h3>
+            <button type="button" class="btn-filter" data-testid="btn-agregar-nota"
+                    (click)="abrirModalNota()">
+                Agregar nota
+            </button>
         </div>
-    }
+
+        @if (tramite()?.notasInternas) {
+            <p class="detalle-texto notas-legado">{{ tramite()?.notasInternas }}</p>
+        }
+
+        @if (cargandoNotas()) {
+            <p class="detalle-texto">Cargando notas...</p>
+        } @else if (notas().length === 0 && !tramite()?.notasInternas) {
+            <div class="empty-inline" data-testid="notas-vacias">
+                No hay notas internas registradas.
+            </div>
+        } @else if (notas().length > 0) {
+            <div class="notas-list">
+                @for (nota of notas(); track nota.id) {
+                    <article class="nota-card" data-testid="nota-card">
+                        @if (nota.etiquetaNombre || nota.prioritario || nota.fijado) {
+                            <div class="nota-tags">
+                                @if (nota.etiquetaNombre) {
+                                    <span class="nota-tag"
+                                        [style.background]="(nota.etiquetaColor || '#358292') + '18'"
+                                        [style.color]="nota.etiquetaColor || '#358292'"
+                                        [style.border-color]="(nota.etiquetaColor || '#358292') + '40'">
+                                        {{ nota.etiquetaNombre }}
+                                    </span>
+                                }
+                                @if (nota.prioritario) {
+                                    <span class="nota-tag nota-prior">Prioritario</span>
+                                }
+                                @if (nota.fijado) {
+                                    <span class="nota-tag nota-tag-fijada">Fijada</span>
+                                }
+                            </div>
+                        }
+                        <p class="nota-texto">{{ nota.contenido }}</p>
+                        <div class="nota-meta">
+                            <span>{{ nota.usuarioNombre || 'Anónimo' }}</span>
+                            <span>{{ formatearFecha(nota.fechaCreacion) }}</span>
+                            <button type="button" class="btn-link-danger"
+                                    data-testid="btn-eliminar-nota"
+                                    (click)="eliminarNota(nota)">
+                                Eliminar
+                            </button>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </div>
 
     @if (tramite()?.documentosAdjuntos) {
         <div class="detalle-seccion">
@@ -171,6 +221,35 @@
                 <button type="submit" class="btn-primary"
                         [disabled]="cambiando() || nuevoEstadoId() === 0">
                     @if (cambiando()) { Guardando... } @else { Guardar Estado }
+                </button>
+            </footer>
+        </form>
+    </app-modal>
+
+    <app-modal
+        titulo="Agregar Nota Interna"
+        [abierto]="modalNotaAbierto()"
+        (cerrado)="cerrarModalNota()"
+        ancho="min(560px, 94vw)">
+        <form class="modal-form" novalidate (submit)="$event.preventDefault(); guardarNota()">
+            <div class="field full">
+                <label for="notaContenido">Contenido de la nota <span class="req">*</span></label>
+                <textarea id="notaContenido" name="notaContenido" rows="5" maxlength="2000"
+                          placeholder="Escriba la nota interna del trámite..."
+                          [ngModel]="notaContenido()"
+                          (ngModelChange)="notaContenido.set($event)"></textarea>
+                <p class="field-help">{{ notaContenido().length }} / 2000 caracteres</p>
+            </div>
+
+            @if (errorNota()) {
+                <div class="form-error" role="alert">{{ errorNota() }}</div>
+            }
+
+            <footer class="modal-footer">
+                <button type="button" class="btn-secondary" (click)="cerrarModalNota()">Cancelar</button>
+                <button type="submit" class="btn-primary"
+                        [disabled]="guardandoNota() || !notaContenido().trim()">
+                    @if (guardandoNota()) { Guardando... } @else { Guardar Nota }
                 </button>
             </footer>
         </form>

@@ -1,5 +1,7 @@
 using LexControlApi.Data;
 using LexControlApi.Dtos.Tramites;
+using LexControlApi.Excepciones;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LexControlApi.Services;
 
@@ -10,6 +12,9 @@ public interface ITramiteService
     Task<TramiteDetalleDto?> ObtenerPorIdAsync(int id);
     Task<int> CrearAsync(TramiteCrearDto dto);
     Task ActualizarEstadoAsync(int id, TramiteActualizarEstadoDto dto);
+    Task<List<NotaTramiteDto>> ObtenerNotasAsync(int tramiteId);
+    Task<NotaTramiteDto> CrearNotaAsync(int tramiteId, NotaTramiteCrearDto datos, int usuarioId);
+    Task EliminarNotaAsync(int notaId);
 }
 
 public class TramiteService : ITramiteService
@@ -75,5 +80,66 @@ public class TramiteService : ITramiteService
                 FechaResolucion = dto.FechaResolucion,
                 ResumenResolucion = dto.ResumenResolucion
             });
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // NOTAS
+    // ════════════════════════════════════════════════════════════
+
+    public async Task<List<NotaTramiteDto>> ObtenerNotasAsync(int tramiteId)
+    {
+        var filas = await _repositorio.ConsultarListaAsync<NotaTramiteFila>(
+            "SP_NotaTramite_ObtenerPorTramite",
+            new { Tramite_ID = tramiteId });
+        return filas.Select(NotaTramiteDto.Desde).ToList();
+    }
+
+    public async Task<NotaTramiteDto> CrearNotaAsync(int tramiteId, NotaTramiteCrearDto datos, int usuarioId)
+    {
+        var tramite = await ObtenerPorIdAsync(tramiteId);
+        if (tramite is null)
+            throw new ExcepcionNegocio(-1, "Trámite no encontrado.",
+                StatusCodes.Status404NotFound);
+
+        var nuevoId = await _repositorio.InsertarAsync(
+            "SP_NotaTramite_Insertar",
+            new
+            {
+                Tramite_ID = tramiteId,
+                datos.Contenido,
+                Etiqueta_ID = datos.EtiquetaId,
+                datos.Fijado,
+                datos.Prioritario,
+                Usuario_ID = usuarioId
+            },
+            "@NuevoID");
+
+        var notas = await ObtenerNotasAsync(tramiteId);
+        return notas.FirstOrDefault(n => n.Id == nuevoId)
+            ?? throw new ExcepcionNegocio(-1, "Nota no encontrada.",
+                StatusCodes.Status404NotFound);
+    }
+
+    public async Task EliminarNotaAsync(int notaId)
+    {
+        var retorno = await _repositorio.EjecutarRetornoAsync(
+            "SP_NotaTramite_Eliminar", new { ID = notaId });
+        VerificarAccion(retorno);
+    }
+
+    private static void VerificarAccion(int retorno)
+    {
+        switch (retorno)
+        {
+            case 0:
+                return;
+            case -1:
+                throw new ExcepcionNegocio(-1, "La nota no existe o ya fue eliminada.",
+                    StatusCodes.Status404NotFound);
+            default:
+                throw new ExcepcionNegocio(retorno,
+                    "No se pudo completar la operación en la base de datos.",
+                    StatusCodes.Status500InternalServerError);
+        }
     }
 }

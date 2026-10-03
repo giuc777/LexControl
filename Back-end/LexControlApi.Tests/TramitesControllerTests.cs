@@ -108,11 +108,121 @@ public class TramitesControllerTests : IClassFixture<TestWebApplicationFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
+    // ════════════════════════════════════════════════════════════
+    // NOTAS INTERNAS
+    // ════════════════════════════════════════════════════════════
+
+    [Fact]
+    public async Task ObtenerNotas_SinAutenticacion_Devuelve401()
+    {
+        var response = await _client.GetAsync("/api/tramites/1/notas");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task ObtenerNotas_ConToken_Devuelve200()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        var response = await _client.GetAsync("/api/tramites/1/notas");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<NotaDto>>>();
+        body!.Success.Should().BeTrue();
+        body.Data.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task ObtenerNotas_TramiteInexistente_Devuelve200Vacio()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        var response = await _client.GetAsync("/api/tramites/99999/notas");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<NotaDto>>>();
+        body!.Data.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CrearNota_Valida_Devuelve201_YLaElimina()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        var crear = await _client.PostAsJsonAsync("/api/tramites/1/notas",
+            new { Contenido = "Nota de prueba de integración" });
+
+        crear.StatusCode.Should().Be(HttpStatusCode.Created);
+        var body = await crear.Content.ReadFromJsonAsync<ApiResponseDto<NotaDto>>();
+        body!.Data.Should().NotBeNull();
+        body.Data!.Id.Should().BeGreaterThan(0);
+
+        var eliminar = await _client.DeleteAsync($"/api/tramites/notas/{body.Data.Id}");
+        eliminar.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Fact]
+    public async Task CrearNota_SinContenido_Devuelve400()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        var response = await _client.PostAsJsonAsync("/api/tramites/1/notas",
+            new { Contenido = "" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task CrearNota_TramiteInexistente_Devuelve404()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        var response = await _client.PostAsJsonAsync("/api/tramites/99999/notas",
+            new { Contenido = "Nota de prueba" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task CrearNota_SinRolAbogado_Devuelve403()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenSecretaria());
+
+        var response = await _client.PostAsJsonAsync("/api/tramites/1/notas",
+            new { Contenido = "Nota de prueba" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task EliminarNota_NotaInexistente_Devuelve404()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        var response = await _client.DeleteAsync("/api/tramites/notas/99999");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    private void AutenticarComo(string token)
+    {
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+    }
+
     // Tipos auxiliares
     public class ApiResponseDto<T>
     {
         public bool Success { get; set; }
         public T? Data { get; set; }
         public string? Error { get; set; }
+    }
+
+    public class NotaDto
+    {
+        public int Id { get; set; }
+        public int TramiteId { get; set; }
+        public string Contenido { get; set; } = string.Empty;
     }
 }

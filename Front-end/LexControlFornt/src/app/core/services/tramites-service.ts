@@ -8,7 +8,9 @@ import {
     Tramite,
     TramiteCrear,
     TramiteDetalle,
-    TramiteActualizarEstado
+    TramiteActualizarEstado,
+    NotaTramite,
+    NotaTramiteCrear
 } from '../models/tramite.model';
 
 @Injectable({ providedIn: 'root' })
@@ -46,5 +48,21 @@ export class TramitesService {
 
     actualizarEstado(id: number, dto: TramiteActualizarEstado): Observable<void> {
         return this.http.put<void>(`${this.base}/${id}/estado`, dto);
+    }
+
+    listarNotas(tramiteId: number): Observable<NotaTramite[]> {
+        return this.http
+            .get<RespuestaApi<NotaTramite[]>>(`${this.base}/${tramiteId}/notas`)
+            .pipe(map(r => r.data));
+    }
+
+    crearNota(tramiteId: number, dto: NotaTramiteCrear): Observable<NotaTramite> {
+        return this.http
+            .post<RespuestaApi<NotaTramite>>(`${this.base}/${tramiteId}/notas`, dto)
+            .pipe(map(r => r.data));
+    }
+
+    eliminarNota(notaId: number): Observable<void> {
+        return this.http.delete<void>(`${this.base}/notas/${notaId}`);
     }
 }

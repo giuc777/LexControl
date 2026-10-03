@@ -577,3 +577,40 @@
         max-height: 95vh;
     }
 }
+
+/* ============ Notas internas ============ */
+
+.detalle-seccion-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.detalle-seccion-head h3 {
+    margin: 0;
+}
+
+.detalle-seccion .notas-list {
+    padding: 0;
+    margin-top: 12px;
+    gap: 10px;
+}
+
+.detalle-seccion .empty-inline {
+    padding: 12px 0 4px;
+}
+
+.notas-legado {
+    background: #f7f9fa;
+    border-left: 3px solid var(--divider);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-top: 4px;
+}
+
+.nota-tag-fijada {
+    background: #eef4f5;
+    color: var(--brand-dark, #2a6b77);
+}

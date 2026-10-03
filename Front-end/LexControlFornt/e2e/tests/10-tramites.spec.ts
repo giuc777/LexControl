@@ -80,4 +80,42 @@ test.describe('Módulo Trámites', () => {
         await adminPage.keyboard.press('Escape');
         await expect(adminPage.locator('#estadoNuevo')).toBeHidden({ timeout: 5000 });
     });
+
+    test('TC-TRA-010: Detalle muestra la sección de notas internas', async ({ adminPage }) => {
+        await adminPage.goto('/tramites/1');
+        await expect(adminPage.locator('[data-testid="btn-agregar-nota"]'))
+            .toBeVisible({ timeout: 15000 });
+        await expect(adminPage.locator('.detalle-seccion[aria-label="Notas internas"] h3'))
+            .toHaveText('Notas internas');
+    });
+
+    test('TC-TRA-011: Agregar una nota desde el detalle', async ({ adminPage }) => {
+        const contenido = `Nota de prueba e2e ${Date.now()}`;
+
+        await adminPage.goto('/tramites/1');
+        await adminPage.locator('[data-testid="btn-agregar-nota"]').click();
+        await expect(adminPage.locator('#notaContenido')).toBeVisible({ timeout: 10000 });
+        await adminPage.locator('#notaContenido').fill(contenido);
+        await adminPage.getByRole('button', { name: 'Guardar Nota' }).click();
+
+        await expect(adminPage.locator('.nota-card').filter({ hasText: contenido }))
+            .toBeVisible({ timeout: 10000 });
+    });
+
+    test('TC-TRA-012: Eliminar una nota con confirmación', async ({ adminPage }) => {
+        const contenido = `Nota a eliminar e2e ${Date.now()}`;
+
+        await adminPage.goto('/tramites/1');
+        await adminPage.locator('[data-testid="btn-agregar-nota"]').click();
+        await adminPage.locator('#notaContenido').fill(contenido);
+        await adminPage.getByRole('button', { name: 'Guardar Nota' }).click();
+
+        const nota = adminPage.locator('.nota-card').filter({ hasText: contenido });
+        await expect(nota).toBeVisible({ timeout: 10000 });
+
+        adminPage.once('dialog', dialog => dialog.accept());
+        await nota.locator('[data-testid="btn-eliminar-nota"]').click();
+
+        await expect(nota).toBeHidden({ timeout: 10000 });
+    });
 });

@@ -52,3 +52,25 @@ export interface TramiteActualizarEstado {
     fechaResolucion: string | null;
     resumenResolucion: string | null;
 }
+
+export interface NotaTramite {
+    id: number;
+    tramiteId: number;
+    contenido: string;
+    etiquetaId: number | null;
+    etiquetaNombre: string | null;
+    etiquetaColor: string | null;
+    fijado: boolean;
+    prioritario: boolean;
+    usuarioId: number;
+    usuarioNombre: string | null;
+    fechaCreacion: string | null;
+    fechaModificacion: string | null;
+}
+
+export interface NotaTramiteCrear {
+    contenido: string;
+    etiquetaId?: number | null;
+    fijado?: boolean;
+    prioritario?: boolean;
+}

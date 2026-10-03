@@ -74,3 +74,16 @@ export interface NotaTramiteCrear {
     fijado?: boolean;
     prioritario?: boolean;
 }
+
+export interface DocTramite {
+    id: number;
+    tramiteId: number;
+    nombreArchivo: string;
+    rutaArchivo: string;
+    tipoArchivo: string;
+    tamano: number | null;
+    descripcion: string | null;
+    usuarioId: number;
+    usuarioNombre: string | null;
+    fechaSubida: string | null;
+}

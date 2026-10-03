@@ -77,9 +77,27 @@ public class FileStorageService : IFileStorageService
         _logger.LogInformation("Almacenamiento de documentos en: {BasePath}", Path.GetFullPath(_basePath));
     }
 
-    public async Task<ArchivoGuardado> GuardarAsync(IFormFile archivo, int expedienteId, string? descripcion = null)
+    public Task<ArchivoGuardado> GuardarAsync(IFormFile archivo, int expedienteId, string? descripcion = null)
+        => GuardarInternoAsync(archivo, expedienteId.ToString());
+
+    public Task<ArchivoGuardado> GuardarEnCarpetaAsync(IFormFile archivo, string subcarpeta, string? descripcion = null)
     {
-        var carpeta = Path.Combine(_basePath, expedienteId.ToString());
+        var carpeta = (subcarpeta ?? string.Empty).Replace('\\', '/').Trim('/');
+        if (string.IsNullOrWhiteSpace(carpeta) || carpeta.Contains(".."))
+            throw new ExcepcionNegocio(-1, "Subcarpeta de almacenamiento invalida.",
+                StatusCodes.Status400BadRequest);
+
+        return GuardarInternoAsync(archivo, carpeta);
+    }
+
+    private async Task<ArchivoGuardado> GuardarInternoAsync(IFormFile archivo, string subcarpeta)
+    {
+        // ResolverRutaSegura garantiza que la carpeta quede dentro del directorio base.
+        var carpeta = ResolverRutaSegura(subcarpeta);
+        if (carpeta is null)
+            throw new ExcepcionNegocio(-1, "Subcarpeta de almacenamiento invalida.",
+                StatusCodes.Status400BadRequest);
+
         Directory.CreateDirectory(carpeta);
 
         var extension = Path.GetExtension(archivo.FileName);
@@ -103,7 +121,7 @@ public class FileStorageService : IFileStorageService
         await using var stream = new FileStream(rutaCompleta, FileMode.Create);
         await archivo.CopyToAsync(stream);
 
-        var rutaRelativa = Path.Combine(expedienteId.ToString(), nombreUnico).Replace("\\", "/");
+        var rutaRelativa = $"{subcarpeta}/{nombreUnico}";
 
         _logger.LogInformation("Archivo guardado: {Ruta} ({Tamano} bytes)", rutaRelativa, archivo.Length);
 

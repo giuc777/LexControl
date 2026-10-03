@@ -205,6 +205,99 @@ public class TramitesControllerTests : IClassFixture<TestWebApplicationFactory>
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    // ════════════════════════════════════════════════════════════
+    // DOCUMENTOS ADJUNTOS
+    // ════════════════════════════════════════════════════════════
+
+    [Fact]
+    public async Task ObtenerDocumentos_ConToken_Devuelve200()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        var response = await _client.GetAsync("/api/tramites/1/documentos");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<DocumentoDto>>>();
+        body!.Data.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task SubirDocumento_SinArchivo_Devuelve400()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        var multipart = new MultipartFormDataContent();
+        var response = await _client.PostAsync("/api/tramites/1/documentos/upload", multipart);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task SubirDocumento_ExtensionNoPermitida_Devuelve400()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        using var multipart = CrearUpload("prueba.exe", "MZ");
+        var response = await _client.PostAsync("/api/tramites/1/documentos/upload", multipart);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await response.Content.ReadFromJsonAsync<ApiResponseDto<object>>();
+        body!.Error.Should().Contain("Tipo de archivo no permitido");
+    }
+
+    [Fact]
+    public async Task SubirDocumento_SinRolAbogado_Devuelve403()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenSecretaria());
+
+        using var multipart = CrearUpload("prueba.txt", "contenido de prueba");
+        var response = await _client.PostAsync("/api/tramites/1/documentos/upload", multipart);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task SubirDocumento_ArchivoValido_Devuelve201_PreviaYElimina()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        using var multipart = CrearUpload("documento-e2e.txt", "contenido de prueba");
+        var subida = await _client.PostAsync("/api/tramites/1/documentos/upload", multipart);
+
+        subida.StatusCode.Should().Be(HttpStatusCode.Created);
+        var body = await subida.Content.ReadFromJsonAsync<ApiResponseDto<DocumentoDto>>();
+        body!.Data.Should().NotBeNull();
+        body.Data!.Id.Should().BeGreaterThan(0);
+
+        var preview = await _client.GetAsync($"/api/tramites/documentos/{body.Data.Id}/preview");
+        preview.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var eliminar = await _client.DeleteAsync($"/api/tramites/documentos/{body.Data.Id}");
+        eliminar.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var previewTrasBorrar = await _client.GetAsync($"/api/tramites/documentos/{body.Data.Id}/preview");
+        previewTrasBorrar.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task PreviewDocumento_Inexistente_Devuelve404()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        var response = await _client.GetAsync("/api/tramites/documentos/99999/preview");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    private static MultipartFormDataContent CrearUpload(string nombreArchivo, string contenido)
+    {
+        var multipart = new MultipartFormDataContent();
+        var archivo = new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes(contenido));
+        archivo.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/plain");
+        multipart.Add(archivo, "file", nombreArchivo);
+        return multipart;
+    }
+
     private void AutenticarComo(string token)
     {
         _client.DefaultRequestHeaders.Authorization =
@@ -224,5 +317,13 @@ public class TramitesControllerTests : IClassFixture<TestWebApplicationFactory>
         public int Id { get; set; }
         public int TramiteId { get; set; }
         public string Contenido { get; set; } = string.Empty;
+    }
+
+    public class DocumentoDto
+    {
+        public int Id { get; set; }
+        public int TramiteId { get; set; }
+        public string NombreArchivo { get; set; } = string.Empty;
+        public string TipoArchivo { get; set; } = string.Empty;
     }
 }

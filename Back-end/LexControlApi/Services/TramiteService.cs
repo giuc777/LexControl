@@ -15,6 +15,10 @@ public interface ITramiteService
     Task<List<NotaTramiteDto>> ObtenerNotasAsync(int tramiteId);
     Task<NotaTramiteDto> CrearNotaAsync(int tramiteId, NotaTramiteCrearDto datos, int usuarioId);
     Task EliminarNotaAsync(int notaId);
+    Task<List<DocTramiteDto>> ObtenerDocumentosAsync(int tramiteId);
+    Task<DocTramiteDto?> ObtenerDocumentoPorIdAsync(int documentoId);
+    Task<DocTramiteDto> CrearDocumentoAsync(int tramiteId, DocTramiteCrearDto datos, int usuarioId);
+    Task EliminarDocumentoAsync(int documentoId);
 }
 
 public class TramiteService : ITramiteService
@@ -124,17 +128,70 @@ public class TramiteService : ITramiteService
     {
         var retorno = await _repositorio.EjecutarRetornoAsync(
             "SP_NotaTramite_Eliminar", new { ID = notaId });
-        VerificarAccion(retorno);
+        VerificarAccion(retorno, "La nota no existe o ya fue eliminada.");
     }
 
-    private static void VerificarAccion(int retorno)
+    // ════════════════════════════════════════════════════════════
+    // DOCUMENTOS
+    // ════════════════════════════════════════════════════════════
+
+    public async Task<List<DocTramiteDto>> ObtenerDocumentosAsync(int tramiteId)
+    {
+        var filas = await _repositorio.ConsultarListaAsync<DocTramiteFila>(
+            "SP_DocTramite_ObtenerPorTramite",
+            new { Tramite_ID = tramiteId });
+        return filas.Select(DocTramiteDto.Desde).ToList();
+    }
+
+    public async Task<DocTramiteDto?> ObtenerDocumentoPorIdAsync(int documentoId)
+    {
+        var fila = await _repositorio.ConsultarPrimeroAsync<DocTramiteFila>(
+            "SP_DocTramite_ObtenerPorID", new { ID = documentoId });
+        return fila is null ? null : DocTramiteDto.Desde(fila);
+    }
+
+    public async Task<DocTramiteDto> CrearDocumentoAsync(int tramiteId, DocTramiteCrearDto datos, int usuarioId)
+    {
+        var tramite = await ObtenerPorIdAsync(tramiteId);
+        if (tramite is null)
+            throw new ExcepcionNegocio(-1, "Trámite no encontrado.",
+                StatusCodes.Status404NotFound);
+
+        var nuevoId = await _repositorio.InsertarAsync(
+            "SP_DocTramite_Insertar",
+            new
+            {
+                Tramite_ID = tramiteId,
+                datos.NombreArchivo,
+                datos.RutaArchivo,
+                datos.TipoArchivo,
+                datos.Tamano,
+                datos.Descripcion,
+                Usuario_ID = usuarioId
+            },
+            "@NuevoID");
+
+        var docs = await ObtenerDocumentosAsync(tramiteId);
+        return docs.FirstOrDefault(d => d.Id == nuevoId)
+            ?? throw new ExcepcionNegocio(-1, "Documento no encontrado.",
+                StatusCodes.Status404NotFound);
+    }
+
+    public async Task EliminarDocumentoAsync(int documentoId)
+    {
+        var retorno = await _repositorio.EjecutarRetornoAsync(
+            "SP_DocTramite_Eliminar", new { ID = documentoId });
+        VerificarAccion(retorno, "El documento no existe o ya fue eliminado.");
+    }
+
+    private static void VerificarAccion(int retorno, string mensajeNoEncontrado)
     {
         switch (retorno)
         {
             case 0:
                 return;
             case -1:
-                throw new ExcepcionNegocio(-1, "La nota no existe o ya fue eliminada.",
+                throw new ExcepcionNegocio(-1, mensajeNoEncontrado,
                     StatusCodes.Status404NotFound);
             default:
                 throw new ExcepcionNegocio(retorno,

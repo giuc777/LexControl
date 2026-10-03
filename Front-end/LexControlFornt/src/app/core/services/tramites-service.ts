@@ -4,18 +4,22 @@ import { Observable, map } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { RespuestaApi } from '../api/respuesta-api';
+import { DocumentoUploadResponse } from '../models/expediente.model';
 import {
     Tramite,
     TramiteCrear,
     TramiteDetalle,
     TramiteActualizarEstado,
     NotaTramite,
-    NotaTramiteCrear
+    NotaTramiteCrear,
+    DocTramite
 } from '../models/tramite.model';
+import { ToastService } from '../../layout/toast/toast-service';
 
 @Injectable({ providedIn: 'root' })
 export class TramitesService {
     private readonly http = inject(HttpClient);
+    private readonly toast = inject(ToastService);
     private readonly base = `${environment.apiBaseUrl}/api/tramites`;
 
     listar(filtros: {
@@ -64,5 +68,50 @@ export class TramitesService {
 
     eliminarNota(notaId: number): Observable<void> {
         return this.http.delete<void>(`${this.base}/notas/${notaId}`);
+    }
+
+    listarDocumentos(tramiteId: number): Observable<DocTramite[]> {
+        return this.http
+            .get<RespuestaApi<DocTramite[]>>(`${this.base}/${tramiteId}/documentos`)
+            .pipe(map(r => r.data));
+    }
+
+    subirDocumento(tramiteId: number, archivo: File, descripcion: string | null): Observable<DocumentoUploadResponse> {
+        const formData = new FormData();
+        formData.append('file', archivo);
+        if (descripcion) formData.append('descripcion', descripcion);
+
+        return this.http
+            .post<RespuestaApi<DocumentoUploadResponse>>(`${this.base}/${tramiteId}/documentos/upload`, formData)
+            .pipe(map(r => r.data));
+    }
+
+    /** URL de vista previa inline (resuelta por ID en el backend). */
+    verDocumento(documentoId: number): string {
+        return `${this.base}/documentos/${documentoId}/preview`;
+    }
+
+    /** URL de descarga (resuelta por ID en el backend). */
+    descargarUrl(documentoId: number): string {
+        return `${this.base}/documentos/${documentoId}/download`;
+    }
+
+    /** Descarga el archivo y lo guarda mediante el navegador. */
+    descargarDocumento(documentoId: number, nombreArchivo?: string): void {
+        this.http.get(this.descargarUrl(documentoId), { responseType: 'blob' }).subscribe({
+            next: (blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = nombreArchivo ?? 'archivo';
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            },
+            error: () => this.toast.mostrar('No se pudo descargar el archivo.', 3000)
+        });
+    }
+
+    eliminarDocumento(documentoId: number): Observable<void> {
+        return this.http.delete<void>(`${this.base}/documentos/${documentoId}`);
     }
 }

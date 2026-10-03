@@ -67,7 +67,7 @@
         </div>
 
         @if (tramite()?.notasInternas) {
-            <p class="detalle-texto notas-legado">{{ tramite()?.notasInternas }}</p>
+            <p class="detalle-texto texto-legado">{{ tramite()?.notasInternas }}</p>
         }
 
         @if (cargandoNotas()) {
@@ -114,12 +114,70 @@
         }
     </div>
 
-    @if (tramite()?.documentosAdjuntos) {
-        <div class="detalle-seccion">
-            <h3>Documentos Adjuntos</h3>
-            <p class="detalle-texto">{{ tramite()?.documentosAdjuntos }}</p>
+    <div class="detalle-seccion" aria-label="Documentos adjuntos">
+        <div class="detalle-seccion-head">
+            <h3>Documentos adjuntos</h3>
+            <button type="button" class="btn-filter" data-testid="btn-subir-archivo"
+                    (click)="abrirModalUpload()">
+                Subir archivo
+            </button>
         </div>
-    }
+
+        @if (tramite()?.documentosAdjuntos) {
+            <p class="detalle-texto texto-legado">{{ tramite()?.documentosAdjuntos }}</p>
+        }
+
+        @if (cargandoDocumentos()) {
+            <p class="detalle-texto">Cargando documentos...</p>
+        } @else if (documentos().length === 0) {
+            <div class="empty-inline" data-testid="documentos-vacios">
+                No hay documentos adjuntos.
+            </div>
+        } @else {
+            <div class="docs-list">
+                @for (doc of documentos(); track doc.id) {
+                    <div class="doc-file" data-testid="doc-file">
+                        <div class="doc-icon" [class]="tipoIcono(doc.tipoArchivo)">
+                            {{ doc.tipoArchivo }}
+                        </div>
+                        <div class="doc-info">
+                            <span class="doc-name">{{ doc.nombreArchivo }}</span>
+                            <span class="doc-meta">
+                                {{ formatearTamano(doc.tamano) }} &middot;
+                                {{ formatearFecha(doc.fechaSubida) }}
+                            </span>
+                        </div>
+                        <button type="button" class="btn-icon" title="Vista previa"
+                            (click)="abrirPreview(doc)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                        <button type="button" class="btn-icon" title="Descargar"
+                            (click)="descargarDocumento(doc)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                        </button>
+                        <button type="button" class="btn-icon" title="Eliminar"
+                            data-testid="btn-eliminar-doc"
+                            (click)="eliminarDocumento(doc)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
+                    </div>
+                }
+            </div>
+        }
+    </div>
 
     @if (esResuelto()) {
         <div class="resultado-panel">
@@ -254,6 +312,45 @@
             </footer>
         </form>
     </app-modal>
+
+    <app-modal
+        titulo="Subir Archivo"
+        [abierto]="modalUploadAbierto()"
+        (cerrado)="cerrarModalUpload()"
+        ancho="min(560px, 94vw)">
+        <form class="modal-form" novalidate (submit)="$event.preventDefault(); subirArchivo()">
+            <div class="field full">
+                <label for="uploadFile">Archivo <span class="req">*</span></label>
+                <input type="file" id="uploadFile" data-testid="input-archivo-tramite"
+                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
+                       (change)="onArchivoSeleccionado($event)" />
+                @if (archivoSeleccionado()) {
+                    <div class="archivo-seleccionado">
+                        <span>{{ archivoSeleccionado()!.name }}</span>
+                        <button type="button" class="btn-link" (click)="quitarArchivo()">Quitar</button>
+                    </div>
+                }
+                <p class="field-help">Tipos permitidos: PDF, Word, JPG, PNG, TXT. Maximo 50 MB.</p>
+            </div>
+
+            @if (errorArchivo()) {
+                <div class="form-error" role="alert">{{ errorArchivo() }}</div>
+            }
+
+            <footer class="modal-footer">
+                <button type="button" class="btn-secondary" (click)="cerrarModalUpload()">Cancelar</button>
+                <button type="submit" class="btn-primary"
+                        [disabled]="subiendo() || !archivoSeleccionado()">
+                    @if (subiendo()) { Subiendo... } @else { Subir }
+                </button>
+            </footer>
+        </form>
+    </app-modal>
+
+    @if (archivoPreview()) {
+        <app-visor-archivos [abierto]="true" [archivo]="archivoPreview()!"
+            (cerrado)="cerrarPreview()" />
+    }
 
     <div class="detalle-meta">
         <span>Creado: {{ tramite()?.fechaCreacion }}</span>

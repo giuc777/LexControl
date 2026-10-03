@@ -118,4 +118,52 @@ test.describe('Módulo Trámites', () => {
 
         await expect(nota).toBeHidden({ timeout: 10000 });
     });
+
+    test('TC-TRA-013: Detalle muestra la seccion de documentos adjuntos', async ({ adminPage }) => {
+        await adminPage.goto('/tramites/1');
+        await expect(adminPage.locator('[data-testid="btn-subir-archivo"]'))
+            .toBeVisible({ timeout: 15000 });
+        await expect(adminPage.locator('.detalle-seccion[aria-label="Documentos adjuntos"] h3'))
+            .toHaveText('Documentos adjuntos');
+    });
+
+    test('TC-TRA-014: Subir un archivo adjunto al tramite', async ({ adminPage }) => {
+        const nombre = `e2e-tramite-${Date.now()}.txt`;
+
+        await adminPage.goto('/tramites/1');
+        await adminPage.locator('[data-testid="btn-subir-archivo"]').click();
+        await expect(adminPage.locator('#uploadFile')).toBeVisible({ timeout: 10000 });
+
+        await adminPage.locator('[data-testid="input-archivo-tramite"]').setInputFiles({
+            name: nombre,
+            mimeType: 'text/plain',
+            buffer: Buffer.from('archivo de prueba e2e de tramites')
+        });
+        await expect(adminPage.locator('.archivo-seleccionado')).toBeVisible({ timeout: 5000 });
+
+        await adminPage.getByRole('button', { name: 'Subir', exact: true }).click();
+        await expect(adminPage.locator('.doc-file').filter({ hasText: nombre }))
+            .toBeVisible({ timeout: 10000 });
+    });
+
+    test('TC-TRA-015: Eliminar un archivo adjunto del tramite', async ({ adminPage }) => {
+        const nombre = `e2e-borrar-${Date.now()}.txt`;
+
+        await adminPage.goto('/tramites/1');
+        await adminPage.locator('[data-testid="btn-subir-archivo"]').click();
+        await adminPage.locator('[data-testid="input-archivo-tramite"]').setInputFiles({
+            name: nombre,
+            mimeType: 'text/plain',
+            buffer: Buffer.from('archivo a eliminar e2e')
+        });
+        await adminPage.getByRole('button', { name: 'Subir', exact: true }).click();
+
+        const doc = adminPage.locator('.doc-file').filter({ hasText: nombre });
+        await expect(doc).toBeVisible({ timeout: 10000 });
+
+        adminPage.once('dialog', dialog => dialog.accept());
+        await doc.locator('[data-testid="btn-eliminar-doc"]').click();
+
+        await expect(doc).toBeHidden({ timeout: 10000 });
+    });
 });

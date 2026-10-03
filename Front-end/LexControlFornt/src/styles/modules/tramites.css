@@ -452,6 +452,55 @@
     margin-top: 16px;
 }
 
+/* ============ Modal de cambio de estado: resumen y vista previa ============ */
+
+.estado-resumen {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: #f0f7f9;
+    border: 1px solid #dcebee;
+    border-radius: var(--radius-field);
+    padding: 12px 14px;
+    margin-bottom: 18px;
+}
+
+.estado-resumen-dato {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    min-width: 0;
+}
+
+.estado-resumen-dato-der {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.estado-resumen-etiqueta {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--subtle);
+}
+
+.estado-resumen-expediente {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--brand);
+    word-break: break-word;
+}
+
+.estado-previa {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
 /* ============ Loading spinner ============ */
 
 .loading-spinner {

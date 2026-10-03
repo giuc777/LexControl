@@ -1,5 +1,5 @@
 <app-page-header titulo="Trámites" subtitulo="Gestión de trámites judiciales">
-    <button type="button" class="btn-primary" (click)="abrirModal()">
+    <button type="button" class="btn-primary" data-testid="btn-nuevo-tramite" (click)="abrirModal()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 5v14M5 12h14"/>
@@ -12,7 +12,7 @@
     <div class="filtros-grid">
         <div class="filtro-grupo">
             <label class="filtro-label">Estado</label>
-            <select class="filtro-select"
+            <select class="filtro-select" data-testid="filtro-estado"
                     [ngModel]="filtroEstadoId()"
                     (ngModelChange)="filtroEstadoId.set($event ? +$event : null)">
                 <option [value]="null">Todos</option>
@@ -23,7 +23,7 @@
         </div>
         <div class="filtro-grupo">
             <label class="filtro-label">Tipo</label>
-            <select class="filtro-select"
+            <select class="filtro-select" data-testid="filtro-tipo"
                     [ngModel]="filtroTipoId()"
                     (ngModelChange)="filtroTipoId.set($event ? +$event : null)">
                 <option [value]="null">Todos</option>
@@ -63,7 +63,7 @@
         mensaje="No se encontraron trámites con los filtros seleccionados." />
 } @else {
     <div class="tabla-contenedor">
-        <table class="tabla-datos">
+        <table class="tabla-datos" data-testid="tramites-table">
             <thead>
                 <tr>
                     <th>No. Expediente</th>

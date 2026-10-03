@@ -1,7 +1,14 @@
 <app-page-header
     [titulo]="tramite()?.noExpediente ?? 'Trámite'"
-    [subtitulo]="'Detalle del trámite judicial'"
-    (volver)="irAVolver()" />
+    [subtitulo]="'Detalle del trámite judicial'">
+    <button type="button" class="btn-secondary" data-testid="btn-volver" (click)="irAVolver()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Volver
+    </button>
+</app-page-header>
 
 @if (cargando()) {
     <div class="loading-spinner">
@@ -87,46 +94,87 @@
 
     <div class="detalle-acciones">
         @if (!esResuelto()) {
-            <button class="btn-primary" (click)="toggleFormEstado()">
+            <button class="btn-primary" (click)="abrirFormEstado()">
                 Cambiar Estado
             </button>
         }
     </div>
 
-    @if (mostrarFormEstado()) {
-        <div class="modal-overlay" (click)="toggleFormEstado()">
-            <div class="modal-contenido" (click)="$event.stopPropagation()">
-                <h3>Cambiar Estado del Trámite</h3>
-                <div class="form-grupo">
-                    <label>Nuevo Estado</label>
-                    <select class="form-control"
+    <app-modal
+        titulo="Cambiar Estado del Trámite"
+        [abierto]="mostrarFormEstado()"
+        (cerrado)="cerrarFormEstado()"
+        ancho="min(540px, 94vw)">
+        <form class="modal-form" novalidate (submit)="$event.preventDefault(); guardarEstado()">
+            <div class="estado-resumen">
+                <div class="estado-resumen-dato">
+                    <span class="estado-resumen-etiqueta">Estado actual</span>
+                    <span class="pill-estado" [style.background-color]="colorEstado(tramite()!.estado)">
+                        {{ tramite()!.estado }}
+                    </span>
+                </div>
+                <div class="estado-resumen-dato estado-resumen-dato-der">
+                    <span class="estado-resumen-etiqueta">Trámite</span>
+                    <span class="estado-resumen-expediente">{{ tramite()!.noExpediente }}</span>
+                </div>
+            </div>
+
+            <fieldset class="fieldset-form">
+                <legend>Nuevo Estado</legend>
+                <div class="field full">
+                    <label for="estadoNuevo">Estado <span class="req">*</span></label>
+                    <select id="estadoNuevo" name="estadoNuevo"
                             [ngModel]="nuevoEstadoId()"
                             (ngModelChange)="nuevoEstadoId.set(+$event)">
+                        <option [value]="0">Seleccione un estado</option>
                         @for (e of estadosTramite(); track e.id) {
                             <option [value]="e.id">{{ e.nombre }}</option>
                         }
                     </select>
+                    @if (nombreEstado()) {
+                        <p class="field-help estado-previa">
+                            El trámite quedará como
+                            <span class="pill-estado" [style.background-color]="colorEstado(nombreEstado())">
+                                {{ nombreEstado() }}
+                            </span>
+                        </p>
+                    }
                 </div>
-                <div class="form-grupo">
-                    <label>Fecha de Resolución</label>
-                    <input type="date" class="form-control"
-                           [ngModel]="fechaResolucion()"
-                           (ngModelChange)="fechaResolucion.set($event)" />
+            </fieldset>
+
+            <fieldset class="fieldset-form">
+                <legend>Resolución</legend>
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="fechaResolucion">Fecha de Resolución</label>
+                        <input type="date" id="fechaResolucion" name="fechaResolucion"
+                               [ngModel]="fechaResolucion()"
+                               (ngModelChange)="fechaResolucion.set($event)" />
+                    </div>
+                    <div class="field full">
+                        <label for="resumenResolucion">Resumen de Resolución</label>
+                        <textarea id="resumenResolucion" name="resumenResolucion" rows="3"
+                                  [ngModel]="resumenResolucion()"
+                                  (ngModelChange)="resumenResolucion.set($event)"
+                                  placeholder="Describe el resultado del trámite..."></textarea>
+                        <p class="field-help">Opcional: complete solo si el trámite se resuelve o se rechaza.</p>
+                    </div>
                 </div>
-                <div class="form-grupo">
-                    <label>Resumen de Resolución</label>
-                    <textarea class="form-control" rows="3"
-                              [ngModel]="resumenResolucion()"
-                              (ngModelChange)="resumenResolucion.set($event)"
-                              placeholder="Describe el resultado del trámite..."></textarea>
-                </div>
-                <div class="form-acciones">
-                    <button class="btn-secondary" (click)="toggleFormEstado()">Cancelar</button>
-                    <button class="btn-primary" (click)="guardarEstado()">Guardar</button>
-                </div>
-            </div>
-        </div>
-    }
+            </fieldset>
+
+            @if (error()) {
+                <div class="form-error" role="alert">{{ error() }}</div>
+            }
+
+            <footer class="modal-footer">
+                <button type="button" class="btn-secondary" (click)="cerrarFormEstado()">Cancelar</button>
+                <button type="submit" class="btn-primary"
+                        [disabled]="cambiando() || nuevoEstadoId() === 0">
+                    @if (cambiando()) { Guardando... } @else { Guardar Estado }
+                </button>
+            </footer>
+        </form>
+    </app-modal>
 
     <div class="detalle-meta">
         <span>Creado: {{ tramite()?.fechaCreacion }}</span>

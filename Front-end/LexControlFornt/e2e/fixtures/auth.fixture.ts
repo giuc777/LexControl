@@ -11,7 +11,7 @@ export const test = base.extend<{ adminPage: Page }>({
 
         await page.goto('/login');
         await page.locator('[data-testid="usuario"]').fill('admin');
-        await page.locator('[data-testid="contrasena"]').fill('Test1234!');
+        await page.locator('[data-testid="contrasena"]').fill('admin123');
         await page.locator('[data-testid="btn-login"]').click();
         await page.waitForURL('**/dashboard', { timeout: 15000 });
 

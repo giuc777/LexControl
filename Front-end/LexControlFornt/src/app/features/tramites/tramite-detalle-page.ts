@@ -8,12 +8,13 @@ import { CatalogosService } from '../../core/services/catalogos-service';
 import { CatalogoItem } from '../../core/models/catalogo.model';
 import { PageHeader } from '../../shared/components/page-header/page-header';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
+import { Modal } from '../../shared/components/modal/modal';
 import { ToastService } from '../../layout/toast/toast-service';
 
 @Component({
     selector: 'app-tramite-detalle-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, PageHeader, EmptyState],
+    imports: [FormsModule, PageHeader, EmptyState, Modal],
     templateUrl: './tramite-detalle-page.html'
 })
 export class TramiteDetallePage implements OnInit {
@@ -31,6 +32,8 @@ export class TramiteDetallePage implements OnInit {
     protected readonly nuevoEstadoId = signal<number>(0);
     protected readonly fechaResolucion = signal<string>('');
     protected readonly resumenResolucion = signal<string>('');
+    protected readonly cambiando = signal(false);
+    protected readonly error = signal('');
 
     ngOnInit(): void {
         const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -44,6 +47,8 @@ export class TramiteDetallePage implements OnInit {
             next: (datos) => {
                 this.tramite.set(datos);
                 this.nuevoEstadoId.set(datos.estadoId);
+                this.fechaResolucion.set(datos.fechaResolucion ?? '');
+                this.resumenResolucion.set(datos.resumenResolucion ?? '');
                 this.cargando.set(false);
             },
             error: () => {
@@ -63,27 +68,56 @@ export class TramiteDetallePage implements OnInit {
         this.router.navigate(['/tramites']);
     }
 
-    toggleFormEstado(): void {
-        this.mostrarFormEstado.set(!this.mostrarFormEstado());
+    abrirFormEstado(): void {
         const t = this.tramite();
-        if (t) this.nuevoEstadoId.set(t.estadoId);
+        if (!t) return;
+        this.nuevoEstadoId.set(t.estadoId);
+        this.fechaResolucion.set(t.fechaResolucion ?? '');
+        this.resumenResolucion.set(t.resumenResolucion ?? '');
+        this.error.set('');
+        this.mostrarFormEstado.set(true);
+    }
+
+    cerrarFormEstado(): void {
+        this.mostrarFormEstado.set(false);
+        this.error.set('');
+    }
+
+    /* Nombre del estado elegido en el select (para la vista previa en color). */
+    nombreEstado(): string {
+        const id = this.nuevoEstadoId();
+        if (!id) return '';
+        return this.estadosTramite().find(e => e.id === id)?.nombre ?? '';
     }
 
     guardarEstado(): void {
         const id = this.tramite()?.id;
-        if (!id) return;
+        if (!id || this.cambiando()) return;
+
+        if (!this.nuevoEstadoId()) {
+            this.error.set('Seleccione el nuevo estado del trámite.');
+            return;
+        }
+
         const dto: TramiteActualizarEstado = {
             estadoId: this.nuevoEstadoId(),
             fechaResolucion: this.fechaResolucion() || null,
             resumenResolucion: this.resumenResolucion() || null
         };
+
+        this.cambiando.set(true);
+        this.error.set('');
         this.tramitesSvc.actualizarEstado(id, dto).subscribe({
             next: () => {
+                this.cambiando.set(false);
                 this.toast.mostrar('Estado actualizado correctamente.', 3000);
                 this.mostrarFormEstado.set(false);
                 this.cargarDetalle(id);
             },
-            error: () => { this.toast.mostrar('Error al actualizar el estado.', 3000); }
+            error: (err) => {
+                this.cambiando.set(false);
+                this.error.set(err.error?.error || 'Error al actualizar el estado.');
+            }
         });
     }
 

@@ -39,4 +39,45 @@ test.describe('Módulo Trámites', () => {
         const text = await sidebar.textContent();
         expect(text).toContain('Trámites');
     });
+
+    test('TC-TRA-006: Detalle muestra botón Volver', async ({ adminPage }) => {
+        await adminPage.goto('/tramites/1');
+        await expect(adminPage.locator('[data-testid="btn-volver"]')).toBeVisible({ timeout: 15000 });
+    });
+
+    test('TC-TRA-007: Botón Volver regresa al listado de trámites', async ({ adminPage }) => {
+        await adminPage.goto('/tramites/1');
+        const btnVolver = adminPage.locator('[data-testid="btn-volver"]');
+        await expect(btnVolver).toBeVisible({ timeout: 15000 });
+        await btnVolver.click();
+        await adminPage.waitForURL('**/tramites', { timeout: 10000 });
+        expect(adminPage.url()).toContain('/tramites');
+    });
+
+    test('TC-TRA-008: Modal de cambio de estado abre con todos sus campos', async ({ adminPage }) => {
+        await adminPage.goto('/tramites/1');
+        const btnCambiar = adminPage.getByRole('button', { name: 'Cambiar Estado' });
+        await expect(btnCambiar).toBeVisible({ timeout: 15000 });
+        await btnCambiar.click();
+
+        await expect(adminPage.locator('.modal-title', { hasText: 'Cambiar Estado del Trámite' }))
+            .toBeVisible({ timeout: 10000 });
+        await expect(adminPage.locator('.estado-resumen')).toBeVisible();
+        await expect(adminPage.locator('#estadoNuevo')).toBeVisible();
+        await expect(adminPage.locator('#fechaResolucion')).toBeVisible();
+        await expect(adminPage.locator('#resumenResolucion')).toBeVisible();
+        await expect(adminPage.getByRole('button', { name: 'Guardar Estado' })).toBeVisible();
+        await expect(adminPage.getByRole('button', { name: 'Cancelar' })).toBeVisible();
+    });
+
+    test('TC-TRA-009: El modal de cambio de estado cierra con Escape', async ({ adminPage }) => {
+        await adminPage.goto('/tramites/1');
+        const btnCambiar = adminPage.getByRole('button', { name: 'Cambiar Estado' });
+        await expect(btnCambiar).toBeVisible({ timeout: 15000 });
+        await btnCambiar.click();
+        await expect(adminPage.locator('#estadoNuevo')).toBeVisible({ timeout: 10000 });
+
+        await adminPage.keyboard.press('Escape');
+        await expect(adminPage.locator('#estadoNuevo')).toBeHidden({ timeout: 5000 });
+    });
 });

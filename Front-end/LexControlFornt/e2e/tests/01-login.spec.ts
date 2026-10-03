@@ -5,7 +5,7 @@ test.describe('Módulo Login', () => {
     test('TC-LOGIN-001: Login exitoso con credenciales válidas', async ({ page }) => {
         const login = new LoginPage(page);
         await login.navigate();
-        await login.login('admin', 'Test1234!');
+        await login.login('admin', 'admin123');
         await page.waitForURL('**/dashboard', { timeout: 15000 });
         expect(page.url()).toContain('/dashboard');
     });

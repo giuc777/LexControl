@@ -156,3 +156,27 @@ public class TramiteActualizarEstadoDto
     [MaxLength(500)]
     public string? ResumenResolucion { get; set; }
 }
+
+/// <summary>Datos de entrada para editar el detalle y la resolución de un trámite.</summary>
+public class TramiteActualizarDto
+{
+    [Required(ErrorMessage = "El tipo de trámite es obligatorio.")]
+    public int TipoId { get; set; }
+
+    [Required(ErrorMessage = "La institución es obligatoria.")]
+    [MaxLength(100)]
+    public string Institucion { get; set; } = string.Empty;
+
+    public DateTime? FechaIngreso { get; set; }
+
+    [MaxLength(500)]
+    public string? Descripcion { get; set; }
+
+    [MaxLength(50)]
+    public string? OficioReferencia { get; set; }
+
+    public DateTime? FechaResolucion { get; set; }
+
+    [MaxLength(500)]
+    public string? ResumenResolucion { get; set; }
+}

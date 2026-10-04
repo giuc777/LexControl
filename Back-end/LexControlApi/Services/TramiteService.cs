@@ -12,6 +12,7 @@ public interface ITramiteService
     Task<TramiteDetalleDto?> ObtenerPorIdAsync(int id);
     Task<int> CrearAsync(TramiteCrearDto dto);
     Task ActualizarEstadoAsync(int id, TramiteActualizarEstadoDto dto);
+    Task ActualizarAsync(int id, TramiteActualizarDto dto);
     Task<List<NotaTramiteDto>> ObtenerNotasAsync(int tramiteId);
     Task<NotaTramiteDto> CrearNotaAsync(int tramiteId, NotaTramiteCrearDto datos, int usuarioId);
     Task EliminarNotaAsync(int notaId);
@@ -84,6 +85,24 @@ public class TramiteService : ITramiteService
                 FechaResolucion = dto.FechaResolucion,
                 ResumenResolucion = dto.ResumenResolucion
             });
+    }
+
+    public async Task ActualizarAsync(int id, TramiteActualizarDto dto)
+    {
+        var retorno = await _repositorio.EjecutarRetornoAsync(
+            "SP_Tramite_Actualizar",
+            new
+            {
+                ID = id,
+                Tipo_ID = dto.TipoId,
+                Institucion = dto.Institucion,
+                FechaIngreso = dto.FechaIngreso,
+                Descripcion = dto.Descripcion,
+                OficioReferencia = dto.OficioReferencia,
+                FechaResolucion = dto.FechaResolucion,
+                ResumenResolucion = dto.ResumenResolucion
+            });
+        VerificarAccion(retorno, "Trámite no encontrado.");
     }
 
     // ════════════════════════════════════════════════════════════

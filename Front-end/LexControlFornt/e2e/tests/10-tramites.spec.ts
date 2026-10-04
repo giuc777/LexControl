@@ -166,4 +166,86 @@ test.describe('Módulo Trámites', () => {
 
         await expect(doc).toBeHidden({ timeout: 10000 });
     });
+
+    test('TC-TRA-016: Modal Editar Tramite abre con los campos precargados', async ({ adminPage }) => {
+        await adminPage.goto('/tramites/1');
+        await expect(adminPage.locator('[data-testid="btn-editar-tramite"]'))
+            .toBeVisible({ timeout: 15000 });
+
+        await adminPage.locator('[data-testid="btn-editar-tramite"]').click();
+        await expect(adminPage.locator('#editTipo')).toBeVisible({ timeout: 10000 });
+        await expect(adminPage.locator('#editInstitucion')).toBeVisible();
+        await expect(adminPage.locator('#editFechaIngreso')).toBeVisible();
+        await expect(adminPage.locator('#editOficio')).toBeVisible();
+        await expect(adminPage.locator('#editDescripcion')).toBeVisible();
+        await expect(adminPage.locator('#editFechaResolucion')).toBeVisible();
+        await expect(adminPage.locator('#editResumenResolucion')).toBeVisible();
+        await expect(adminPage.getByRole('button', { name: 'Guardar Cambios' })).toBeVisible();
+
+        const institucion = await adminPage.locator('#editInstitucion').inputValue();
+        expect(institucion.length).toBeGreaterThan(0);
+    });
+
+    test('TC-TRA-017: Editar la institucion y la descripcion del tramite', async ({ adminPage }) => {
+        const institucionNueva = `Institucion e2e ${Date.now()}`;
+        const descripcionNueva = `Descripcion e2e ${Date.now()}`;
+
+        await adminPage.goto('/tramites/1');
+        await adminPage.locator('[data-testid="btn-editar-tramite"]').click();
+        await expect(adminPage.locator('#editInstitucion')).toBeVisible({ timeout: 10000 });
+
+        const institucionOriginal = await adminPage.locator('#editInstitucion').inputValue();
+        const descripcionOriginal = await adminPage.locator('#editDescripcion').inputValue();
+
+        await adminPage.locator('#editInstitucion').fill(institucionNueva);
+        await adminPage.locator('#editDescripcion').fill(descripcionNueva);
+        await adminPage.locator('[data-testid="btn-guardar-edicion"]').click();
+
+        await expect(adminPage.locator('#editInstitucion')).toBeHidden({ timeout: 10000 });
+        await expect(adminPage.locator('.detalle-valor-destacado'))
+            .toContainText(institucionNueva, { timeout: 10000 });
+
+        // Restaura los valores originales para no alterar la BD.
+        await adminPage.locator('[data-testid="btn-editar-tramite"]').click();
+        await adminPage.locator('#editInstitucion').fill(institucionOriginal);
+        await adminPage.locator('#editDescripcion').fill(descripcionOriginal);
+        await adminPage.locator('[data-testid="btn-guardar-edicion"]').click();
+
+        await expect(adminPage.locator('.detalle-valor-destacado'))
+            .toContainText(institucionOriginal, { timeout: 10000 });
+    });
+
+    test('TC-TRA-018: Editar la resolucion del tramite', async ({ adminPage }) => {
+        const resumen = `Resolucion e2e ${Date.now()}`;
+
+        await adminPage.goto('/tramites/1');
+        await adminPage.locator('[data-testid="btn-editar-tramite"]').click();
+        await expect(adminPage.locator('#editFechaResolucion')).toBeVisible({ timeout: 10000 });
+
+        const fechaOriginal = await adminPage.locator('#editFechaResolucion').inputValue();
+        const resumenOriginal = await adminPage.locator('#editResumenResolucion').inputValue();
+
+        await adminPage.locator('#editFechaResolucion').fill('2026-10-05');
+        await adminPage.locator('#editResumenResolucion').fill(resumen);
+        await adminPage.locator('[data-testid="btn-guardar-edicion"]').click();
+
+        await expect(adminPage.locator('[data-testid="panel-resolucion"]'))
+            .toBeVisible({ timeout: 10000 });
+        await expect(adminPage.locator('[data-testid="panel-resolucion"]')).toContainText(resumen);
+
+        // Restaura los valores originales para no alterar la BD.
+        await adminPage.locator('[data-testid="btn-editar-tramite"]').click();
+        await adminPage.locator('#editFechaResolucion').fill(fechaOriginal);
+        await adminPage.locator('#editResumenResolucion').fill(resumenOriginal);
+        await adminPage.locator('[data-testid="btn-guardar-edicion"]').click();
+
+        await expect(adminPage.locator('[data-testid="btn-editar-tramite"]'))
+            .toBeVisible({ timeout: 10000 });
+        const panel = adminPage.locator('[data-testid="panel-resolucion"]');
+        if (fechaOriginal || resumenOriginal) {
+            await expect(panel).toContainText(resumenOriginal);
+        } else {
+            await expect(panel).toBeHidden();
+        }
+    });
 });

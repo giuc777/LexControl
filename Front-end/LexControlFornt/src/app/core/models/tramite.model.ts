@@ -53,6 +53,16 @@ export interface TramiteActualizarEstado {
     resumenResolucion: string | null;
 }
 
+export interface TramiteActualizar {
+    tipoId: number;
+    institucion: string;
+    fechaIngreso: string | null;
+    descripcion: string | null;
+    oficioReferencia: string | null;
+    fechaResolucion: string | null;
+    resumenResolucion: string | null;
+}
+
 export interface NotaTramite {
     id: number;
     tramiteId: number;

@@ -3,7 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { TramitesService } from '../../core/services/tramites-service';
-import { TramiteDetalle, TramiteActualizarEstado, NotaTramite, DocTramite } from '../../core/models/tramite.model';
+import { TramiteDetalle, TramiteActualizarEstado, TramiteActualizar, NotaTramite, DocTramite } from '../../core/models/tramite.model';
+import { AuthService } from '../../core/auth/auth-service';
 import { CatalogosService } from '../../core/services/catalogos-service';
 import { CatalogoItem } from '../../core/models/catalogo.model';
 import { PageHeader } from '../../shared/components/page-header/page-header';
@@ -27,11 +28,13 @@ export class TramiteDetallePage implements OnInit {
     private readonly router = inject(Router);
     private readonly tramitesSvc = inject(TramitesService);
     private readonly catalogosSvc = inject(CatalogosService);
+    private readonly auth = inject(AuthService);
     private readonly toast = inject(ToastService);
 
     protected readonly tramite = signal<TramiteDetalle | null>(null);
     protected readonly cargando = signal(true);
     protected readonly estadosTramite = signal<CatalogoItem[]>([]);
+    protected readonly tiposTramite = signal<CatalogoItem[]>([]);
 
     protected readonly mostrarFormEstado = signal(false);
     protected readonly nuevoEstadoId = signal<number>(0);
@@ -39,6 +42,17 @@ export class TramiteDetallePage implements OnInit {
     protected readonly resumenResolucion = signal<string>('');
     protected readonly cambiando = signal(false);
     protected readonly error = signal('');
+
+    protected readonly modalEditarAbierto = signal(false);
+    protected readonly editTipoId = signal<number>(0);
+    protected readonly editInstitucion = signal<string>('');
+    protected readonly editFechaIngreso = signal<string>('');
+    protected readonly editOficioReferencia = signal<string>('');
+    protected readonly editDescripcion = signal<string>('');
+    protected readonly editFechaResolucion = signal<string>('');
+    protected readonly editResumenResolucion = signal<string>('');
+    protected readonly guardandoEdicion = signal(false);
+    protected readonly errorEdicion = signal('');
 
     protected readonly notas = signal<NotaTramite[]>([]);
     protected readonly cargandoNotas = signal(false);
@@ -59,6 +73,7 @@ export class TramiteDetallePage implements OnInit {
         const id = Number(this.route.snapshot.paramMap.get('id'));
         if (id) this.cargarDetalle(id);
         this.cargarEstados();
+        this.cargarTipos();
     }
 
     cargarDetalle(id: number): void {
@@ -84,6 +99,18 @@ export class TramiteDetallePage implements OnInit {
         this.catalogosSvc.buscarCatalogo('ESTADO_TRAMITE').subscribe({
             next: (data) => { this.estadosTramite.set(data.items); }
         });
+    }
+
+    cargarTipos(): void {
+        this.catalogosSvc.buscarCatalogo('TIPO_TRAMITE').subscribe({
+            next: (data) => { this.tiposTramite.set(data.items); }
+        });
+    }
+
+    /* Solo Administrador y Abogado pueden editar (igual que el backend). */
+    puedeEditar(): boolean {
+        const rol = this.auth.rol();
+        return rol === 'Administrador' || rol === 'Abogado';
     }
 
     irAVolver(): void {
@@ -139,6 +166,66 @@ export class TramiteDetallePage implements OnInit {
             error: (err) => {
                 this.cambiando.set(false);
                 this.error.set(err.error?.error || 'Error al actualizar el estado.');
+            }
+        });
+    }
+
+    // ── Edición del trámite (detalle + resolución) ───────────
+
+    abrirModalEditar(): void {
+        const t = this.tramite();
+        if (!t) return;
+        this.editTipoId.set(t.tipoId);
+        this.editInstitucion.set(t.institucion ?? '');
+        this.editFechaIngreso.set(t.fechaIngreso ?? '');
+        this.editOficioReferencia.set(t.oficioReferencia ?? '');
+        this.editDescripcion.set(t.descripcion ?? '');
+        this.editFechaResolucion.set(t.fechaResolucion ?? '');
+        this.editResumenResolucion.set(t.resumenResolucion ?? '');
+        this.errorEdicion.set('');
+        this.modalEditarAbierto.set(true);
+    }
+
+    cerrarModalEditar(): void {
+        this.modalEditarAbierto.set(false);
+        this.errorEdicion.set('');
+    }
+
+    guardarEdicion(): void {
+        const id = this.tramite()?.id;
+        if (!id || this.guardandoEdicion()) return;
+
+        if (!this.editTipoId()) {
+            this.errorEdicion.set('Seleccione el tipo de trámite.');
+            return;
+        }
+        if (!this.editInstitucion().trim()) {
+            this.errorEdicion.set('La institución es obligatoria.');
+            return;
+        }
+
+        const dto: TramiteActualizar = {
+            tipoId: this.editTipoId(),
+            institucion: this.editInstitucion().trim(),
+            fechaIngreso: this.editFechaIngreso() || null,
+            descripcion: this.editDescripcion().trim() || null,
+            oficioReferencia: this.editOficioReferencia().trim() || null,
+            fechaResolucion: this.editFechaResolucion() || null,
+            resumenResolucion: this.editResumenResolucion().trim() || null
+        };
+
+        this.guardandoEdicion.set(true);
+        this.errorEdicion.set('');
+        this.tramitesSvc.actualizar(id, dto).subscribe({
+            next: () => {
+                this.guardandoEdicion.set(false);
+                this.cerrarModalEditar();
+                this.cargarDetalle(id);
+                this.toast.mostrar('Trámite actualizado correctamente.', 3000);
+            },
+            error: (err) => {
+                this.guardandoEdicion.set(false);
+                this.errorEdicion.set(err.error?.error || 'Error al actualizar el trámite.');
             }
         });
     }

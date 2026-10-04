@@ -289,6 +289,106 @@ public class TramitesControllerTests : IClassFixture<TestWebApplicationFactory>
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    // ════════════════════════════════════════════════════════════
+    // EDICIÓN DEL TRÁMITE (detalle + resolución)
+    // ════════════════════════════════════════════════════════════
+
+    [Fact]
+    public async Task Actualizar_SinAutenticacion_Devuelve401()
+    {
+        var response = await _client.PutAsJsonAsync("/api/tramites/1",
+            new { TipoId = 1, Institucion = "Institución" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task Actualizar_TramiteInexistente_Devuelve404()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        var response = await _client.PutAsJsonAsync("/api/tramites/99999",
+            new { TipoId = 1, Institucion = "Institución de prueba" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task Actualizar_SinRolAbogado_Devuelve403()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenSecretaria());
+
+        var response = await _client.PutAsJsonAsync("/api/tramites/1",
+            new { TipoId = 1, Institucion = "Institución de prueba" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Actualizar_SinInstitucion_Devuelve400()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        var response = await _client.PutAsJsonAsync("/api/tramites/1",
+            new { TipoId = 1, Institucion = "" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task Actualizar_DetalleYResolucion_Devuelve204_YReflejaLosCambios()
+    {
+        AutenticarComo(AuthHelper.GenerarTokenAdmin());
+
+        var original = await _client.GetAsync("/api/tramites/1");
+        if (original.StatusCode == HttpStatusCode.NotFound) return;
+
+        var detalle = await original.Content
+            .ReadFromJsonAsync<ApiResponseDto<TramiteDetalleTestDto>>();
+        detalle!.Data.Should().NotBeNull();
+
+        var datos = detalle.Data!;
+        var institucionEditada = "Institución editada por test";
+        var resumenEditado = "Resolución corregida por test";
+        var fechaResolucion = new DateTime(2026, 10, 5);
+
+        var editar = await _client.PutAsJsonAsync($"/api/tramites/{datos.Id}",
+            new
+            {
+                TipoId = datos.TipoId,
+                Institucion = institucionEditada,
+                FechaIngreso = datos.FechaIngreso,
+                Descripcion = "Descripción corregida por test",
+                OficioReferencia = datos.OficioReferencia,
+                FechaResolucion = fechaResolucion,
+                ResumenResolucion = resumenEditado
+            });
+
+        editar.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var verificado = await _client.GetFromJsonAsync<ApiResponseDto<TramiteDetalleTestDto>>(
+            $"/api/tramites/{datos.Id}");
+        verificado!.Data.Should().NotBeNull();
+        verificado.Data!.Institucion.Should().Be(institucionEditada);
+        verificado.Data.Descripcion.Should().Be("Descripción corregida por test");
+        verificado.Data.ResumenResolucion.Should().Be(resumenEditado);
+        verificado.Data.FechaResolucion.Should().Be("2026-10-05");
+
+        // Restaura los valores originales para no alterar la BD.
+        var restaurar = await _client.PutAsJsonAsync($"/api/tramites/{datos.Id}",
+            new
+            {
+                TipoId = datos.TipoId,
+                Institucion = datos.Institucion,
+                FechaIngreso = datos.FechaIngreso,
+                Descripcion = datos.Descripcion,
+                OficioReferencia = datos.OficioReferencia,
+                FechaResolucion = datos.FechaResolucion,
+                ResumenResolucion = datos.ResumenResolucion
+            });
+        restaurar.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
     private static MultipartFormDataContent CrearUpload(string nombreArchivo, string contenido)
     {
         var multipart = new MultipartFormDataContent();
@@ -325,5 +425,17 @@ public class TramitesControllerTests : IClassFixture<TestWebApplicationFactory>
         public int TramiteId { get; set; }
         public string NombreArchivo { get; set; } = string.Empty;
         public string TipoArchivo { get; set; } = string.Empty;
+    }
+
+    public class TramiteDetalleTestDto
+    {
+        public int Id { get; set; }
+        public int TipoId { get; set; }
+        public string Institucion { get; set; } = string.Empty;
+        public string FechaIngreso { get; set; } = string.Empty;
+        public string? Descripcion { get; set; }
+        public string? OficioReferencia { get; set; }
+        public string? FechaResolucion { get; set; }
+        public string? ResumenResolucion { get; set; }
     }
 }

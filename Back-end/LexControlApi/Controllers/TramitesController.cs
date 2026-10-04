@@ -58,6 +58,16 @@ public class TramitesController : ControllerBase
         return NoContent();
     }
 
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = "Administrador,Abogado")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Actualizar(int id, TramiteActualizarDto dto)
+    {
+        await _service.ActualizarAsync(id, dto);
+        return NoContent();
+    }
+
     // ════════════════════════════════════════════════════════════
     // NOTAS INTERNAS
     // ════════════════════════════════════════════════════════════

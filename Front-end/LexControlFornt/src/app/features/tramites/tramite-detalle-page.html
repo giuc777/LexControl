@@ -179,8 +179,8 @@
         }
     </div>
 
-    @if (esResuelto()) {
-        <div class="resultado-panel">
+    @if (esResuelto() || tramite()?.fechaResolucion || tramite()?.resumenResolucion) {
+        <div class="resultado-panel" data-testid="panel-resolucion">
             <div class="resultado-icono">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                      stroke="#2ecc71" stroke-width="2">
@@ -201,12 +201,103 @@
     }
 
     <div class="detalle-acciones">
+        @if (puedeEditar()) {
+            <button class="btn-secondary" data-testid="btn-editar-tramite"
+                    (click)="abrirModalEditar()">
+                Editar trámite
+            </button>
+        }
         @if (!esResuelto()) {
             <button class="btn-primary" (click)="abrirFormEstado()">
                 Cambiar Estado
             </button>
         }
     </div>
+
+    <app-modal
+        titulo="Editar Trámite"
+        [abierto]="modalEditarAbierto()"
+        (cerrado)="cerrarModalEditar()"
+        ancho="min(620px, 94vw)">
+        <form class="modal-form" novalidate (submit)="$event.preventDefault(); guardarEdicion()">
+            <fieldset class="fieldset-form">
+                <legend>Datos del Trámite</legend>
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="editTipo">Tipo de Trámite <span class="req">*</span></label>
+                        <select id="editTipo" name="editTipo"
+                                [ngModel]="editTipoId()"
+                                (ngModelChange)="editTipoId.set(+$event)">
+                            <option [value]="0">Seleccione tipo</option>
+                            @for (t of tiposTramite(); track t.id) {
+                                <option [value]="t.id">{{ t.nombre }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="editInstitucion">Institución <span class="req">*</span></label>
+                        <input type="text" id="editInstitucion" name="editInstitucion"
+                               maxlength="100"
+                               [ngModel]="editInstitucion()"
+                               (ngModelChange)="editInstitucion.set($event)"
+                               placeholder="Ej: Ministerio Público" />
+                    </div>
+                    <div class="field">
+                        <label for="editFechaIngreso">Fecha de Ingreso</label>
+                        <input type="date" id="editFechaIngreso" name="editFechaIngreso"
+                               [ngModel]="editFechaIngreso()"
+                               (ngModelChange)="editFechaIngreso.set($event)" />
+                    </div>
+                    <div class="field">
+                        <label for="editOficio">Oficio de Referencia</label>
+                        <input type="text" id="editOficio" name="editOficio" maxlength="50"
+                               [ngModel]="editOficioReferencia()"
+                               (ngModelChange)="editOficioReferencia.set($event)"
+                               placeholder="Número de oficio" />
+                    </div>
+                    <div class="field full">
+                        <label for="editDescripcion">Descripción</label>
+                        <textarea id="editDescripcion" name="editDescripcion" rows="3" maxlength="500"
+                                  [ngModel]="editDescripcion()"
+                                  (ngModelChange)="editDescripcion.set($event)"
+                                  placeholder="Descripción del trámite..."></textarea>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="fieldset-form">
+                <legend>Resolución</legend>
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="editFechaResolucion">Fecha de Resolución</label>
+                        <input type="date" id="editFechaResolucion" name="editFechaResolucion"
+                               [ngModel]="editFechaResolucion()"
+                               (ngModelChange)="editFechaResolucion.set($event)" />
+                    </div>
+                    <div class="field full">
+                        <label for="editResumenResolucion">Resumen de Resolución</label>
+                        <textarea id="editResumenResolucion" name="editResumenResolucion" rows="3" maxlength="500"
+                                  [ngModel]="editResumenResolucion()"
+                                  (ngModelChange)="editResumenResolucion.set($event)"
+                                  placeholder="Describe el resultado del trámite..."></textarea>
+                        <p class="field-help">Déjelo vacío si el trámite aún no tiene resolución.</p>
+                    </div>
+                </div>
+            </fieldset>
+
+            @if (errorEdicion()) {
+                <div class="form-error" role="alert">{{ errorEdicion() }}</div>
+            }
+
+            <footer class="modal-footer">
+                <button type="button" class="btn-secondary" (click)="cerrarModalEditar()">Cancelar</button>
+                <button type="submit" class="btn-primary" data-testid="btn-guardar-edicion"
+                        [disabled]="guardandoEdicion()">
+                    @if (guardandoEdicion()) { Guardando... } @else { Guardar Cambios }
+                </button>
+            </footer>
+        </form>
+    </app-modal>
 
     <app-modal
         titulo="Cambiar Estado del Trámite"

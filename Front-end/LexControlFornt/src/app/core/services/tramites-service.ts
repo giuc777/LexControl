@@ -10,6 +10,7 @@ import {
     TramiteCrear,
     TramiteDetalle,
     TramiteActualizarEstado,
+    TramiteActualizar,
     NotaTramite,
     NotaTramiteCrear,
     DocTramite
@@ -52,6 +53,10 @@ export class TramitesService {
 
     actualizarEstado(id: number, dto: TramiteActualizarEstado): Observable<void> {
         return this.http.put<void>(`${this.base}/${id}/estado`, dto);
+    }
+
+    actualizar(id: number, dto: TramiteActualizar): Observable<void> {
+        return this.http.put<void>(`${this.base}/${id}`, dto);
     }
 
     listarNotas(tramiteId: number): Observable<NotaTramite[]> {

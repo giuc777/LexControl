@@ -8,6 +8,8 @@ USE DBLexControl;
 GO
 
 -- 19.1 Catálogo RESULTADO_DILIGENCIA
+--     El resultado se captura como texto libre (DILIGENCIA.DescripcionResultado),
+--     por lo que los valores del catalogo quedan desactivados.
 IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'RESULTADO_DILIGENCIA')
 BEGIN
     CREATE TABLE RESULTADO_DILIGENCIA (
@@ -17,7 +19,7 @@ BEGIN
         Descripcion NVARCHAR(200) NULL,
         Color NVARCHAR(7) NULL,
         Orden INT NOT NULL DEFAULT 0,
-        Activo BIT NOT NULL DEFAULT 1,
+        Activo BIT NOT NULL DEFAULT 0,
         FechaCreacion DATETIME NOT NULL DEFAULT GETDATE()
     );
     CREATE INDEX IX_RESULTADO_DILIGENCIA_Nombre ON RESULTADO_DILIGENCIA(Nombre);
@@ -27,11 +29,11 @@ GO
 
 IF NOT EXISTS (SELECT 1 FROM RESULTADO_DILIGENCIA)
 BEGIN
-    INSERT INTO RESULTADO_DILIGENCIA (Nombre, Valor, Descripcion, Color, Orden) VALUES
-    ('Ejecutada', 'EJE', 'Diligencia ejecutada', '#2ECC71', 1),
-    ('No Ejecutada', 'NOE', 'Diligencia no ejecutada', '#E74C3C', 2),
-    ('Re-programada', 'REPR', 'Diligencia reprogramada', '#F39C12', 3),
-    ('Sin Resultado', 'SIN', 'Sin resultado registrado', '#95A5A6', 4);
+    INSERT INTO RESULTADO_DILIGENCIA (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+    ('Ejecutada', 'EJE', 'Diligencia ejecutada', '#2ECC71', 1, 0),
+    ('No Ejecutada', 'NOE', 'Diligencia no ejecutada', '#E74C3C', 2, 0),
+    ('Re-programada', 'REPR', 'Diligencia reprogramada', '#F39C12', 3, 0),
+    ('Sin Resultado', 'SIN', 'Sin resultado registrado', '#95A5A6', 4, 0);
 END
 GO
 

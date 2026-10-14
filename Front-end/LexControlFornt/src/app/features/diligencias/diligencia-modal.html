@@ -43,11 +43,11 @@
                                placeholder="Ej: Asesoria con cliente" />
                     </div>
                     <div class="form-grupo">
-                        <label>Tipo <span class="obligatorio">*</span></label>
+                        <label>Tipo</label>
                         <select class="form-control"
                                 [ngModel]="tipoId()"
                                 (ngModelChange)="tipoId.set(+$event)">
-                            <option [value]="0">Seleccione tipo</option>
+                            <option [value]="0">Sin tipo</option>
                             @for (t of tiposDiligencia(); track t.id) {
                                 <option [value]="t.id">{{ t.nombre }}</option>
                             }

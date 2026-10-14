@@ -35,17 +35,6 @@
             <legend>Resultado de la diligencia</legend>
             <div class="form-grid">
                 <div class="field full">
-                    <label for="resDiligResultado">Resultado <span class="req">*</span></label>
-                    <select id="resDiligResultado" data-testid="select-resultado-diligencia"
-                        [(ngModel)]="resultadoSeleccionado" name="resultadoId" required>
-                        <option value="0" disabled>Seleccionar resultado...</option>
-                        @for (res of resultados(); track res.id) {
-                            <option [value]="res.id">{{ res.nombre }}</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="field full">
                     <label for="resDiligDescripcion">Descripción del resultado <span class="req">*</span></label>
                     <textarea id="resDiligDescripcion" data-testid="input-descripcion-diligencia"
                         [(ngModel)]="descripcionResultado" name="descripcionResultado"

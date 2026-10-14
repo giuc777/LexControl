@@ -13,9 +13,12 @@ import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { DiligenciaModal } from './diligencia-modal';
 
 const COLORES_ESTADO: Record<string, string> = {
+    'Programada': '#3498db',
+    'Completada': '#2ecc71',
+    'Reprogramada': '#f39c12',
+    // Estados legacy que ya no aparecen en el catalogo (filas antiguas).
     'Pendiente': '#f39c12',
     'En Progreso': '#3498db',
-    'Completada': '#2ecc71',
     'Cancelada': '#e74c3c'
 };
 

@@ -153,11 +153,29 @@ public class DiligenciasControllerTests : IClassFixture<TestWebApplicationFactor
         _client.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
+        // Sin ResultadoId (opcional) y sin descripcion: la validacion debe rechazarlo.
         var response = await _client.PutAsJsonAsync("/api/diligencias/1/resultado",
-            new { ResultadoId = 0, DescripcionResultado = "" });
+            new { DescripcionResultado = "" });
 
         response.StatusCode.Should().BeOneOf(
             HttpStatusCode.BadRequest, HttpStatusCode.UnprocessableEntity);
+    }
+
+    [Fact]
+    public async Task RegistrarResultado_SinResultadoId_NoDevuelveErrorValidacion()
+    {
+        var token = AuthHelper.GenerarTokenAdmin();
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        // ResultadoId opcional: el resultado "por escrito" se registra solo con descripcion.
+        var response = await _client.PutAsJsonAsync("/api/diligencias/1/resultado",
+            new { DescripcionResultado = "Diligencia ejecutada por escrito" });
+
+        // 200/204 = ok, 404/500 = SP responde segun existencia; nunca 400/422 por validacion
+        response.StatusCode.Should().BeOneOf(
+            HttpStatusCode.NoContent, HttpStatusCode.OK,
+            HttpStatusCode.NotFound, HttpStatusCode.InternalServerError);
     }
 
     // Tipos auxiliares

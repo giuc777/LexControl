@@ -57,7 +57,7 @@ export interface AudienciaCrear {
 }
 
 export interface AudienciaResultado {
-    resultadoId: number;
+    resultadoId: number | null;
     descripcionResultado: string;
     proximaActuacion: string | null;
 }

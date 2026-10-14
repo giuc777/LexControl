@@ -14,9 +14,11 @@ import { ToastService } from '../../layout/toast/toast-service';
 import { NotificacionModal } from './notificacion-modal';
 
 const COLORES_ESTADO: Record<string, string> = {
+    'Recibida': '#3498db',
+    'Atendida': '#2ecc71',
+    // Estados legacy que ya no aparecen en el catalogo (filas antiguas).
     'Pendiente': '#f39c12',
     'En Tramite': '#3498db',
-    'Atendida': '#2ecc71',
     'Vencida': '#e74c3c',
     'Rechazada': '#95a5a6'
 };

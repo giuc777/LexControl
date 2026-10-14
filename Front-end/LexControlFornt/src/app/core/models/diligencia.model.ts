@@ -54,7 +54,7 @@ export interface DiligenciaDetalle {
 export interface DiligenciaCrear {
     expedienteId: number | null;
     clienteId: number | null;
-    tipoId: number;
+    tipoId: number | null;
     titulo: string;
     descripcion: string | null;
     fecha: string;
@@ -86,6 +86,6 @@ export interface DiligenciaActualizar {
 }
 
 export interface DiligenciaResultado {
-    resultadoId: number;
+    resultadoId: number | null;
     descripcionResultado: string;
 }

@@ -229,7 +229,7 @@ export class DashboardPage implements OnInit {
 
         this.notificacionesSvc.listar({}).subscribe({
             next: (notificaciones) => {
-                const pendientes = notificaciones.filter(n => n.estado === 'Pendiente').length;
+                const pendientes = notificaciones.filter(n => n.estado !== 'Atendida').length;
                 this.estadisticas.update(s => {
                     const copia = [...s];
                     copia[3] = { label: 'Notificaciones OJ', valor: pendientes, detalle: pendientes > 0 ? `${pendientes} pendientes` : 'Al dia', tono: pendientes > 0 ? 'danger' : '' };

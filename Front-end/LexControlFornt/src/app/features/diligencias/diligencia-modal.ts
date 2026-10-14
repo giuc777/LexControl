@@ -57,7 +57,9 @@ export class DiligenciaModal implements OnInit {
         this.catalogosSvc.buscarCatalogo('ESTADO_DILIGENCIA').subscribe({
             next: (data) => {
                 this.estadosDiligencia.set(data.items);
-                const primerEstado = data.items.find(e => e.nombre === 'Pendiente') ?? data.items[0];
+                const primerEstado = data.items.find(e => e.nombre === 'Programada')
+                    ?? data.items.find(e => e.nombre === 'Pendiente')
+                    ?? data.items[0];
                 if (primerEstado) this.estadoId.set(primerEstado.id);
             }
         });
@@ -66,7 +68,7 @@ export class DiligenciaModal implements OnInit {
     onCerrar(): void { this.cerrar.emit(); }
 
     guardar(): void {
-        if (!this.titulo().trim() || !this.tipoId() || !this.fecha()) {
+        if (!this.titulo().trim() || !this.fecha()) {
             this.toast.mostrar('Complete los campos obligatorios.', 3000);
             return;
         }
@@ -78,7 +80,7 @@ export class DiligenciaModal implements OnInit {
         const dto: DiligenciaCrear = {
             expedienteId: this.expedienteId(),
             clienteId: this.clienteId(),
-            tipoId: this.tipoId(),
+            tipoId: this.tipoId() || null,
             titulo: this.titulo().trim(),
             descripcion: this.descripcion() || null,
             fecha: this.fecha(),

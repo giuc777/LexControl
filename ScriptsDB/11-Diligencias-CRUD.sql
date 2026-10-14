@@ -106,7 +106,7 @@ GO
 CREATE OR ALTER PROCEDURE SP_Diligencia_Insertar
     @Expediente_ID INT = NULL,
     @Cliente_ID INT = NULL,
-    @Tipo_ID INT,
+    @Tipo_ID INT = NULL,
     @Titulo NVARCHAR(200),
     @Descripcion NVARCHAR(500) = NULL,
     @Fecha DATE,

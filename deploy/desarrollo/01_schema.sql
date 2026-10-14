@@ -522,7 +522,7 @@ CREATE TABLE DILIGENCIA (
     ID INT IDENTITY(1,1) PRIMARY KEY,
     Expediente_ID INT NULL,
     Cliente_ID INT NULL,
-    Tipo_ID INT NOT NULL,
+    Tipo_ID INT NULL,
     Titulo NVARCHAR(200) NOT NULL,
     Descripcion NVARCHAR(500) NULL,
     Fecha DATE NOT NULL,
@@ -1105,6 +1105,8 @@ CREATE INDEX IX_AUDIENCIA_EXPEDIENTE_FECHA ON AUDIENCIA (Expediente_ID, Fecha);
 -- 6. Catalogo de resultados de diligencia (ScriptsDB/19-Diligencias-Resultado.sql)
 -- ------------------------------------------------------------
 -- 19.1 Catálogo RESULTADO_DILIGENCIA
+--     El resultado se captura como texto libre (DILIGENCIA.DescripcionResultado),
+--     por lo que los valores del catalogo quedan desactivados.
 IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'RESULTADO_DILIGENCIA')
 BEGIN
     CREATE TABLE RESULTADO_DILIGENCIA (
@@ -1114,7 +1116,7 @@ BEGIN
         Descripcion NVARCHAR(200) NULL,
         Color NVARCHAR(7) NULL,
         Orden INT NOT NULL DEFAULT 0,
-        Activo BIT NOT NULL DEFAULT 1,
+        Activo BIT NOT NULL DEFAULT 0,
         FechaCreacion DATETIME NOT NULL DEFAULT GETDATE()
     );
     CREATE INDEX IX_RESULTADO_DILIGENCIA_Nombre ON RESULTADO_DILIGENCIA(Nombre);

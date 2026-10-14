@@ -35,17 +35,6 @@
             <legend>Resultado de la audiencia</legend>
             <div class="form-grid">
                 <div class="field full">
-                    <label for="resResultado">Resultado <span class="req">*</span></label>
-                    <select id="resResultado" data-testid="select-resultado"
-                        [(ngModel)]="resultadoSeleccionado" name="resultadoId" required>
-                        <option value="0" disabled>Seleccionar resultado...</option>
-                        @for (res of resultados(); track res.id) {
-                            <option [value]="res.id">{{ res.nombre }}</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="field full">
                     <label for="resDescripcion">Descripción del resultado <span class="req">*</span></label>
                     <textarea id="resDescripcion" data-testid="input-descripcion"
                         [(ngModel)]="descripcionResultado" name="descripcionResultado"

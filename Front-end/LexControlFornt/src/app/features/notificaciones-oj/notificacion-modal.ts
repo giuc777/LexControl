@@ -81,7 +81,9 @@ export class NotificacionModal implements OnInit {
             next: (data) => {
                 this.estadosNotificacion.set(data.items);
                 if (!this.esEdicion()) {
-                    const primerEstado = data.items.find(e => e.nombre === 'Pendiente') ?? data.items[0];
+                    const primerEstado = data.items.find(e => e.nombre === 'Recibida')
+                        ?? data.items.find(e => e.nombre === 'Pendiente')
+                        ?? data.items[0];
                     if (primerEstado) this.estadoId.set(primerEstado.id);
                 }
             }

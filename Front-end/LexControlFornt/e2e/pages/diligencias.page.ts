@@ -41,6 +41,6 @@ export class DiligenciasPage {
     }
 
     get modalResultado(): Locator {
-        return this.page.locator('[data-testid="select-resultado-diligencia"]');
+        return this.page.locator('[data-testid="input-descripcion-diligencia"]');
     }
 }

@@ -3,7 +3,6 @@ import { FormsModule } from '@angular/forms';
 
 import { Modal } from '../../shared/components/modal/modal';
 import { DiligenciasService } from '../../core/services/diligencias-service';
-import { CatalogosService } from '../../core/services/catalogos-service';
 import { ToastService } from '../../layout/toast/toast-service';
 import { DiligenciaDetalle, DiligenciaResultado } from '../../core/models/diligencia.model';
 
@@ -20,32 +19,20 @@ export class ResultadoDiligenciaModal implements OnInit {
     readonly diligencia = input.required<DiligenciaDetalle>();
 
     private readonly diligenciasSvc = inject(DiligenciasService);
-    private readonly catalogosSvc = inject(CatalogosService);
     private readonly toast = inject(ToastService);
 
     protected readonly guardando = signal(false);
     protected readonly error = signal('');
-    protected readonly resultados = signal<{ id: number; nombre: string; color: string }[]>([]);
 
-    protected resultadoSeleccionado = 0;
     protected descripcionResultado = '';
 
     ngOnInit(): void {
-        const d = this.diligencia();
-        if (d.resultadoId) {
-            this.resultadoSeleccionado = d.resultadoId;
-            this.descripcionResultado = d.descripcionResultado ?? '';
-        }
-
-        this.catalogosSvc.buscarCatalogo('RESULTADO_DILIGENCIA').subscribe({
-            next: (datos) => this.resultados.set(
-                datos.items.map(i => ({ id: i.id, nombre: i.nombre, color: i.color ?? '#6c757d' }))
-            )
-        });
+        this.descripcionResultado = this.diligencia().descripcionResultado ?? '';
     }
 
     get esEdicion(): boolean {
-        return !!this.diligencia().resultadoId;
+        const d = this.diligencia();
+        return !!d.resultadoId || !!d.descripcionResultado;
     }
 
     alCerrar(): void {
@@ -56,10 +43,6 @@ export class ResultadoDiligenciaModal implements OnInit {
         evento.preventDefault();
         this.error.set('');
 
-        if (!this.resultadoSeleccionado) {
-            this.error.set('Seleccione un resultado.');
-            return;
-        }
         if (!this.descripcionResultado.trim()) {
             this.error.set('La descripción del resultado es obligatoria.');
             return;
@@ -67,7 +50,8 @@ export class ResultadoDiligenciaModal implements OnInit {
 
         this.guardando.set(true);
         const dto: DiligenciaResultado = {
-            resultadoId: this.resultadoSeleccionado,
+            // Resultado "por escrito": sin vinculo al catalogo RESULTADO_DILIGENCIA.
+            resultadoId: null,
             descripcionResultado: this.descripcionResultado.trim()
         };
 

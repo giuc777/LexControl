@@ -112,9 +112,12 @@ export class DiligenciaDetallePage implements OnInit {
 
     colorEstado(estado: string): string {
         const colores: Record<string, string> = {
+            'Programada': '#3498db',
+            'Completada': '#2ecc71',
+            'Reprogramada': '#f39c12',
+            // Estados legacy que ya no aparecen en el catalogo (filas antiguas).
             'Pendiente': '#f39c12',
             'En Progreso': '#3498db',
-            'Completada': '#2ecc71',
             'Cancelada': '#e74c3c'
         };
         return colores[estado] ?? '#6c757d';
@@ -132,7 +135,8 @@ export class DiligenciaDetallePage implements OnInit {
 
     esPendiente(): boolean {
         const estado = this.diligencia()?.estado;
-        return estado === 'Pendiente' || estado === 'En Progreso';
+        return estado === 'Programada' || estado === 'Reprogramada'
+            || estado === 'Pendiente' || estado === 'En Progreso';
     }
 
     tieneResultado(): boolean {

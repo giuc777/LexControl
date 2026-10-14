@@ -202,8 +202,9 @@ public class AudienciaCrearDto
 /// <summary>Datos de entrada para registrar resultado de una audiencia.</summary>
 public class AudienciaResultadoDto
 {
-    [Required(ErrorMessage = "El resultado es obligatorio.")]
-    public int ResultadoId { get; set; }
+    /// <summary>Vinculo opcional con RESULTADO_AUDIENCIA. Si es null el
+    /// resultado se captura unicamente como texto (DescripcionResultado).</summary>
+    public int? ResultadoId { get; set; }
 
     [Required(ErrorMessage = "La descripción del resultado es obligatoria.")]
     [MaxLength(1000)]

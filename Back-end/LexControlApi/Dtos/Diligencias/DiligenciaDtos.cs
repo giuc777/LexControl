@@ -174,8 +174,9 @@ public class DiligenciaCrearDto
     [Required(ErrorMessage = "El cliente es obligatorio.")]
     public int? ClienteId { get; set; }
 
-    [Required(ErrorMessage = "El tipo de diligencia es obligatorio.")]
-    public int TipoId { get; set; }
+    /// <summary>Tipo de diligencia opcional: el catalogo TIPO_DILIGENCIA
+    /// puede quedar sin filas activas.</summary>
+    public int? TipoId { get; set; }
 
     [Required(ErrorMessage = "El titulo es obligatorio.")]
     [MaxLength(200)]
@@ -250,8 +251,9 @@ public class DiligenciaActualizarDto
 /// <summary>Datos de entrada para registrar o editar el resultado de una diligencia.</summary>
 public class DiligenciaResultadoDto
 {
-    [Required(ErrorMessage = "El resultado es obligatorio.")]
-    public int ResultadoId { get; set; }
+    /// <summary>Vinculo opcional con RESULTADO_DILIGENCIA. Si es null el
+    /// resultado se captura unicamente como texto (DescripcionResultado).</summary>
+    public int? ResultadoId { get; set; }
 
     [Required(ErrorMessage = "La descripción del resultado es obligatoria.")]
     [MaxLength(1000)]

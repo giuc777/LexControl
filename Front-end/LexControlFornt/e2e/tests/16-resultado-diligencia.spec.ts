@@ -22,10 +22,8 @@ test.describe('Diligencia Detalle — Resultado', () => {
         const btn = adminPage.locator('[data-testid="btn-registrar-resultado"]');
         if (await btn.isVisible()) {
             await btn.click();
-            await expect(adminPage.locator('[data-testid="select-resultado-diligencia"]'))
-                .toBeVisible({ timeout: 5000 });
             await expect(adminPage.locator('[data-testid="input-descripcion-diligencia"]'))
-                .toBeVisible();
+                .toBeVisible({ timeout: 5000 });
             await expect(adminPage.locator('[data-testid="btn-guardar-resultado-diligencia"]'))
                 .toBeVisible();
         }
@@ -52,7 +50,7 @@ test.describe('Diligencia Detalle — Resultado', () => {
         const btnEditar = adminPage.locator('[data-testid="btn-editar-resultado"]');
         if (await btnEditar.isVisible()) {
             await btnEditar.click();
-            await expect(adminPage.locator('[data-testid="select-resultado-diligencia"]'))
+            await expect(adminPage.locator('[data-testid="input-descripcion-diligencia"]'))
                 .toBeVisible({ timeout: 5000 });
             const titulo = adminPage.locator('.modal-title');
             await expect(titulo).toContainText(/editar/i);
@@ -82,7 +80,7 @@ test.describe('Agenda — Editar Resultado de Audiencia', () => {
         const btn = adminPage.locator('[data-testid="btn-registrar-resultado"]');
         if (await btn.isVisible()) {
             await btn.click();
-            await expect(adminPage.locator('[data-testid="select-resultado"]'))
+            await expect(adminPage.locator('[data-testid="input-descripcion"]'))
                 .toBeVisible({ timeout: 5000 });
             await expect(adminPage.locator('[data-testid="btn-guardar-resultado"]'))
                 .toBeVisible();
@@ -95,7 +93,7 @@ test.describe('Agenda — Editar Resultado de Audiencia', () => {
         const btnEditar = adminPage.locator('[data-testid="btn-editar-resultado"]');
         if (await btnEditar.isVisible()) {
             await btnEditar.click();
-            await expect(adminPage.locator('[data-testid="select-resultado"]'))
+            await expect(adminPage.locator('[data-testid="input-descripcion"]'))
                 .toBeVisible({ timeout: 5000 });
         }
     });

@@ -3,7 +3,6 @@ import { FormsModule } from '@angular/forms';
 
 import { Modal } from '../../shared/components/modal/modal';
 import { AudienciasService } from '../../core/services/audiencias-service';
-import { CatalogosService } from '../../core/services/catalogos-service';
 import { ToastService } from '../../layout/toast/toast-service';
 import { AudienciaDetalle, AudienciaResultado } from '../../core/models/audiencia.model';
 
@@ -20,34 +19,23 @@ export class ResultadoModal implements OnInit {
     readonly audiencia = input.required<AudienciaDetalle>();
 
     private readonly audienciasSvc = inject(AudienciasService);
-    private readonly catalogosSvc = inject(CatalogosService);
     private readonly toast = inject(ToastService);
 
     protected readonly guardando = signal(false);
     protected readonly error = signal('');
-    protected readonly resultados = signal<{ id: number; nombre: string; color: string }[]>([]);
 
-    protected resultadoSeleccionado = 0;
     protected descripcionResultado = '';
     protected proximaActuacion = '';
 
     ngOnInit(): void {
         const aud = this.audiencia();
-        if (aud.resultadoId) {
-            this.resultadoSeleccionado = aud.resultadoId;
-            this.descripcionResultado = aud.descripcionResultado ?? '';
-            this.proximaActuacion = aud.proximaActuacion ?? '';
-        }
-
-        this.catalogosSvc.buscarCatalogo('RESULTADO_AUDIENCIA').subscribe({
-            next: (datos) => this.resultados.set(
-                datos.items.map(i => ({ id: i.id, nombre: i.nombre, color: i.color ?? '#6c757d' }))
-            )
-        });
+        this.descripcionResultado = aud.descripcionResultado ?? '';
+        this.proximaActuacion = aud.proximaActuacion ?? '';
     }
 
     get esEdicion(): boolean {
-        return !!this.audiencia().resultadoId;
+        const aud = this.audiencia();
+        return !!aud.resultadoId || !!aud.descripcionResultado;
     }
 
     alCerrar(): void {
@@ -58,10 +46,6 @@ export class ResultadoModal implements OnInit {
         evento.preventDefault();
         this.error.set('');
 
-        if (!this.resultadoSeleccionado) {
-            this.error.set('Seleccione un resultado.');
-            return;
-        }
         if (!this.descripcionResultado.trim()) {
             this.error.set('La descripción del resultado es obligatoria.');
             return;
@@ -69,7 +53,8 @@ export class ResultadoModal implements OnInit {
 
         this.guardando.set(true);
         const dto: AudienciaResultado = {
-            resultadoId: this.resultadoSeleccionado,
+            // Resultado "por escrito": sin vinculo al catalogo RESULTADO_AUDIENCIA.
+            resultadoId: null,
             descripcionResultado: this.descripcionResultado.trim(),
             proximaActuacion: this.proximaActuacion.trim() || null
         };

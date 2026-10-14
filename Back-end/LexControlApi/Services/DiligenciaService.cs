@@ -52,7 +52,8 @@ public class DiligenciaService : IDiligenciaService
 
     public async Task<int> CrearAsync(DiligenciaCrearDto dto, int usuarioId)
     {
-        if (dto.TipoId <= 0)
+        // Tipo opcional: si se envia, debe ser un ID valido del catalogo.
+        if (dto.TipoId.HasValue && dto.TipoId.Value <= 0)
             throw new ExcepcionNegocio(-2, "El tipo de diligencia seleccionado no es válido.",
                 StatusCodes.Status400BadRequest);
 
@@ -127,7 +128,8 @@ public class DiligenciaService : IDiligenciaService
 
     public async Task RegistrarResultadoAsync(int id, DiligenciaResultadoDto dto, int usuarioId)
     {
-        if (dto.ResultadoId <= 0)
+        // ResultadoId es opcional: null = resultado "por escrito" (solo DescripcionResultado).
+        if (dto.ResultadoId.HasValue && dto.ResultadoId.Value <= 0)
             throw new ExcepcionNegocio(-2, "El resultado seleccionado no es válido.",
                 StatusCodes.Status400BadRequest);
 

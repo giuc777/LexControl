@@ -31,14 +31,17 @@ BEGIN
 -- 9. DATOS DE CATÁLOGOS (SEED)
 -- ============================================================
 
--- 9.1 RAMA
-INSERT INTO RAMA (Nombre, Valor, Descripcion, Color, Orden) VALUES
-('Civil', 'CIV', 'Derecho Civil', '#358292', 1),
-('Penal', 'PEN', 'Derecho Penal', '#B2845A', 2),
-('Familiar', 'FAM', 'Derecho Familiar', '#97BEC6', 3),
-('Municipal', 'MUN', 'Derecho Municipal', '#6C8B6C', 4),
-('Laboral', 'LAB', 'Derecho Laboral', '#8E44AD', 5),
-('Constitucional', 'CON', 'Derecho Constitucional', '#2C3E50', 6);
+-- 9.1 RAMA (valores segun Formulario Respuesta: Municipal -> Administrativo,
+--           Constitucional desactivado, Juicio Verbal -> Juicio)
+INSERT INTO RAMA (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+('Civil', 'CIV', 'Derecho Civil', '#358292', 1, 1),
+('Penal', 'PEN', 'Derecho Penal', '#B2845A', 2, 1),
+('Familiar', 'FAM', 'Derecho Familiar', '#97BEC6', 3, 1),
+('Administrativo', 'ADM', 'Derecho administrativo', '#6C8B6C', 4, 1),
+('Laboral', 'LAB', 'Derecho Laboral', '#8E44AD', 5, 1),
+('Constitucional', 'CON', 'Derecho Constitucional', '#2C3E50', 6, 0),
+('Derecho Ambiental', 'AMB', 'Derecho Ambiental', '#1ABC9C', 7, 0),
+('Juicio', 'VP', 'Para una consulta no especifica', '#95A5A6', 8, 1);
 END
 GO
 
@@ -56,47 +59,50 @@ GO
 
 IF NOT EXISTS (SELECT 1 FROM [TIPO_AUDIENCIA])
 BEGIN
--- 9.3 TIPO_AUDIENCIA
-INSERT INTO TIPO_AUDIENCIA (Nombre, Valor, Descripcion, Color, Orden) VALUES
-('Conciliación', 'CONC', 'Audiencia de conciliación', '#2ECC71', 1),
-('Juicio Oral', 'JO', 'Juicio oral y público', '#E74C3C', 2),
-('Vista Pública', 'VP', 'Vista pública', '#3498DB', 3),
-('Declaración', 'DEC', 'Declaración de parte', '#9B59B6', 4),
-('Ratificación', 'RAT', 'Ratificación de pruebas', '#1ABC9C', 5);
+-- 9.3 TIPO_AUDIENCIA (activos: Juicio Escrito, Juicio Oral)
+INSERT INTO TIPO_AUDIENCIA (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+('Juicio Escrito', 'JE', 'Juicio escrito', '#2ECC71', 1, 1),
+('Juicio Oral', 'JO', 'Juicio oral y público', '#E74C3C', 2, 1),
+('Conciliación', 'CONC', 'Audiencia de conciliación', '#2ECC71', 3, 0),
+('Vista Pública', 'VP', 'Vista pública', '#3498DB', 4, 0),
+('Declaración', 'DEC', 'Declaración de parte', '#9B59B6', 5, 0),
+('Ratificación', 'RAT', 'Ratificación de pruebas', '#1ABC9C', 6, 0);
 END
 GO
 
 IF NOT EXISTS (SELECT 1 FROM [ESTADO_AUDIENCIA])
 BEGIN
--- 9.4 ESTADO_AUDIENCIA
-INSERT INTO ESTADO_AUDIENCIA (Nombre, Valor, Descripcion, Color, Orden) VALUES
-('Programada', 'PROG', 'Audiencia programada', '#3498DB', 1),
-('Realizada', 'REAL', 'Audiencia realizada', '#2ECC71', 2),
-('Suspendida', 'SUSP', 'Audiencia suspendida', '#F39C12', 3),
-('Cancelada', 'CANC', 'Audiencia cancelada', '#E74C3C', 4);
+-- 9.4 ESTADO_AUDIENCIA (activos: Programada, Realizada, Reprogramada)
+INSERT INTO ESTADO_AUDIENCIA (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+('Programada', 'PROG', 'Audiencia programada', '#3498DB', 1, 1),
+('Realizada', 'REAL', 'Audiencia realizada', '#2ECC71', 2, 1),
+('Reprogramada', 'REP', 'Audiencia reprogramada', '#F39C12', 3, 1),
+('Suspendida', 'SUSP', 'Audiencia suspendida', '#F39C12', 4, 0),
+('Cancelada', 'CANC', 'Audiencia cancelada', '#E74C3C', 5, 0);
 END
 GO
 
 IF NOT EXISTS (SELECT 1 FROM [RESULTADO_AUDIENCIA])
 BEGIN
--- 9.5 RESULTADO_AUDIENCIA
-INSERT INTO RESULTADO_AUDIENCIA (Nombre, Valor, Descripcion, Color, Orden) VALUES
-('Favorable', 'FAV', 'Resultado favorable', '#2ECC71', 1),
-('Desfavorable', 'DES', 'Resultado desfavorable', '#E74C3C', 2),
-('Parcial', 'PAR', 'Resultado parcial', '#F39C12', 3),
-('Sin Resultado', 'SIN', 'No se obtuvo resultado', '#95A5A6', 4);
+-- 9.5 RESULTADO_AUDIENCIA (el resultado se captura como texto libre en
+--     AUDIENCIA.DescripcionResultado; los valores quedan desactivados)
+INSERT INTO RESULTADO_AUDIENCIA (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+('Favorable', 'FAV', 'Resultado favorable', '#2ECC71', 1, 0),
+('Desfavorable', 'DES', 'Resultado desfavorable', '#E74C3C', 2, 0),
+('Parcial', 'PAR', 'Resultado parcial', '#F39C12', 3, 0),
+('Sin Resultado', 'SIN', 'No se obtuvo resultado', '#95A5A6', 4, 0);
 END
 GO
 
 IF NOT EXISTS (SELECT 1 FROM [TIPO_TRAMITE])
 BEGIN
--- 9.6 TIPO_TRAMITE
-INSERT INTO TIPO_TRAMITE (Nombre, Valor, Descripcion, Color, Orden) VALUES
-('Memorial', 'MEM', 'Presentación de memorial', '#3498DB', 1),
-('Recurso', 'REC', 'Recurso de apelación', '#E74C3C', 2),
-('Solicitud', 'SOL', 'Solicitud administrativa', '#2ECC71', 3),
-('Notificación', 'NOT', 'Notificación de resolución', '#9B59B6', 4),
-('Oficio', 'OFI', 'Oficio de comunicación', '#1ABC9C', 5);
+-- 9.6 TIPO_TRAMITE (activo: solo Memorial)
+INSERT INTO TIPO_TRAMITE (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+('Memorial', 'MEM', 'Presentación de memorial', '#3498DB', 1, 1),
+('Recurso', 'REC', 'Recurso de apelación', '#E74C3C', 2, 0),
+('Solicitud', 'SOL', 'Solicitud administrativa', '#2ECC71', 3, 0),
+('Notificación', 'NOT', 'Notificación de resolución', '#9B59B6', 4, 0),
+('Oficio', 'OFI', 'Oficio de comunicación', '#1ABC9C', 5, 0);
 END
 GO
 
@@ -113,68 +119,70 @@ GO
 
 IF NOT EXISTS (SELECT 1 FROM [TIPO_DILIGENCIA])
 BEGIN
--- 9.8 TIPO_DILIGENCIA
-INSERT INTO TIPO_DILIGENCIA (Nombre, Valor, Descripcion, Color, Orden) VALUES
-('Asesoría', 'ASE', 'Asesoría con cliente', '#3498DB', 1),
-('Redacción', 'RED', 'Redacción de documentos', '#2ECC71', 2),
-('Revisión', 'REV', 'Revisión de expediente', '#F39C12', 3),
-('Llamada', 'LLA', 'Llamada de seguimiento', '#9B59B6', 4),
-('Visita', 'VIS', 'Visita a institución', '#E74C3C', 5),
-('Correo', 'COR', 'Correo electrónico', '#1ABC9C', 6);
+-- 9.8 TIPO_DILIGENCIA (manual: catalogo vacio, todos desactivados)
+INSERT INTO TIPO_DILIGENCIA (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+('Asesoría', 'ASE', 'Asesoría con cliente', '#3498DB', 1, 0),
+('Redacción', 'RED', 'Redacción de documentos', '#2ECC71', 2, 0),
+('Revisión', 'REV', 'Revisión de expediente', '#F39C12', 3, 0),
+('Llamada', 'LLA', 'Llamada de seguimiento', '#9B59B6', 4, 0),
+('Visita', 'VIS', 'Visita a institución', '#E74C3C', 5, 0),
+('Correo', 'COR', 'Correo electrónico', '#1ABC9C', 6, 0);
 END
 GO
 
 IF NOT EXISTS (SELECT 1 FROM [ESTADO_DILIGENCIA])
 BEGIN
--- 9.9 ESTADO_DILIGENCIA
-INSERT INTO ESTADO_DILIGENCIA (Nombre, Valor, Descripcion, Color, Orden) VALUES
-('Pendiente', 'PEN', 'Diligencia pendiente', '#F39C12', 1),
-('En Progreso', 'EP', 'Diligencia en progreso', '#3498DB', 2),
-('Completada', 'COM', 'Diligencia completada', '#2ECC71', 3),
-('Cancelada', 'CAN', 'Diligencia cancelada', '#E74C3C', 4);
+-- 9.9 ESTADO_DILIGENCIA (activos: Programada, Completada, Reprogramada)
+INSERT INTO ESTADO_DILIGENCIA (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+('Programada', 'PROG', 'Diligencia programada', '#F39C12', 1, 1),
+('Completada', 'COM', 'Diligencia completada', '#2ECC71', 2, 1),
+('Reprogramada', 'REP', 'Diligencia reprogramada', '#F39C12', 3, 1),
+('En Progreso', 'EP', 'Diligencia en progreso', '#3498DB', 4, 0),
+('Cancelada', 'CAN', 'Diligencia cancelada', '#E74C3C', 5, 0);
 END
 GO
 
 IF NOT EXISTS (SELECT 1 FROM [TIPO_NOTIFICACION_OJ])
 BEGIN
--- 9.10 TIPO_NOTIFICACION_OJ
-INSERT INTO TIPO_NOTIFICACION_OJ (Nombre, Valor, Descripcion, Color, Orden) VALUES
-('Resolución', 'RES', 'Resolución judicial', '#3498DB', 1),
-('Citación', 'CIT', 'Citación a audiencia', '#E74C3C', 2),
-('Emplazamiento', 'EMP', 'Emplazamiento', '#2ECC71', 3);
+-- 9.10 TIPO_NOTIFICACION_OJ (activos: Resolución, Notificación)
+INSERT INTO TIPO_NOTIFICACION_OJ (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+('Resolución', 'RES', 'Resolución judicial', '#3498DB', 1, 1),
+('Notificación', 'NOT', 'Notificación', '#E74C3C', 2, 1),
+('Citación', 'CIT', 'Citación a audiencia', '#E74C3C', 3, 0),
+('Emplazamiento', 'EMP', 'Emplazamiento', '#2ECC71', 4, 0);
 END
 GO
 
 IF NOT EXISTS (SELECT 1 FROM [ESTADO_NOTIFICACION_OJ])
 BEGIN
--- 9.11 ESTADO_NOTIFICACION_OJ
-INSERT INTO ESTADO_NOTIFICACION_OJ (Nombre, Valor, Descripcion, Color, Orden) VALUES
-('Recibida', 'REC', 'Notificación recibida', '#3498DB', 1),
-('Atendida', 'ATE', 'Notificación atendida', '#2ECC71', 2),
-('Pendiente', 'PEN', 'Notificación pendiente', '#F39C12', 3);
+-- 9.11 ESTADO_NOTIFICACION_OJ (activos: Recibida, Atendida)
+INSERT INTO ESTADO_NOTIFICACION_OJ (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+('Recibida', 'REC', 'Notificación recibida', '#3498DB', 1, 1),
+('Atendida', 'ATE', 'Notificación atendida', '#2ECC71', 2, 1),
+('Pendiente', 'PEN', 'Notificación pendiente', '#F39C12', 3, 0);
 END
 GO
 
 IF NOT EXISTS (SELECT 1 FROM [TIPO_PROCESO])
 BEGIN
--- 9.12 TIPO_PROCESO
-INSERT INTO TIPO_PROCESO (Nombre, Valor, Descripcion, Color, Orden) VALUES
-('Juicio Ordinario', 'JO', 'Proceso de conocimiento pleno', '#3498DB', 1),
-('Juicio Ejecutivo', 'JE', 'Proceso de ejecución', '#E74C3C', 2),
-('Juicio Verbal', 'JV', 'Proceso verbal', '#2ECC71', 3),
-('Proceso Especial', 'PE', 'Proceso especial', '#F39C12', 4);
+-- 9.12 TIPO_PROCESO (manual: catalogo vacio, todos desactivados)
+INSERT INTO TIPO_PROCESO (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+('Juicio Ordinario', 'JO', 'Proceso de conocimiento pleno', '#3498DB', 1, 0),
+('Juicio Ejecutivo', 'JE', 'Proceso de ejecución', '#E74C3C', 2, 0),
+('Juicio Verbal', 'JV', 'Proceso verbal', '#2ECC71', 3, 0),
+('Proceso Especial', 'PE', 'Proceso especial', '#F39C12', 4, 0);
 END
 GO
 
 IF NOT EXISTS (SELECT 1 FROM [ETIQUETA_NOTA])
 BEGIN
--- 9.13 ETIQUETA_NOTA
-INSERT INTO ETIQUETA_NOTA (Nombre, Valor, Descripcion, Color, Orden) VALUES
-('Urgente', 'URG', 'Nota urgente', '#E74C3C', 1),
-('Importante', 'IMP', 'Nota importante', '#F39C12', 2),
-('Recordatorio', 'REC', 'Recordatorio', '#3498DB', 3),
-('Estrategia', 'EST', 'Nota estratégica', '#2ECC71', 4),
-('Cliente', 'CLI', 'Nota sobre cliente', '#9B59B6', 5);
+-- 9.13 ETIQUETA_NOTA (manual: catalogo vacio, todas desactivadas)
+INSERT INTO ETIQUETA_NOTA (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+('Urgente', 'URG', 'Nota urgente', '#E74C3C', 1, 0),
+('Importante', 'IMP', 'Nota importante', '#F39C12', 2, 0),
+('Recordatorio', 'REC', 'Recordatorio', '#3498DB', 3, 0),
+('Estrategia', 'EST', 'Nota estratégica', '#2ECC71', 4, 0),
+('Cliente', 'CLI', 'Nota sobre cliente', '#9B59B6', 5, 0);
 END
 GO
 
@@ -190,28 +198,29 @@ GO
 
 IF NOT EXISTS (SELECT 1 FROM [TIPO_JUZGADO])
 BEGIN
--- 9.15 TIPO_JUZGADO
-INSERT INTO TIPO_JUZGADO (Nombre, Valor, Descripcion, Color, Orden) VALUES
-('Civil', 'CIV', 'Juzgado de Primera Instancia Civil', '#358292', 1),
-('Penal', 'PEN', 'Juzgado de Primera Instancia Penal', '#B2845A', 2),
-('Paz', 'PAZ', 'Juzgado de Paz', '#97BEC6', 3),
-('Familia', 'FAM', 'Juzgado de Familia', '#6C8B6C', 4),
-('Trabajo', 'TRA', 'Juzgado de Trabajo', '#8E44AD', 5),
-('Mercantil', 'MER', 'Juzgado de lo Mercantil', '#2C3E50', 6);
+-- 9.15 TIPO_JUZGADO (solo Mercantil sin juzgados: desactivado)
+INSERT INTO TIPO_JUZGADO (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+('Civil', 'CIV', 'Juzgado de Primera Instancia Civil', '#358292', 1, 1),
+('Penal', 'PEN', 'Juzgado de Primera Instancia Penal', '#B2845A', 2, 1),
+('Paz', 'PAZ', 'Juzgado de Paz', '#97BEC6', 3, 1),
+('Familia', 'FAM', 'Juzgado de Familia', '#6C8B6C', 4, 1),
+('Trabajo', 'TRA', 'Juzgado de Trabajo', '#8E44AD', 5, 1),
+('Mercantil', 'MER', 'Juzgado de lo Mercantil', '#2C3E50', 6, 0);
 END
 GO
 
 IF NOT EXISTS (SELECT 1 FROM [ROL_PROCESAL])
 BEGIN
 -- 9.16 ROL_PROCESAL (CORREGIDO: Demandado con Valor 'DMD')
-INSERT INTO ROL_PROCESAL (Nombre, Valor, Descripcion, Color, Orden) VALUES
-('Demandante', 'DEM', 'Persona que demanda o inicia el proceso', '#358292', 1),
-('Demandado', 'DMD', 'Persona contra quien se demanda', '#B2845A', 2),
-('Tercero Interesado', 'TER', 'Persona con interés legítimo en el proceso', '#F39C12', 3),
-('Testigo', 'TES', 'Persona que declara en el proceso', '#97BEC6', 4),
-('Perito', 'PER', 'Experto que dictamina en el proceso', '#8E44AD', 5),
-('Ministerio Público', 'MP', 'Representante del MP en el proceso', '#2C3E50', 6),
-('Querellante', 'QUE', 'Víctima que se querella', '#E74C3C', 7);
+--     Solo Demandante activo; los demas se cargan manualmente.
+INSERT INTO ROL_PROCESAL (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+('Demandante', 'DEM', 'Persona que demanda o inicia el proceso', '#358292', 1, 1),
+('Demandado', 'DMD', 'Persona contra quien se demanda', '#B2845A', 2, 0),
+('Tercero Interesado', 'TER', 'Persona con interés legítimo en el proceso', '#F39C12', 3, 0),
+('Testigo', 'TES', 'Persona que declara en el proceso', '#97BEC6', 4, 0),
+('Perito', 'PER', 'Experto que dictamina en el proceso', '#8E44AD', 5, 0),
+('Ministerio Público', 'MP', 'Representante del MP en el proceso', '#2C3E50', 6, 0),
+('Querellante', 'QUE', 'Víctima que se querella', '#E74C3C', 7, 0);
 END
 GO
 
@@ -491,10 +500,10 @@ GO
 -- ------------------------------------------------------------
 IF NOT EXISTS (SELECT 1 FROM RESULTADO_DILIGENCIA)
 BEGIN
-    INSERT INTO RESULTADO_DILIGENCIA (Nombre, Valor, Descripcion, Color, Orden) VALUES
-    ('Ejecutada', 'EJE', 'Diligencia ejecutada', '#2ECC71', 1),
-    ('No Ejecutada', 'NOE', 'Diligencia no ejecutada', '#E74C3C', 2),
-    ('Re-programada', 'REPR', 'Diligencia reprogramada', '#F39C12', 3),
-    ('Sin Resultado', 'SIN', 'Sin resultado registrado', '#95A5A6', 4);
+    INSERT INTO RESULTADO_DILIGENCIA (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
+    ('Ejecutada', 'EJE', 'Diligencia ejecutada', '#2ECC71', 1, 0),
+    ('No Ejecutada', 'NOE', 'Diligencia no ejecutada', '#E74C3C', 2, 0),
+    ('Re-programada', 'REPR', 'Diligencia reprogramada', '#F39C12', 3, 0),
+    ('Sin Resultado', 'SIN', 'Sin resultado registrado', '#95A5A6', 4, 0);
 END
 GO

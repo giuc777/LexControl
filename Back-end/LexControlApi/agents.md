@@ -310,12 +310,8 @@ Los demás (notas/documentos de cliente, audiencia, trámite, diligencia, notifi
 | GET | `/api/reportes/expedientes-por-rama` | `SP_Reporte_ExpedientesPorRama` | Distribución por rama |
 | GET | `/api/reportes/expedientes-por-juzgado` | `SP_Reporte_ExpedientesPorJuzgado` | Distribución por juzgado |
 | GET | `/api/reportes/antiguedad-expedientes` | `SP_Reporte_AntiguedadExpedientes` | Control de mora procesal |
-| GET | `/api/reportes/actividad-audiencias` | `SP_Reporte_ActividadAudiencias` | Estadísticas de audiencias |
 | GET | `/api/reportes/gestion-tramites` | `SP_Reporte_GestionTramites` | KPIs de trámites |
 | GET | `/api/reportes/notificaciones-oj` | `SP_Reporte_NotificacionesOJ` | Seguimiento de notificaciones |
-| GET | `/api/reportes/diligencias` | `SP_Reporte_Diligencias` | Actividad de diligencias |
-| GET | `/api/reportes/alertas-pendientes` | `SP_Reporte_AlertasPendientes` | Alertas activas |
-| GET | `/api/reportes/eventos-agenda-mes` | `SP_Reporte_EventosAgendaMes` | Eventos del mes en agenda |
 
 > Cada reporte devuelve **dos conjuntos de resultados**: un **resumen** (agrupado) y un **detalle** (filas individuales). El DTO de respuesta contendrá `Resumen` y `Detalle` como listas.
 

@@ -98,39 +98,6 @@ export interface AntiguedadExpedientesDetalle {
     abogado: string | null;
 }
 
-// 6. Actividad de Audiencias
-export interface ActividadAudienciasResumenEstado {
-    estado: string;
-    color: string | null;
-    cantidad: number;
-    porcentaje: number;
-}
-
-export interface ActividadAudienciasResumenResultado {
-    resultado: string;
-    color: string | null;
-    cantidad: number;
-}
-
-export interface ActividadAudienciasDetalle {
-    noExpediente: string | null;
-    cliente: string | null;
-    tipo: string | null;
-    estado: string | null;
-    resultado: string | null;
-    fecha: string | null;
-    horaInicio: string | null;
-    juzgado: string | null;
-    sala: string | null;
-    proximaActuacion: string | null;
-}
-
-export interface ActividadAudienciasRespuesta {
-    resumenEstados: ActividadAudienciasResumenEstado[];
-    resumenResultados: ActividadAudienciasResumenResultado[];
-    detalle: ActividadAudienciasDetalle[];
-}
-
 // 7. Gestión de Trámites
 export interface GestionTramitesResumen {
     tipo: string;
@@ -176,70 +143,6 @@ export interface NotificacionesOJDetalle {
     numeroResolucion: string | null;
     esResolucion: boolean | null;
     favorable: boolean | null;
-}
-
-// 9. Diligencias
-export interface DiligenciasResumen {
-    tipo: string;
-    color: string | null;
-    cantidad: number;
-    completadas: number;
-    pendientes: number;
-}
-
-export interface DiligenciasDetalle {
-    titulo: string | null;
-    noExpediente: string | null;
-    vinculado: string | null;
-    tipo: string | null;
-    estado: string | null;
-    fecha: string | null;
-    horaInicio: string | null;
-    ubicacion: string | null;
-    tiempoDedicado: string | null;
-    encargado: string | null;
-}
-
-// 10. Alertas Pendientes
-export interface AlertasPendientesResumen {
-    tipoAlerta: string;
-    cantidad: number;
-    noLeidas: number;
-}
-
-export interface AlertasPendientesDetalle {
-    titulo: string | null;
-    tipoAlerta: string | null;
-    descripcion: string | null;
-    fechaAlerta: string | null;
-    diasTranscurridos: number | null;
-    referenciaTabla: string | null;
-    referenciaId: number | null;
-    leida: boolean | null;
-    noExpediente: string | null;
-}
-
-// 11. Eventos Agenda Mes
-export interface EventosAgendaMesResumen {
-    tipoEvento: string;
-    cantidad: number;
-    pendientes: number;
-}
-
-export interface EventosAgendaMesDetalle {
-    titulo: string | null;
-    tipoEvento: string | null;
-    estado: string | null;
-    fecha: string | null;
-    horaInicio: string | null;
-    horaFin: string | null;
-    ubicacion: string | null;
-    prioridad: string | null;
-    noExpediente: string | null;
-    cliente: string | null;
-    subtipo: string | null;
-    fechaVencimiento: string | null;
-    diasRestantes: number | null;
 }
 
 // 12. Clientes por Tipo

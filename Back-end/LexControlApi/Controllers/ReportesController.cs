@@ -57,15 +57,6 @@ public class ReportesController : ControllerBase
         return Ok(ApiResponse<ReporteRespuesta<AntiguedadExpedientesResumen, AntiguedadExpedientesDetalle>>.Correcto(resultado));
     }
 
-    [HttpGet("actividad-audiencias")]
-    public async Task<ActionResult<ApiResponse<ActividadAudienciasRespuesta>>> ActividadAudiencias(
-        [FromQuery] DateTime? fechaInicio, [FromQuery] DateTime? fechaFin,
-        [FromQuery] int? tipoId, [FromQuery] int? estadoId, [FromQuery] int? juzgadoId, [FromQuery] int? usuarioId)
-    {
-        var resultado = await _service.ActividadAudienciasAsync(fechaInicio, fechaFin, tipoId, estadoId, juzgadoId, usuarioId);
-        return Ok(ApiResponse<ActividadAudienciasRespuesta>.Correcto(resultado));
-    }
-
     [HttpGet("gestion-tramites")]
     public async Task<ActionResult<ApiResponse<ReporteRespuesta<GestionTramitesResumen, GestionTramitesDetalle>>>> GestionTramites(
         [FromQuery] DateTime? fechaInicio, [FromQuery] DateTime? fechaFin,
@@ -82,33 +73,6 @@ public class ReportesController : ControllerBase
     {
         var resultado = await _service.NotificacionesOJAsync(fechaInicio, fechaFin, tipoId, estadoId, juzgadoId, soloPendientes);
         return Ok(ApiResponse<ReporteRespuesta<NotificacionesOJResumen, NotificacionesOJDetalle>>.Correcto(resultado));
-    }
-
-    [HttpGet("diligencias")]
-    public async Task<ActionResult<ApiResponse<ReporteRespuesta<DiligenciasResumen, DiligenciasDetalle>>>> Diligencias(
-        [FromQuery] DateTime? fechaInicio, [FromQuery] DateTime? fechaFin,
-        [FromQuery] int? tipoId, [FromQuery] int? estadoId, [FromQuery] int? usuarioId)
-    {
-        var resultado = await _service.DiligenciasAsync(fechaInicio, fechaFin, tipoId, estadoId, usuarioId);
-        return Ok(ApiResponse<ReporteRespuesta<DiligenciasResumen, DiligenciasDetalle>>.Correcto(resultado));
-    }
-
-    [HttpGet("alertas-pendientes")]
-    public async Task<ActionResult<ApiResponse<ReporteRespuesta<AlertasPendientesResumen, AlertasPendientesDetalle>>>> AlertasPendientes(
-        [FromQuery] DateTime? fechaInicio, [FromQuery] DateTime? fechaFin,
-        [FromQuery] string? tipoAlerta, [FromQuery] bool? soloNoLeidas)
-    {
-        var resultado = await _service.AlertasPendientesAsync(fechaInicio, fechaFin, tipoAlerta, soloNoLeidas);
-        return Ok(ApiResponse<ReporteRespuesta<AlertasPendientesResumen, AlertasPendientesDetalle>>.Correcto(resultado));
-    }
-
-    [HttpGet("eventos-agenda-mes")]
-    public async Task<ActionResult<ApiResponse<ReporteRespuesta<EventosAgendaMesResumen, EventosAgendaMesDetalle>>>> EventosAgendaMes(
-        [FromQuery] int? anio, [FromQuery] int? mes, [FromQuery] string? tipoEvento,
-        [FromQuery] int? estadoId, [FromQuery] int? usuarioId)
-    {
-        var resultado = await _service.EventosAgendaMesAsync(anio, mes, tipoEvento, estadoId, usuarioId);
-        return Ok(ApiResponse<ReporteRespuesta<EventosAgendaMesResumen, EventosAgendaMesDetalle>>.Correcto(resultado));
     }
 
     [HttpGet("clientes-por-tipo")]

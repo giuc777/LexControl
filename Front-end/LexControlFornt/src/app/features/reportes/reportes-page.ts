@@ -3,10 +3,8 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { ReportesUsuariosPage } from './reportes-usuarios-page';
 import { ReportesClientesPage } from './reportes-clientes-page';
 import { ReportesExpedientesPage } from './reportes-expedientes-page';
-import { ReportesAgendaPage } from './reportes-agenda-page';
 import { ReportesTramitesPage } from './reportes-tramites-page';
 import { ReportesNotificacionesPage } from './reportes-notificaciones-page';
-import { ReportesDiligenciasPage } from './reportes-diligencias-page';
 import { ReportesRendimientoPage } from './reportes-rendimiento-page';
 
 interface ReporteItem {
@@ -24,10 +22,8 @@ interface ReporteItem {
         ReportesUsuariosPage,
         ReportesClientesPage,
         ReportesExpedientesPage,
-        ReportesAgendaPage,
         ReportesTramitesPage,
         ReportesNotificacionesPage,
-        ReportesDiligenciasPage,
         ReportesRendimientoPage
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,14 +58,6 @@ export class ReportesPage {
             disponibles: 4
         },
         {
-            key: 'agenda',
-            titulo: 'Agenda y Audiencias',
-            descripcion: 'Audiencias programadas y realizadas, eventos del mes y plazos por vencer.',
-            icono: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
-            color: '#8e44ad',
-            disponibles: 3
-        },
-        {
             key: 'tramites',
             titulo: 'Trámites en Curso',
             descripcion: 'Estado de trámites activos, tiempos de respuesta y resolución.',
@@ -84,14 +72,6 @@ export class ReportesPage {
             icono: 'M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9',
             color: '#6C8B6C',
             disponibles: 1
-        },
-        {
-            key: 'diligencias',
-            titulo: 'Diligencias y Alertas',
-            descripcion: 'Actividad de diligencias y seguimiento de alertas pendientes.',
-            icono: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11',
-            color: '#E67E22',
-            disponibles: 2
         },
         {
             key: 'rendimiento',

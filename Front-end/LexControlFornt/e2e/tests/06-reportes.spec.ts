@@ -34,13 +34,6 @@ test.describe('Módulo Reportes', () => {
         await expect(reportes.reporteVisible('expedientes')).toBeVisible({ timeout: 15000 });
     });
 
-    test('TC-REP-006: Abre reporte de Agenda y Audiencias', async ({ adminPage }) => {
-        const reportes = new ReportesPage(adminPage);
-        await reportes.navigate();
-        await reportes.abrirCategoria('agenda');
-        await expect(reportes.reporteVisible('agenda')).toBeVisible({ timeout: 15000 });
-    });
-
     test('TC-REP-007: Abre reporte de Trámites', async ({ adminPage }) => {
         const reportes = new ReportesPage(adminPage);
         await reportes.navigate();
@@ -53,13 +46,6 @@ test.describe('Módulo Reportes', () => {
         await reportes.navigate();
         await reportes.abrirCategoria('notificaciones');
         await expect(reportes.reporteVisible('notificaciones')).toBeVisible({ timeout: 15000 });
-    });
-
-    test('TC-REP-009: Abre reporte de Diligencias y Alertas', async ({ adminPage }) => {
-        const reportes = new ReportesPage(adminPage);
-        await reportes.navigate();
-        await reportes.abrirCategoria('diligencias');
-        await expect(reportes.reporteVisible('diligencias')).toBeVisible({ timeout: 15000 });
     });
 
     test('TC-REP-010: Abre reporte de Rendimiento del Bufete', async ({ adminPage }) => {

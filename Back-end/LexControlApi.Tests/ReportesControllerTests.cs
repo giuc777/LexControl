@@ -86,18 +86,6 @@ public class ReportesControllerTests : IClassFixture<TestWebApplicationFactory>
     }
 
     [Fact]
-    public async Task ActividadAudiencias_ConToken_Devuelve200()
-    {
-        var token = AuthHelper.GenerarTokenAdmin();
-        _client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-        var response = await _client.GetAsync("/api/reportes/actividad-audiencias");
-
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.InternalServerError);
-    }
-
-    [Fact]
     public async Task GestionTramites_ConToken_Devuelve200()
     {
         var token = AuthHelper.GenerarTokenAdmin();
@@ -161,42 +149,6 @@ public class ReportesControllerTests : IClassFixture<TestWebApplicationFactory>
     }
 
     [Fact]
-    public async Task Diligencias_ConToken_Devuelve200()
-    {
-        var token = AuthHelper.GenerarTokenAdmin();
-        _client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-        var response = await _client.GetAsync("/api/reportes/diligencias");
-
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.InternalServerError);
-    }
-
-    [Fact]
-    public async Task AlertasPendientes_ConToken_Devuelve200()
-    {
-        var token = AuthHelper.GenerarTokenAdmin();
-        _client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-        var response = await _client.GetAsync("/api/reportes/alertas-pendientes");
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
-    [Fact]
-    public async Task EventosAgendaMes_ConToken_Devuelve200()
-    {
-        var token = AuthHelper.GenerarTokenAdmin();
-        _client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-        var response = await _client.GetAsync("/api/reportes/eventos-agenda-mes");
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
-    [Fact]
     public async Task ExpedientesPorEstado_ConFiltros_Devuelve200()
     {
         var token = AuthHelper.GenerarTokenAdmin();
@@ -225,12 +177,8 @@ public class ReportesControllerTests : IClassFixture<TestWebApplicationFactory>
             "/api/reportes/expedientes-por-rama",
             "/api/reportes/expedientes-por-juzgado",
             "/api/reportes/antiguedad-expedientes",
-            "/api/reportes/actividad-audiencias",
             "/api/reportes/gestion-tramites",
             "/api/reportes/notificaciones-oj",
-            "/api/reportes/diligencias",
-            "/api/reportes/alertas-pendientes",
-            "/api/reportes/eventos-agenda-mes",
             "/api/reportes/clientes-por-tipo",
             "/api/reportes/carga-por-abogado"
         };

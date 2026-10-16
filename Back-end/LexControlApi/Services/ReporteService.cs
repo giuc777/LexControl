@@ -14,18 +14,10 @@ public interface IReporteService
         DateTime? fechaInicio, DateTime? fechaFin, int? estadoId, int? juzgadoId, int? usuarioId);
     Task<ReporteRespuesta<AntiguedadExpedientesResumen, AntiguedadExpedientesDetalle>> AntiguedadExpedientesAsync(
         int? estadoId, int? ramaId, int? juzgadoId, int? usuarioId);
-    Task<ActividadAudienciasRespuesta> ActividadAudienciasAsync(
-        DateTime? fechaInicio, DateTime? fechaFin, int? tipoId, int? estadoId, int? juzgadoId, int? usuarioId);
     Task<ReporteRespuesta<GestionTramitesResumen, GestionTramitesDetalle>> GestionTramitesAsync(
         DateTime? fechaInicio, DateTime? fechaFin, int? tipoId, int? estadoId, string? institucion, int? usuarioId);
     Task<ReporteRespuesta<NotificacionesOJResumen, NotificacionesOJDetalle>> NotificacionesOJAsync(
         DateTime? fechaInicio, DateTime? fechaFin, int? tipoId, int? estadoId, int? juzgadoId, bool? soloPendientes);
-    Task<ReporteRespuesta<DiligenciasResumen, DiligenciasDetalle>> DiligenciasAsync(
-        DateTime? fechaInicio, DateTime? fechaFin, int? tipoId, int? estadoId, int? usuarioId);
-    Task<ReporteRespuesta<AlertasPendientesResumen, AlertasPendientesDetalle>> AlertasPendientesAsync(
-        DateTime? fechaInicio, DateTime? fechaFin, string? tipoAlerta, bool? soloNoLeidas);
-    Task<ReporteRespuesta<EventosAgendaMesResumen, EventosAgendaMesDetalle>> EventosAgendaMesAsync(
-        int? anio, int? mes, string? tipoEvento, int? estadoId, int? usuarioId);
     Task<ReporteRespuesta<ClientesPorTipoResumen, ClientesPorTipoDetalle>> ClientesPorTipoAsync(
         string? tipoCliente, bool? activo);
     Task<ReporteRespuesta<CargaPorAbogadoResumen, CargaPorAbogadoDetalle>> CargaPorAbogadoAsync(
@@ -97,20 +89,6 @@ public class ReporteService : IReporteService
         };
     }
 
-    public async Task<ActividadAudienciasRespuesta> ActividadAudienciasAsync(
-        DateTime? fechaInicio, DateTime? fechaFin, int? tipoId, int? estadoId, int? juzgadoId, int? usuarioId)
-    {
-        using var grid = await _repositorio.ConsultarMultiplesAsync(
-            "SP_Reporte_ActividadAudiencias",
-            new { FechaInicio = fechaInicio, FechaFin = fechaFin, Tipo_ID = tipoId, Estado_ID = estadoId, Juzgado_ID = juzgadoId, Usuario_ID = usuarioId });
-        return new ActividadAudienciasRespuesta
-        {
-            ResumenEstados = (await grid.ReadAsync<ActividadAudienciasResumenEstado>()).ToList(),
-            ResumenResultados = (await grid.ReadAsync<ActividadAudienciasResumenResultado>()).ToList(),
-            Detalle = (await grid.ReadAsync<ActividadAudienciasDetalle>()).ToList()
-        };
-    }
-
     public async Task<ReporteRespuesta<GestionTramitesResumen, GestionTramitesDetalle>> GestionTramitesAsync(
         DateTime? fechaInicio, DateTime? fechaFin, int? tipoId, int? estadoId, string? institucion, int? usuarioId)
     {
@@ -134,45 +112,6 @@ public class ReporteService : IReporteService
         {
             Resumen = (await grid.ReadAsync<NotificacionesOJResumen>()).ToList(),
             Detalle = (await grid.ReadAsync<NotificacionesOJDetalle>()).ToList()
-        };
-    }
-
-    public async Task<ReporteRespuesta<DiligenciasResumen, DiligenciasDetalle>> DiligenciasAsync(
-        DateTime? fechaInicio, DateTime? fechaFin, int? tipoId, int? estadoId, int? usuarioId)
-    {
-        using var grid = await _repositorio.ConsultarMultiplesAsync(
-            "SP_Reporte_Diligencias",
-            new { FechaInicio = fechaInicio, FechaFin = fechaFin, Tipo_ID = tipoId, Estado_ID = estadoId, Usuario_ID = usuarioId });
-        return new ReporteRespuesta<DiligenciasResumen, DiligenciasDetalle>
-        {
-            Resumen = (await grid.ReadAsync<DiligenciasResumen>()).ToList(),
-            Detalle = (await grid.ReadAsync<DiligenciasDetalle>()).ToList()
-        };
-    }
-
-    public async Task<ReporteRespuesta<AlertasPendientesResumen, AlertasPendientesDetalle>> AlertasPendientesAsync(
-        DateTime? fechaInicio, DateTime? fechaFin, string? tipoAlerta, bool? soloNoLeidas)
-    {
-        using var grid = await _repositorio.ConsultarMultiplesAsync(
-            "SP_Reporte_AlertasPendientes",
-            new { FechaInicio = fechaInicio, FechaFin = fechaFin, TipoAlerta = tipoAlerta, SoloNoLeidas = soloNoLeidas ?? false });
-        return new ReporteRespuesta<AlertasPendientesResumen, AlertasPendientesDetalle>
-        {
-            Resumen = (await grid.ReadAsync<AlertasPendientesResumen>()).ToList(),
-            Detalle = (await grid.ReadAsync<AlertasPendientesDetalle>()).ToList()
-        };
-    }
-
-    public async Task<ReporteRespuesta<EventosAgendaMesResumen, EventosAgendaMesDetalle>> EventosAgendaMesAsync(
-        int? anio, int? mes, string? tipoEvento, int? estadoId, int? usuarioId)
-    {
-        using var grid = await _repositorio.ConsultarMultiplesAsync(
-            "SP_Reporte_EventosAgendaMes",
-            new { Anio = anio, Mes = mes, TipoEvento = tipoEvento, Estado_ID = estadoId, Usuario_ID = usuarioId });
-        return new ReporteRespuesta<EventosAgendaMesResumen, EventosAgendaMesDetalle>
-        {
-            Resumen = (await grid.ReadAsync<EventosAgendaMesResumen>()).ToList(),
-            Detalle = (await grid.ReadAsync<EventosAgendaMesDetalle>()).ToList()
         };
     }
 

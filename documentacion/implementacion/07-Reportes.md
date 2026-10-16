@@ -11,7 +11,9 @@
 Sistema de reportes con consultas estadísticas. Cada reporte devuelve un **resumen**
 (agrupado) y un **detalle** (filas individuales). Los reportes que ya existían en el
 backend se expusieron en la UI, se corrigió el SP de trámites y se agregaron dos reportes
-nuevos derivados de otros módulos (Clientes y Rendimiento).
+nuevos derivados de otros módulos (Clientes y Rendimiento). Se retiraron las categorías
+**Agenda y Audiencias** y **Diligencias y Alertas** (no operativas): sus endpoints, DTOs,
+servicios y SPs fueron eliminados.
 
 ## 2. Categorías en la UI
 
@@ -20,10 +22,8 @@ nuevos derivados de otros módulos (Clientes y Rendimiento).
 | Reporte de Usuarios | Actividad, roles y estado de usuarios (calculado desde `/api/usuarios`) |
 | Clientes por Tipo | Clientes por tipo/estado (nuevo) |
 | Expedientes | Por estado · por juzgado · por rama · antigüedad |
-| Agenda y Audiencias | Actividad de audiencias · eventos del mes · plazos por vencer |
 | Trámites en Curso | Gestión de trámites |
 | Notificaciones OJ | Notificaciones por tipo/estado |
-| Diligencias y Alertas | Diligencias · alertas pendientes |
 | Rendimiento del Bufete | Carga de trabajo por responsable (nuevo) |
 
 ---
@@ -34,9 +34,7 @@ nuevos derivados de otros módulos (Clientes y Rendimiento).
 
 `SP_Reporte_ExpedientesPorEstado`, `SP_Reporte_PlazosVencimiento`,
 `SP_Reporte_ExpedientesPorRama`, `SP_Reporte_ExpedientesPorJuzgado`,
-`SP_Reporte_AntiguedadExpedientes`, `SP_Reporte_ActividadAudiencias`,
-`SP_Reporte_NotificacionesOJ`, `SP_Reporte_Diligencias`,
-`SP_Reporte_AlertasPendientes`, `SP_Reporte_EventosAgendaMes`.
+`SP_Reporte_AntiguedadExpedientes`, `SP_Reporte_NotificacionesOJ`.
 
 ### Nuevos — `ScriptsDB/14-Reportes-Completar.sql`
 
@@ -70,12 +68,8 @@ nuevos derivados de otros módulos (Clientes y Rendimiento).
 | GET | `/api/reportes/expedientes-por-rama` |
 | GET | `/api/reportes/expedientes-por-juzgado` |
 | GET | `/api/reportes/antiguedad-expedientes` |
-| GET | `/api/reportes/actividad-audiencias` |
 | GET | `/api/reportes/gestion-tramites` |
 | GET | `/api/reportes/notificaciones-oj` |
-| GET | `/api/reportes/diligencias` |
-| GET | `/api/reportes/alertas-pendientes` |
-| GET | `/api/reportes/eventos-agenda-mes` |
 | GET | `/api/reportes/clientes-por-tipo` |
 | GET | `/api/reportes/carga-por-abogado` |
 

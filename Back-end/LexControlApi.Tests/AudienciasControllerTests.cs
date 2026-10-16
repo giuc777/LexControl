@@ -95,10 +95,11 @@ public class AudienciasControllerTests : IClassFixture<TestWebApplicationFactory
 
         var response = await _client.PostAsJsonAsync("/api/audiencias", audiencia);
 
-        // 200 = creado, 401 = auth, 500 = error SP
+        // 200 = creado, 401 = auth, 400 = validacion de catalogos (id o texto),
+        // 500 = error SP
         response.StatusCode.Should().BeOneOf(
             HttpStatusCode.OK, HttpStatusCode.Unauthorized,
-            HttpStatusCode.InternalServerError);
+            HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError);
     }
 
     [Fact]

@@ -43,9 +43,11 @@ export interface NotificacionDetalle {
 
 export interface NotificacionCrear {
     expedienteId: number;
-    juzgadoId: number;
+    juzgadoId: number | null;
+    juzgadoTexto: string | null;
     fechaRecepcion: string;
-    tipoId: number;
+    tipoId: number | null;
+    tipoTexto: string | null;
     contenido: string | null;
     resumen: string | null;
     estadoId: number;
@@ -60,8 +62,10 @@ export interface NotificacionCrear {
 
 export interface NotificacionActualizar {
     juzgadoId: number | null;
+    juzgadoTexto: string | null;
     fechaRecepcion: string | null;
     tipoId: number | null;
+    tipoTexto: string | null;
     contenido: string | null;
     resumen: string | null;
     estadoId: number | null;

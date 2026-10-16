@@ -133,6 +133,7 @@ builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IExpedienteService, ExpedienteService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<ICatalogoService, CatalogoService>();
+builder.Services.AddScoped<ICatalogoTextoResolver, CatalogoTextoResolver>();
 builder.Services.AddScoped<IAudienciaService, AudienciaService>();
 builder.Services.AddScoped<ITramiteService, TramiteService>();
 builder.Services.AddScoped<IEventoService, EventoService>();

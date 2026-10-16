@@ -108,11 +108,14 @@ export interface DocumentoUploadResponse {
 
 export interface ExpedienteCrearDto {
     clienteId: number;
-    rolProcesalId: number;
+    rolProcesalId: number | null;
+    rolProcesalTexto: string | null;
     noExpediente: string;
-    ramaId: number;
+    ramaId: number | null;
+    ramaTexto: string | null;
     tipoProceso: string | null;
-    juzgadoId: number;
+    juzgadoId: number | null;
+    juzgadoTexto: string | null;
     fechaIngreso: string | null;
     estadoId: number;
     descripcion: string | null;
@@ -123,9 +126,12 @@ export interface ExpedienteCrearDto {
 export interface ExpedienteActualizarDto {
     clienteId: number | null;
     rolProcesalId: number | null;
+    rolProcesalTexto: string | null;
     ramaId: number | null;
+    ramaTexto: string | null;
     tipoProceso: string | null;
     juzgadoId: number | null;
+    juzgadoTexto: string | null;
     estadoId: number | null;
     descripcion: string | null;
     notasInternas: string | null;

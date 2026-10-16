@@ -188,6 +188,10 @@ export class ExpedienteDetallePage implements OnInit {
     }
 
     alGuardarParte(datos: { tipo: string; nombreCompleto: string; dpi: string | null; telefono: string | null; abogadoDefensor: string | null; rol: string | null; descripcion: string | null }): void {
+        if (!datos.tipo.trim()) {
+            this.toastSvc.mostrar('Seleccione o escriba el tipo de parte procesal.');
+            return;
+        }
         this.expedientesSvc.crearParte(this.expedienteId, datos).subscribe({
             next: () => {
                 this.cerrarModalParte();

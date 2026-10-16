@@ -479,7 +479,7 @@ END
 GO
 
 -- ------------------------------------------------------------
--- [00-LexControlDB.sql] SP_Reporte_ExpedientesPorJuzgado
+-- [24-Formularios-Manuales-Texto.sql] SP_Reporte_ExpedientesPorJuzgado
 -- ------------------------------------------------------------
 CREATE OR ALTER PROCEDURE SP_Reporte_ExpedientesPorJuzgado
     @FechaInicio DATE = NULL,
@@ -497,7 +497,7 @@ BEGIN
             CAST(COUNT(*) * 100.0 / NULLIF(SUM(COUNT(*)) OVER(), 0) AS DECIMAL(5,2)) AS Porcentaje
         FROM EXPEDIENTE E
         INNER JOIN JUZGADO J ON E.Juzgado_ID = J.ID
-        INNER JOIN TIPO_JUZGADO TJ ON J.Tipo_Juzgado_ID = TJ.ID
+        LEFT JOIN TIPO_JUZGADO TJ ON J.Tipo_Juzgado_ID = TJ.ID
         WHERE (@FechaInicio IS NULL OR E.FechaIngreso >= @FechaInicio)
             AND (@FechaFin IS NULL OR E.FechaIngreso <= @FechaFin)
             AND (@Estado_ID IS NULL OR E.Estado_ID = @Estado_ID)
@@ -514,7 +514,7 @@ BEGIN
         INNER JOIN CLIENTE C ON E.Cliente_ID = C.ID
         INNER JOIN PERSONA P ON C.Persona_ID = P.ID
         INNER JOIN JUZGADO J ON E.Juzgado_ID = J.ID
-        INNER JOIN TIPO_JUZGADO TJ ON J.Tipo_Juzgado_ID = TJ.ID
+        LEFT JOIN TIPO_JUZGADO TJ ON J.Tipo_Juzgado_ID = TJ.ID
         INNER JOIN ESTADO_EXPEDIENTE ES ON E.Estado_ID = ES.ID
         INNER JOIN RAMA R ON E.Rama_ID = R.ID
         INNER JOIN USUARIO U ON E.Usuario_ID = U.ID
@@ -940,7 +940,7 @@ END
 GO
 
 -- ------------------------------------------------------------
--- [00-LexControlDB.sql] SP_Catalogo_ObtenerTodos
+-- [24-Formularios-Manuales-Texto.sql] SP_Catalogo_ObtenerTodos
 -- ------------------------------------------------------------
 CREATE OR ALTER PROCEDURE SP_Catalogo_ObtenerTodos
 AS
@@ -961,10 +961,10 @@ BEGIN
     -- 5. Resultados Audiencia
     SELECT ID, Nombre, Valor, Descripcion, Color, Orden
     FROM RESULTADO_AUDIENCIA WHERE Activo = 1 ORDER BY Orden, Nombre;
-    -- 6. Tipos Trámite
+    -- 6. Tipos Tramite
     SELECT ID, Nombre, Valor, Descripcion, Color, Orden
     FROM TIPO_TRAMITE WHERE Activo = 1 ORDER BY Orden, Nombre;
-    -- 7. Estados Trámite
+    -- 7. Estados Tramite
     SELECT ID, Nombre, Valor, Descripcion, Color, Orden
     FROM ESTADO_TRAMITE WHERE Activo = 1 ORDER BY Orden, Nombre;
     -- 8. Tipos Diligencia
@@ -973,10 +973,10 @@ BEGIN
     -- 9. Estados Diligencia
     SELECT ID, Nombre, Valor, Descripcion, Color, Orden
     FROM ESTADO_DILIGENCIA WHERE Activo = 1 ORDER BY Orden, Nombre;
-    -- 10. Tipos Notificación OJ
+    -- 10. Tipos Notificacion OJ
     SELECT ID, Nombre, Valor, Descripcion, Color, Orden
     FROM TIPO_NOTIFICACION_OJ WHERE Activo = 1 ORDER BY Orden, Nombre;
-    -- 11. Estados Notificación OJ
+    -- 11. Estados Notificacion OJ
     SELECT ID, Nombre, Valor, Descripcion, Color, Orden
     FROM ESTADO_NOTIFICACION_OJ WHERE Activo = 1 ORDER BY Orden, Nombre;
     -- 12. Tipos Proceso
@@ -994,14 +994,14 @@ BEGIN
     -- 16. Roles Procesales
     SELECT ID, Nombre, Valor, Descripcion, Color, Orden
     FROM ROL_PROCESAL WHERE Activo = 1 ORDER BY Orden, Nombre;
-    -- 17. Juzgados con ubicación
+    -- 17. Juzgados con ubicacion
     SELECT
         J.ID, J.Nombre, TJ.Nombre AS TipoJuzgado,
         M.Nombre AS Municipio, D.Nombre AS Departamento
     FROM JUZGADO J
-    INNER JOIN TIPO_JUZGADO TJ ON J.Tipo_Juzgado_ID = TJ.ID
-    INNER JOIN MUNICIPIO M ON J.Municipio_ID = M.ID
-    INNER JOIN DEPARTAMENTO D ON M.Departamento_ID = D.ID
+    LEFT JOIN TIPO_JUZGADO TJ ON J.Tipo_Juzgado_ID = TJ.ID
+    LEFT JOIN MUNICIPIO M ON J.Municipio_ID = M.ID
+    LEFT JOIN DEPARTAMENTO D ON M.Departamento_ID = D.ID
     WHERE J.Activo = 1
     ORDER BY D.Nombre, J.Nombre;
     -- 18. Usuarios activos con su rol
@@ -2343,7 +2343,7 @@ END
 GO
 
 -- ------------------------------------------------------------
--- [07-Catalogos_Juzgados.sql] SP_Juzgado_Buscar
+-- [24-Formularios-Manuales-Texto.sql] SP_Juzgado_Buscar
 -- ------------------------------------------------------------
 CREATE OR ALTER PROCEDURE SP_Juzgado_Buscar
     @Busqueda NVARCHAR(200) = NULL,
@@ -2362,7 +2362,7 @@ BEGIN
             J.Activo, J.FechaCreacion,
             COUNT(*) OVER() AS Total
         FROM JUZGADO J
-        INNER JOIN TIPO_JUZGADO TJ ON J.Tipo_Juzgado_ID = TJ.ID
+        LEFT JOIN TIPO_JUZGADO TJ ON J.Tipo_Juzgado_ID = TJ.ID
         LEFT JOIN MUNICIPIO M ON J.Municipio_ID = M.ID
         LEFT JOIN DEPARTAMENTO D ON M.Departamento_ID = D.ID
         WHERE (@Busqueda IS NULL OR J.Nombre LIKE '%' + @Busqueda + '%')
@@ -2378,7 +2378,7 @@ END
 GO
 
 -- ------------------------------------------------------------
--- [07-Catalogos_Juzgados.sql] SP_Juzgado_ObtenerPorID
+-- [24-Formularios-Manuales-Texto.sql] SP_Juzgado_ObtenerPorID
 -- ------------------------------------------------------------
 CREATE OR ALTER PROCEDURE SP_Juzgado_ObtenerPorID
     @ID INT
@@ -2393,7 +2393,7 @@ BEGIN
             D.Nombre AS Departamento,
             J.Activo, J.FechaCreacion
         FROM JUZGADO J
-        INNER JOIN TIPO_JUZGADO TJ ON J.Tipo_Juzgado_ID = TJ.ID
+        LEFT JOIN TIPO_JUZGADO TJ ON J.Tipo_Juzgado_ID = TJ.ID
         LEFT JOIN MUNICIPIO M ON J.Municipio_ID = M.ID
         LEFT JOIN DEPARTAMENTO D ON M.Departamento_ID = D.ID
         WHERE J.ID = @ID;

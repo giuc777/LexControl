@@ -45,8 +45,10 @@ public interface IExpedienteService
 public class ExpedienteService : IExpedienteService
 {
     private readonly Data.IRepositorio _repositorio;
+    private readonly ICatalogoTextoResolver _resolverTexto;
 
-    public ExpedienteService(Data.IRepositorio repositorio) => _repositorio = repositorio;
+    public ExpedienteService(Data.IRepositorio repositorio, ICatalogoTextoResolver resolverTexto)
+        => (_repositorio, _resolverTexto) = (repositorio, resolverTexto);
 
     public async Task<List<AbogadoDto>> ListarAbogadosAsync()
     {
@@ -95,6 +97,20 @@ public class ExpedienteService : IExpedienteService
 
     public async Task<ExpedienteDto> CrearAsync(ExpedienteCrearDto datos, int usuarioId)
     {
+        // Los campos de catálogo aceptan ID existente o texto manual ("Otro...").
+        var rolProcesalId = await _resolverTexto.ResolverAsync(
+                "ROL_PROCESAL", datos.RolProcesalId, datos.RolProcesalTexto)
+            ?? throw new ExcepcionNegocio(-2, "El rol procesal es obligatorio.",
+                StatusCodes.Status400BadRequest);
+        var ramaId = await _resolverTexto.ResolverAsync(
+                "RAMA", datos.RamaId, datos.RamaTexto)
+            ?? throw new ExcepcionNegocio(-2, "La rama es obligatoria.",
+                StatusCodes.Status400BadRequest);
+        var juzgadoId = await _resolverTexto.ResolverJuzgadoAsync(
+                datos.JuzgadoId, datos.JuzgadoTexto)
+            ?? throw new ExcepcionNegocio(-2, "El juzgado es obligatorio.",
+                StatusCodes.Status400BadRequest);
+
         int nuevoId;
         try
         {
@@ -103,11 +119,11 @@ public class ExpedienteService : IExpedienteService
                 new
                 {
                     Cliente_ID = datos.ClienteId,
-                    Rol_Procesal_ID = datos.RolProcesalId,
+                    Rol_Procesal_ID = rolProcesalId,
                     datos.NoExpediente,
-                    Rama_ID = datos.RamaId,
+                    Rama_ID = ramaId,
                     datos.TipoProceso,
-                    Juzgado_ID = datos.JuzgadoId,
+                    Juzgado_ID = juzgadoId,
                     datos.FechaIngreso,
                     Estado_ID = datos.EstadoId,
                     datos.Descripcion,
@@ -127,16 +143,24 @@ public class ExpedienteService : IExpedienteService
 
     public async Task<ExpedienteDto> ActualizarAsync(int id, ExpedienteActualizarDto datos)
     {
+        // Si viene texto manual se resuelve a ID (si no hay ni ID ni texto queda null).
+        var rolProcesalId = await _resolverTexto.ResolverAsync(
+            "ROL_PROCESAL", datos.RolProcesalId, datos.RolProcesalTexto);
+        var ramaId = await _resolverTexto.ResolverAsync(
+            "RAMA", datos.RamaId, datos.RamaTexto);
+        var juzgadoId = await _resolverTexto.ResolverJuzgadoAsync(
+            datos.JuzgadoId, datos.JuzgadoTexto);
+
         var retorno = await _repositorio.EjecutarRetornoAsync(
             "SP_Expediente_Actualizar",
             new
             {
                 ID = id,
                 Cliente_ID = datos.ClienteId,
-                Rol_Procesal_ID = datos.RolProcesalId,
-                Rama_ID = datos.RamaId,
+                Rol_Procesal_ID = rolProcesalId,
+                Rama_ID = ramaId,
                 datos.TipoProceso,
-                Juzgado_ID = datos.JuzgadoId,
+                Juzgado_ID = juzgadoId,
                 Estado_ID = datos.EstadoId,
                 datos.Descripcion,
                 datos.NotasInternas,

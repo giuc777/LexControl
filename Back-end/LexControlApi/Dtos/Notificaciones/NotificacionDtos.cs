@@ -137,12 +137,24 @@ public class NotificacionCrearDto
 {
     [Required(ErrorMessage = "El expediente es obligatorio.")]
     public int ExpedienteId { get; set; }
-    [Required(ErrorMessage = "El juzgado es obligatorio.")]
-    public int JuzgadoId { get; set; }
+
+    /// <summary>ID de juzgado existente. Alternativa: <see cref="JuzgadoTexto"/>.</summary>
+    public int? JuzgadoId { get; set; }
+
+    /// <summary>Juzgado capturado a mano (se crea en el catálogo si no existe).</summary>
+    [MaxLength(100)]
+    public string? JuzgadoTexto { get; set; }
+
     [Required(ErrorMessage = "La fecha de recepción es obligatoria.")]
     public DateTime FechaRecepcion { get; set; }
-    [Required(ErrorMessage = "El tipo es obligatorio.")]
-    public int TipoId { get; set; }
+
+    /// <summary>ID de tipo de notificación existente. Alternativa: <see cref="TipoTexto"/>.</summary>
+    public int? TipoId { get; set; }
+
+    /// <summary>Tipo de notificación capturado a mano cuando no existe en el catálogo.</summary>
+    [MaxLength(50)]
+    public string? TipoTexto { get; set; }
+
     [MaxLength(2000)]
     public string? Contenido { get; set; }
     [MaxLength(500)]
@@ -166,8 +178,18 @@ public class NotificacionCrearDto
 public class NotificacionActualizarDto
 {
     public int? JuzgadoId { get; set; }
+
+    /// <summary>Juzgado capturado a mano (se resuelve si JuzgadoId viene vacío).</summary>
+    [MaxLength(100)]
+    public string? JuzgadoTexto { get; set; }
+
     public DateTime? FechaRecepcion { get; set; }
     public int? TipoId { get; set; }
+
+    /// <summary>Tipo de notificación capturado a mano (se resuelve si TipoId viene vacío).</summary>
+    [MaxLength(50)]
+    public string? TipoTexto { get; set; }
+
     [MaxLength(2000)]
     public string? Contenido { get; set; }
     [MaxLength(500)]

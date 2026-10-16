@@ -20,10 +20,12 @@ public interface INotificacionService
 public class NotificacionService : INotificacionService
 {
     private readonly IRepositorio _repositorio;
+    private readonly ICatalogoTextoResolver _resolverTexto;
 
-    public NotificacionService(IRepositorio repositorio)
+    public NotificacionService(IRepositorio repositorio, ICatalogoTextoResolver resolverTexto)
     {
         _repositorio = repositorio;
+        _resolverTexto = resolverTexto;
     }
 
     public async Task<List<NotificacionDto>> ListarAsync(int? expedienteId, int? estadoId, int? tipoId,
@@ -55,14 +57,16 @@ public class NotificacionService : INotificacionService
         if (dto.ExpedienteId <= 0)
             throw new ExcepcionNegocio(-2, "El expediente seleccionado no es válido.",
                 StatusCodes.Status400BadRequest);
-        if (dto.JuzgadoId <= 0)
-            throw new ExcepcionNegocio(-2, "El juzgado seleccionado no es válido.",
-                StatusCodes.Status400BadRequest);
-        if (dto.TipoId <= 0)
-            throw new ExcepcionNegocio(-2, "El tipo de notificación seleccionado no es válido.",
-                StatusCodes.Status400BadRequest);
         if (dto.EstadoId <= 0)
             throw new ExcepcionNegocio(-2, "El estado seleccionado no es válido.",
+                StatusCodes.Status400BadRequest);
+
+        // Juzgado y tipo aceptan ID existente o texto manual ("Otro...").
+        var juzgadoId = await _resolverTexto.ResolverJuzgadoAsync(dto.JuzgadoId, dto.JuzgadoTexto)
+            ?? throw new ExcepcionNegocio(-2, "El juzgado es obligatorio.",
+                StatusCodes.Status400BadRequest);
+        var tipoId = await _resolverTexto.ResolverAsync("TIPO_NOTIFICACION_OJ", dto.TipoId, dto.TipoTexto)
+            ?? throw new ExcepcionNegocio(-2, "El tipo de notificación es obligatorio.",
                 StatusCodes.Status400BadRequest);
 
         return await _repositorio.InsertarAsync(
@@ -70,9 +74,9 @@ public class NotificacionService : INotificacionService
             new
             {
                 Expediente_ID = dto.ExpedienteId,
-                Juzgado_ID = dto.JuzgadoId,
+                Juzgado_ID = juzgadoId,
                 FechaRecepcion = dto.FechaRecepcion,
-                Tipo_ID = dto.TipoId,
+                Tipo_ID = tipoId,
                 Contenido = dto.Contenido,
                 Resumen = dto.Resumen,
                 Estado_ID = dto.EstadoId,
@@ -89,14 +93,18 @@ public class NotificacionService : INotificacionService
 
     public async Task ActualizarAsync(int id, NotificacionActualizarDto dto)
     {
+        // Si viene texto manual se resuelve a ID (si no hay ni ID ni texto queda null).
+        var juzgadoId = await _resolverTexto.ResolverJuzgadoAsync(dto.JuzgadoId, dto.JuzgadoTexto);
+        var tipoId = await _resolverTexto.ResolverAsync("TIPO_NOTIFICACION_OJ", dto.TipoId, dto.TipoTexto);
+
         await _repositorio.EjecutarRetornoAsync(
             "SP_NotificacionOJ_Actualizar",
             new
             {
                 ID = id,
-                Juzgado_ID = dto.JuzgadoId,
+                Juzgado_ID = juzgadoId,
                 FechaRecepcion = dto.FechaRecepcion,
-                Tipo_ID = dto.TipoId,
+                Tipo_ID = tipoId,
                 Contenido = dto.Contenido,
                 Resumen = dto.Resumen,
                 Estado_ID = dto.EstadoId,

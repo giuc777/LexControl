@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { Modal } from '../../shared/components/modal/modal';
@@ -27,6 +27,7 @@ export class ExpedienteModal implements OnChanges {
     private readonly clientesService = inject(ClientesService);
     private readonly usuariosService = inject(UsuariosService);
     private readonly catalogosService = inject(CatalogosService);
+    private readonly cdr = inject(ChangeDetectorRef);
 
     protected readonly titulo = signal('Nuevo Expediente');
     protected readonly textoBoton = signal('Guardar expediente');
@@ -44,19 +45,32 @@ export class ExpedienteModal implements OnChanges {
     protected noExpediente = '';
     protected clienteId = 0;
     protected rolProcesalId = 0;
+    protected rolProcesalTexto = '';
     protected ramaId = 0;
+    protected ramaTexto = '';
     protected tipoProceso = '';
     protected juzgadoId = 0;
+    protected juzgadoTexto = '';
     protected fechaIngreso = '';
     protected estadoId = 1;
     protected descripcion = '';
     protected notasInternas = '';
     protected abogadoId = 0;
 
+    /** Valor reservado del select para "Otro (escribir…)". */
+    protected readonly valorOtro = -1;
+
+    protected esOtro(valor: number | string): boolean {
+        return Number(valor) === this.valorOtro;
+    }
+
     ngOnChanges(cambios: SimpleChanges): void {
         if (cambios['abierto'] && this.abierto) {
             this.error.set('');
             this.guardando.set(false);
+            this.rolProcesalTexto = '';
+            this.ramaTexto = '';
+            this.juzgadoTexto = '';
             this.cargarCatalogos();
             this.cargarClientes();
             this.cargarAbogados();
@@ -95,16 +109,25 @@ export class ExpedienteModal implements OnChanges {
             this.error.set('El cliente es obligatorio.');
             return;
         }
-        if (!this.rolProcesalId) {
-            this.error.set('El rol procesal es obligatorio.');
+        const rolOtro = this.esOtro(this.rolProcesalId);
+        const ramaOtro = this.esOtro(this.ramaId);
+        const juzgadoOtro = this.esOtro(this.juzgadoId);
+        if (rolOtro ? !this.rolProcesalTexto.trim() : !this.rolProcesalId) {
+            this.error.set(rolOtro
+                ? 'Escriba el nuevo rol procesal.'
+                : 'El rol procesal es obligatorio.');
             return;
         }
-        if (!this.ramaId) {
-            this.error.set('La rama es obligatoria.');
+        if (ramaOtro ? !this.ramaTexto.trim() : !this.ramaId) {
+            this.error.set(ramaOtro
+                ? 'Escriba la nueva rama.'
+                : 'La rama es obligatoria.');
             return;
         }
-        if (!this.juzgadoId) {
-            this.error.set('El juzgado es obligatorio.');
+        if (juzgadoOtro ? !this.juzgadoTexto.trim() : !this.juzgadoId) {
+            this.error.set(juzgadoOtro
+                ? 'Escriba el nuevo juzgado.'
+                : 'El juzgado es obligatorio.');
             return;
         }
         if (!this.abogadoId) {
@@ -117,10 +140,13 @@ export class ExpedienteModal implements OnChanges {
         if (this.modo === 'editar') {
             const datos: ExpedienteActualizarDto = {
                 clienteId: this.clienteId || null,
-                rolProcesalId: this.rolProcesalId || null,
-                ramaId: this.ramaId || null,
+                rolProcesalId: rolOtro ? null : this.rolProcesalId || null,
+                rolProcesalTexto: rolOtro ? this.rolProcesalTexto.trim() : null,
+                ramaId: ramaOtro ? null : this.ramaId || null,
+                ramaTexto: ramaOtro ? this.ramaTexto.trim() : null,
                 tipoProceso: this.tipoProceso.trim() || null,
-                juzgadoId: this.juzgadoId || null,
+                juzgadoId: juzgadoOtro ? null : this.juzgadoId || null,
+                juzgadoTexto: juzgadoOtro ? this.juzgadoTexto.trim() : null,
                 estadoId: this.estadoId || null,
                 descripcion: this.descripcion.trim() || null,
                 notasInternas: this.notasInternas.trim() || null,
@@ -131,10 +157,13 @@ export class ExpedienteModal implements OnChanges {
             const datos: ExpedienteCrearDto = {
                 noExpediente: this.noExpediente.trim(),
                 clienteId: this.clienteId,
-                rolProcesalId: this.rolProcesalId,
-                ramaId: this.ramaId,
+                rolProcesalId: rolOtro ? null : this.rolProcesalId,
+                rolProcesalTexto: rolOtro ? this.rolProcesalTexto.trim() : null,
+                ramaId: ramaOtro ? null : this.ramaId,
+                ramaTexto: ramaOtro ? this.ramaTexto.trim() : null,
                 tipoProceso: this.tipoProceso.trim() || null,
-                juzgadoId: this.juzgadoId,
+                juzgadoId: juzgadoOtro ? null : this.juzgadoId,
+                juzgadoTexto: juzgadoOtro ? this.juzgadoTexto.trim() : null,
                 fechaIngreso: this.fechaIngreso || null,
                 estadoId: this.estadoId,
                 descripcion: this.descripcion.trim() || null,
@@ -147,34 +176,37 @@ export class ExpedienteModal implements OnChanges {
 
     private cargarClientes(): void {
         this.clientesService.listar({ pagina: 1, tamanioPagina: 500 }).subscribe({
-            next: resp => this.clientes = resp.clientes,
-            error: () => this.clientes = []
+            next: resp => { this.clientes = resp.clientes; this.cdr.markForCheck(); },
+            error: () => { this.clientes = []; this.cdr.markForCheck(); }
         });
     }
 
     private cargarAbogados(): void {
         this.usuariosService.listar({ rolId: 3, activo: true }).subscribe({
-            next: users => this.abogados = users,
-            error: () => this.abogados = []
+            next: users => { this.abogados = users; this.cdr.markForCheck(); },
+            error: () => { this.abogados = []; this.cdr.markForCheck(); }
         });
     }
 
     private cargarCatalogos(): void {
-        this.catalogosService.buscarCatalogo('RAMA', { tamanoPagina: 500 }).subscribe({
-            next: resp => this.ramas = resp.items,
-            error: () => this.ramas = []
+        // En edición se incluyen inactivos para que el valor ya asignado siga visible;
+        // en creación solo se listan activos.
+        const soloActivos = this.modo !== 'editar';
+        this.catalogosService.buscarCatalogo('RAMA', { tamanoPagina: 500, incluirInactivos: !soloActivos }).subscribe({
+            next: resp => { this.ramas = resp.items; this.cdr.markForCheck(); },
+            error: () => { this.ramas = []; this.cdr.markForCheck(); }
         });
         this.catalogosService.buscarCatalogo('ESTADO_EXPEDIENTE', { tamanoPagina: 500 }).subscribe({
-            next: resp => this.estados = resp.items,
-            error: () => this.estados = []
+            next: resp => { this.estados = resp.items; this.cdr.markForCheck(); },
+            error: () => { this.estados = []; this.cdr.markForCheck(); }
         });
-        this.catalogosService.buscarCatalogo('ROL_PROCESAL', { tamanoPagina: 500 }).subscribe({
-            next: resp => this.rolesProcesales = resp.items,
-            error: () => this.rolesProcesales = []
+        this.catalogosService.buscarCatalogo('ROL_PROCESAL', { tamanoPagina: 500, incluirInactivos: !soloActivos }).subscribe({
+            next: resp => { this.rolesProcesales = resp.items; this.cdr.markForCheck(); },
+            error: () => { this.rolesProcesales = []; this.cdr.markForCheck(); }
         });
-        this.catalogosService.buscarJuzgados({ tamanoPagina: 500 }).subscribe({
-            next: resp => this.juzgados = resp.items.map(j => ({ id: j.id, nombre: j.nombre })),
-            error: () => this.juzgados = []
+        this.catalogosService.buscarJuzgados({ tamanoPagina: 500, incluirInactivos: !soloActivos }).subscribe({
+            next: resp => { this.juzgados = resp.items.map(j => ({ id: j.id, nombre: j.nombre })); this.cdr.markForCheck(); },
+            error: () => { this.juzgados = []; this.cdr.markForCheck(); }
         });
     }
 
@@ -182,9 +214,12 @@ export class ExpedienteModal implements OnChanges {
         this.noExpediente = '';
         this.clienteId = 0;
         this.rolProcesalId = 0;
+        this.rolProcesalTexto = '';
         this.ramaId = 0;
+        this.ramaTexto = '';
         this.tipoProceso = '';
         this.juzgadoId = 0;
+        this.juzgadoTexto = '';
         this.fechaIngreso = '';
         this.estadoId = 1;
         this.descripcion = '';

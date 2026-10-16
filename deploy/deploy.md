@@ -83,7 +83,7 @@ $S = "DESKTOP-V7G3G1I\SQLEXPRESS"     # instancia objetivo
 $i = "deploy\desarrollo"
 
 sqlcmd -S $S -E -b -f 65001 -i "$i\01_schema.sql"               # crea DBLexControl desde cero
-sqlcmd -S $S -E -b -f 65001 -i "$i\02_sp_escritura_simple.sql"  # 48 SP
+sqlcmd -S $S -E -b -f 65001 -i "$i\02_sp_escritura_simple.sql"  # 50 SP
 sqlcmd -S $S -E -b -f 65001 -i "$i\03_sp_transaccionales.sql"   # 72 SP
 sqlcmd -S $S -E -b -f 65001 -i "$i\04_seed.sql"                 # datos mínimos
 ```
@@ -115,7 +115,7 @@ Resultado esperado en una instalación limpia:
 | Métrica | Valor |
 |---|---|
 | `sys.tables` | 53 |
-| `sys.procedures` | 120 |
+| `sys.procedures` | 122 |
 | `sys.foreign_keys` | 79 |
 | `USUARIO` | 1 (admin) |
 | `ROL` / `MODULO` / `PERMISO_ROL` | 3 / 10 / 30 |
@@ -192,13 +192,13 @@ editan después desde **Ajustes → Permisos**.
 ## 7. Pruebas
 
 ```powershell
-# Unitarias (xUnit, 140 tests)
+# Unitarias (xUnit, 149 tests)
 dotnet test Back-end\LexControlApi.Tests\LexControlApi.Tests.csproj
 
 # Unitarias frontend (Jasmine/Karma)
 cd Front-end\LexControlFornt; npm test
 
-# E2E (Playwright, 109 tests / 16 specs)
+# E2E (Playwright, 110 tests / 16 specs)
 cd Front-end\LexControlFornt; npm run e2e
 # un spec: npx playwright test e2e/tests/10-tramites.spec.ts
 ```
@@ -223,7 +223,7 @@ de `ScriptsDB/` (fuente histórica). Si se modifica un SP o una tabla:
    - **INSERT/MERGE de configuración** → `04`
 3. Cuando un SP aparece en varios scripts se conserva la **última definición**
    por orden numérico (13 SP redefinidos: reportes → `10`/`14`, permisos → `99`,
-   autenticación → `02`, diligencias → `19`, etc.). Total: **120 SP únicos**.
+   autenticación → `02`, diligencias → `19`, etc.). Total: **122 SP únicos**.
 4. Re-validar en una BD temporal (ver §9).
 
 Los `.sql` están ignorados por `.gitignore` (`*.sql`): versionarlos con

@@ -46,8 +46,10 @@ export class NotificacionModal implements OnInit {
 
     protected readonly expedienteId = signal<number>(0);
     protected readonly juzgadoId = signal<number>(0);
+    protected readonly juzgadoTexto = signal<string>('');
     protected readonly fechaRecepcion = signal<string>(new Date().toISOString().split('T')[0]);
     protected readonly tipoId = signal<number>(0);
+    protected readonly tipoTexto = signal<string>('');
     protected readonly contenido = signal<string>('');
     protected readonly resumen = signal<string>('');
     protected readonly estadoId = signal<number>(0);
@@ -65,6 +67,13 @@ export class NotificacionModal implements OnInit {
     protected readonly confirmadoDuplicado = signal(false);
     protected readonly duplicados = signal<NotificacionDuplicado[]>([]);
 
+    /** Valor reservado del select para "Otro (escribir…)". */
+    protected readonly valorOtro = -1;
+
+    protected esOtro(valor: number | string): boolean {
+        return Number(valor) === this.valorOtro;
+    }
+
     ngOnInit(): void {
         this.cargarCatalogos();
         if (this.notificacion) {
@@ -74,7 +83,8 @@ export class NotificacionModal implements OnInit {
     }
 
     cargarCatalogos(): void {
-        this.catalogosSvc.buscarCatalogo('TIPO_NOTIFICACION_OJ').subscribe({
+        // En edición se incluyen inactivos para que el tipo ya asignado siga visible.
+        this.catalogosSvc.buscarCatalogo('TIPO_NOTIFICACION_OJ', { incluirInactivos: this.notificacion !== null }).subscribe({
             next: (data) => { this.tiposNotificacion.set(data.items); }
         });
         this.catalogosSvc.buscarCatalogo('ESTADO_NOTIFICACION_OJ').subscribe({
@@ -93,8 +103,10 @@ export class NotificacionModal implements OnInit {
     private precargar(n: NotificacionDetalle): void {
         this.expedienteId.set(n.expedienteId);
         this.juzgadoId.set(n.juzgadoId);
+        this.juzgadoTexto.set('');
         this.fechaRecepcion.set(n.fechaRecepcion);
         this.tipoId.set(n.tipoId);
+        this.tipoTexto.set('');
         this.contenido.set(n.contenido ?? '');
         this.resumen.set(n.resumen ?? '');
         this.estadoId.set(n.estadoId);
@@ -187,7 +199,19 @@ export class NotificacionModal implements OnInit {
     }
 
     guardar(): void {
-        if (!this.expedienteId() || !this.juzgadoId() || !this.tipoId() || !this.fechaRecepcion()) {
+        const juzgadoOtro = this.esOtro(this.juzgadoId());
+        const tipoOtro = this.esOtro(this.tipoId());
+        if (juzgadoOtro && !this.juzgadoTexto().trim()) {
+            this.toast.mostrar('Escriba el nuevo juzgado.', 3000);
+            return;
+        }
+        if (tipoOtro && !this.tipoTexto().trim()) {
+            this.toast.mostrar('Escriba el nuevo tipo de notificación.', 3000);
+            return;
+        }
+        if (!this.expedienteId() || !this.fechaRecepcion()
+            || (!juzgadoOtro && !this.juzgadoId())
+            || (!tipoOtro && !this.tipoId())) {
             this.toast.mostrar('Complete los campos obligatorios.', 3000);
             return;
         }
@@ -226,13 +250,17 @@ export class NotificacionModal implements OnInit {
 
     private guardarReal(): void {
         this.guardando.set(true);
+        const juzgadoOtro = this.esOtro(this.juzgadoId());
+        const tipoOtro = this.esOtro(this.tipoId());
 
         const actual = this.notificacion;
         if (this.esEdicion() && actual) {
             const dto: NotificacionActualizar = {
-                juzgadoId: this.juzgadoId(),
+                juzgadoId: juzgadoOtro ? null : this.juzgadoId(),
+                juzgadoTexto: juzgadoOtro ? this.juzgadoTexto().trim() : null,
                 fechaRecepcion: this.fechaRecepcion(),
-                tipoId: this.tipoId(),
+                tipoId: tipoOtro ? null : this.tipoId(),
+                tipoTexto: tipoOtro ? this.tipoTexto().trim() : null,
                 contenido: this.contenido() || null,
                 resumen: this.resumen() || null,
                 estadoId: this.estadoId(),
@@ -255,9 +283,11 @@ export class NotificacionModal implements OnInit {
 
         const dto: NotificacionCrear = {
             expedienteId: this.expedienteId(),
-            juzgadoId: this.juzgadoId(),
+            juzgadoId: juzgadoOtro ? null : this.juzgadoId(),
+            juzgadoTexto: juzgadoOtro ? this.juzgadoTexto().trim() : null,
             fechaRecepcion: this.fechaRecepcion(),
-            tipoId: this.tipoId(),
+            tipoId: tipoOtro ? null : this.tipoId(),
+            tipoTexto: tipoOtro ? this.tipoTexto().trim() : null,
             contenido: this.contenido() || null,
             resumen: this.resumen() || null,
             estadoId: this.estadoId(),

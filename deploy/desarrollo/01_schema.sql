@@ -385,8 +385,8 @@ GO
 -- 3.3 JUZGADO
 CREATE TABLE JUZGADO (
     ID INT IDENTITY(1,1) PRIMARY KEY,
-    Municipio_ID INT NOT NULL,
-    Tipo_Juzgado_ID INT NOT NULL,
+    Municipio_ID INT NULL,
+    Tipo_Juzgado_ID INT NULL,
     Nombre NVARCHAR(100) NOT NULL,
     Direccion NVARCHAR(200) NULL,
     Telefono NVARCHAR(20) NULL,

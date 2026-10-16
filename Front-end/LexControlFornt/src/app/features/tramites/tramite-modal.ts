@@ -29,6 +29,7 @@ export class TramiteModal implements OnInit {
 
     protected readonly expedienteId = signal<number>(0);
     protected readonly tipoId = signal<number>(0);
+    protected readonly tipoTexto = signal<string>('');
     protected readonly institucion = signal<string>('');
     protected readonly fechaIngreso = signal<string>('');
     protected readonly estadoId = signal<number>(0);
@@ -37,6 +38,13 @@ export class TramiteModal implements OnInit {
     protected readonly notasInternas = signal<string>('');
 
     protected readonly guardando = signal(false);
+
+    /** Valor reservado del select para "Otro (escribir…)". */
+    protected readonly valorOtro = -1;
+
+    protected esOtro(valor: number | string): boolean {
+        return Number(valor) === this.valorOtro;
+    }
 
     ngOnInit(): void {
         this.cargarCatalogos();
@@ -69,14 +77,20 @@ export class TramiteModal implements OnInit {
     onCerrar(): void { this.cerrar.emit(); }
 
     guardar(): void {
-        if (!this.expedienteId() || !this.tipoId() || !this.institucion().trim()) {
-            this.toast.mostrar('Complete los campos obligatorios.', 3000);
+        const tipoOtro = this.esOtro(this.tipoId());
+        if (!this.expedienteId() || (tipoOtro ? !this.tipoTexto().trim() : !this.tipoId()) || !this.institucion().trim()) {
+            this.toast.mostrar(
+                tipoOtro && !this.tipoTexto().trim()
+                    ? 'Escriba el nuevo tipo de trámite.'
+                    : 'Complete los campos obligatorios.',
+                3000);
             return;
         }
         this.guardando.set(true);
         const dto: TramiteCrear = {
             expedienteId: this.expedienteId(),
-            tipoId: this.tipoId(),
+            tipoId: tipoOtro ? null : this.tipoId(),
+            tipoTexto: tipoOtro ? this.tipoTexto().trim() : null,
             institucion: this.institucion().trim(),
             fechaIngreso: this.fechaIngreso() || null,
             estadoId: this.estadoId(),

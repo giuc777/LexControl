@@ -232,7 +232,15 @@
                             @for (t of tiposTramite(); track t.id) {
                                 <option [value]="t.id">{{ t.nombre }}</option>
                             }
+                            <option [value]="valorOtro">Otro (escribir&hellip;)</option>
                         </select>
+                        @if (esOtro(editTipoId())) {
+                            <input type="text" id="editTipoOtro" name="editTipoOtro"
+                                   data-testid="input-tipo-otro"
+                                   [ngModel]="editTipoTexto()"
+                                   (ngModelChange)="editTipoTexto.set($event)"
+                                   maxlength="50" placeholder="Escriba el nuevo tipo de trámite..." />
+                        }
                     </div>
                     <div class="field">
                         <label for="editInstitucion">Institución <span class="req">*</span></label>

@@ -19,7 +19,13 @@
                         @for (rama of ramas; track rama.id) {
                             <option [value]="rama.id">{{ rama.nombre }}</option>
                         }
+                        <option [value]="valorOtro">Otro (escribir&hellip;)</option>
                     </select>
+                    @if (esOtro(ramaId)) {
+                        <input type="text" id="expRamaOtro" data-testid="exp-rama-otro"
+                            [(ngModel)]="ramaTexto" name="ramaTexto"
+                            maxlength="50" placeholder="Escriba la nueva rama...">
+                    }
                 </div>
                 <div class="field">
                     <label for="expEstado">Estado <span class="req">*</span></label>
@@ -45,7 +51,13 @@
                         @for (rol of rolesProcesales; track rol.id) {
                             <option [value]="rol.id">{{ rol.nombre }}</option>
                         }
+                        <option [value]="valorOtro">Otro (escribir&hellip;)</option>
                     </select>
+                    @if (esOtro(rolProcesalId)) {
+                        <input type="text" id="expRolProcesalOtro" data-testid="exp-rol-otro"
+                            [(ngModel)]="rolProcesalTexto" name="rolProcesalTexto"
+                            maxlength="30" placeholder="Escriba el nuevo rol procesal...">
+                    }
                 </div>
                 <div class="field">
                     <label for="expTipoProceso">Tipo de proceso</label>
@@ -59,7 +71,13 @@
                         @for (juzgado of juzgados; track juzgado.id) {
                             <option [value]="juzgado.id">{{ juzgado.nombre }}</option>
                         }
+                        <option [value]="valorOtro">Otro (escribir&hellip;)</option>
                     </select>
+                    @if (esOtro(juzgadoId)) {
+                        <input type="text" id="expJuzgadoOtro" data-testid="exp-juzgado-otro"
+                            [(ngModel)]="juzgadoTexto" name="juzgadoTexto"
+                            maxlength="100" placeholder="Escriba el nuevo juzgado...">
+                    }
                 </div>
                 <div class="field">
                     <label for="expAbogado">Abogado asignado <span class="req">*</span></label>

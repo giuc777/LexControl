@@ -18,10 +18,12 @@ public interface IDiligenciaService
 public class DiligenciaService : IDiligenciaService
 {
     private readonly IRepositorio _repositorio;
+    private readonly ICatalogoTextoResolver _resolverTexto;
 
-    public DiligenciaService(IRepositorio repositorio)
+    public DiligenciaService(IRepositorio repositorio, ICatalogoTextoResolver resolverTexto)
     {
         _repositorio = repositorio;
+        _resolverTexto = resolverTexto;
     }
 
     public async Task<List<DiligenciaDto>> ListarAsync(int? expedienteId, int? clienteId, int? tipoId,
@@ -52,10 +54,9 @@ public class DiligenciaService : IDiligenciaService
 
     public async Task<int> CrearAsync(DiligenciaCrearDto dto, int usuarioId)
     {
-        // Tipo opcional: si se envia, debe ser un ID valido del catalogo.
-        if (dto.TipoId.HasValue && dto.TipoId.Value <= 0)
-            throw new ExcepcionNegocio(-2, "El tipo de diligencia seleccionado no es válido.",
-                StatusCodes.Status400BadRequest);
+        // Tipo opcional: acepta ID existente o texto manual ("Otro...");
+        // sin ninguno de los dos queda en null.
+        var tipoId = await _resolverTexto.ResolverAsync("TIPO_DILIGENCIA", dto.TipoId, dto.TipoTexto);
 
         if (dto.EstadoId <= 0)
             throw new ExcepcionNegocio(-2, "El estado seleccionado no es válido.",
@@ -78,7 +79,7 @@ public class DiligenciaService : IDiligenciaService
             {
                 Expediente_ID = dto.ExpedienteId,
                 Cliente_ID = dto.ClienteId,
-                Tipo_ID = dto.TipoId,
+                Tipo_ID = tipoId,
                 Titulo = dto.Titulo,
                 Descripcion = dto.Descripcion,
                 Fecha = dto.Fecha,
@@ -97,6 +98,9 @@ public class DiligenciaService : IDiligenciaService
 
     public async Task ActualizarAsync(int id, DiligenciaActualizarDto dto)
     {
+        // Si viene texto manual se resuelve a ID (si no hay ni ID ni texto queda null).
+        var tipoId = await _resolverTexto.ResolverAsync("TIPO_DILIGENCIA", dto.TipoId, dto.TipoTexto);
+
         TimeSpan? horaInicio = null;
         if (!string.IsNullOrEmpty(dto.HoraInicio))
         {
@@ -111,7 +115,7 @@ public class DiligenciaService : IDiligenciaService
                 ID = id,
                 Expediente_ID = dto.ExpedienteId,
                 Cliente_ID = dto.ClienteId,
-                Tipo_ID = dto.TipoId,
+                Tipo_ID = tipoId,
                 Titulo = dto.Titulo,
                 Descripcion = dto.Descripcion,
                 Fecha = dto.Fecha,

@@ -78,7 +78,7 @@ export class NotificacionesPage implements OnInit {
     }
 
     cargarJuzgados(): void {
-        this.catalogosSvc.buscarJuzgados({}).subscribe({
+        this.catalogosSvc.buscarJuzgados().subscribe({
             next: (data) => {
                 this.juzgados.set(
                     data.items.map((j: JuzgadoItem) => ({ id: j.id, nombre: j.nombre }))

@@ -37,7 +37,8 @@ export interface TramiteDetalle {
 
 export interface TramiteCrear {
     expedienteId: number;
-    tipoId: number;
+    tipoId: number | null;
+    tipoTexto: string | null;
     institucion: string;
     fechaIngreso: string | null;
     estadoId: number;
@@ -54,7 +55,8 @@ export interface TramiteActualizarEstado {
 }
 
 export interface TramiteActualizar {
-    tipoId: number;
+    tipoId: number | null;
+    tipoTexto: string | null;
     institucion: string;
     fechaIngreso: string | null;
     descripcion: string | null;

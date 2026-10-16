@@ -21,7 +21,13 @@
                         @for (tipo of tipos(); track tipo.id) {
                             <option [value]="tipo.id">{{ tipo.nombre }}</option>
                         }
+                        <option [value]="valorOtro">Otro (escribir&hellip;)</option>
                     </select>
+                    @if (esOtro(tipoId)) {
+                        <input type="text" id="audTipoOtro" data-testid="input-tipo-otro"
+                            [(ngModel)]="tipoTexto" name="tipoTexto"
+                            maxlength="50" placeholder="Escriba el nuevo tipo de audiencia...">
+                    }
                 </div>
                 <div class="field">
                     <label for="audEstado">Estado <span class="req">*</span></label>
@@ -41,7 +47,13 @@
                         @for (juzgado of juzgados(); track juzgado.id) {
                             <option [value]="juzgado.id">{{ juzgado.nombre }}</option>
                         }
+                        <option [value]="valorOtro">Otro (escribir&hellip;)</option>
                     </select>
+                    @if (esOtro(juzgadoId)) {
+                        <input type="text" id="audJuzgadoOtro" data-testid="input-juzgado-otro"
+                            [(ngModel)]="juzgadoTexto" name="juzgadoTexto"
+                            maxlength="100" placeholder="Escriba el nuevo juzgado...">
+                    }
                 </div>
                 <div class="field">
                     <label for="audSala">Sala</label>

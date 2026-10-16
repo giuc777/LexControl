@@ -55,6 +55,7 @@ export interface DiligenciaCrear {
     expedienteId: number | null;
     clienteId: number | null;
     tipoId: number | null;
+    tipoTexto: string | null;
     titulo: string;
     descripcion: string | null;
     fecha: string;

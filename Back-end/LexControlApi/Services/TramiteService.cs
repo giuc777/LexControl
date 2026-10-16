@@ -25,10 +25,12 @@ public interface ITramiteService
 public class TramiteService : ITramiteService
 {
     private readonly IRepositorio _repositorio;
+    private readonly ICatalogoTextoResolver _resolverTexto;
 
-    public TramiteService(IRepositorio repositorio)
+    public TramiteService(IRepositorio repositorio, ICatalogoTextoResolver resolverTexto)
     {
         _repositorio = repositorio;
+        _resolverTexto = resolverTexto;
     }
 
     public async Task<List<TramiteDto>> ListarAsync(int? expedienteId, int? estadoId, int? tipoId,
@@ -57,12 +59,17 @@ public class TramiteService : ITramiteService
 
     public async Task<int> CrearAsync(TramiteCrearDto dto)
     {
+        // El tipo acepta ID existente o texto manual ("Otro...").
+        var tipoId = await _resolverTexto.ResolverAsync("TIPO_TRAMITE", dto.TipoId, dto.TipoTexto)
+            ?? throw new ExcepcionNegocio(-2, "El tipo de trámite es obligatorio.",
+                StatusCodes.Status400BadRequest);
+
         return await _repositorio.InsertarAsync(
             "SP_Tramite_Insertar",
             new
             {
                 Expediente_ID = dto.ExpedienteId,
-                Tipo_ID = dto.TipoId,
+                Tipo_ID = tipoId,
                 Institucion = dto.Institucion,
                 FechaIngreso = dto.FechaIngreso,
                 Estado_ID = dto.EstadoId,
@@ -89,12 +96,17 @@ public class TramiteService : ITramiteService
 
     public async Task ActualizarAsync(int id, TramiteActualizarDto dto)
     {
+        // Si viene texto manual se resuelve a ID (si no hay ni ID ni texto queda null).
+        var tipoId = await _resolverTexto.ResolverAsync("TIPO_TRAMITE", dto.TipoId, dto.TipoTexto)
+            ?? throw new ExcepcionNegocio(-2, "El tipo de trámite es obligatorio.",
+                StatusCodes.Status400BadRequest);
+
         var retorno = await _repositorio.EjecutarRetornoAsync(
             "SP_Tramite_Actualizar",
             new
             {
                 ID = id,
-                Tipo_ID = dto.TipoId,
+                Tipo_ID = tipoId,
                 Institucion = dto.Institucion,
                 FechaIngreso = dto.FechaIngreso,
                 Descripcion = dto.Descripcion,

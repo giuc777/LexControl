@@ -230,7 +230,11 @@
                         @for (rol of rolesProcesales; track rol.id) {
                             <option [value]="rol.nombre">{{ rol.nombre }}</option>
                         }
+                        <option value="__otro__">Otro (escribir&hellip;)</option>
                     </select>
+                    <input type="text" id="parteTipoOtro" #parteTipoOtro maxlength="30"
+                        placeholder="Escriba el nuevo tipo..."
+                        [hidden]="parteTipo.value !== '__otro__'">
                 </div>
                 <div class="field">
                     <label for="parteNombre">Nombre completo <span class="req">*</span></label>
@@ -257,7 +261,7 @@
                 <button type="button" class="btn-secondary" (click)="cerrarModalParte()">Cancelar</button>
                 <button type="button" class="btn-primary"
                     (click)="alGuardarParte({
-                        tipo: parteTipo.value,
+                        tipo: parteTipo.value === '__otro__' ? (parteTipoOtro.value || '').trim() : parteTipo.value,
                         nombreCompleto: parteNombre.value,
                         dpi: parteDpi.value || null,
                         telefono: parteTelefono.value || null,

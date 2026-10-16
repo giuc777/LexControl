@@ -13,7 +13,17 @@ export default defineConfig({
         trace: 'on-first-retry',
         screenshot: 'only-on-failure',
         video: 'on-first-retry',
-        ignoreHTTPSErrors: true
+        ignoreHTTPSErrors: true,
+        // El dev server (ng serve) + contexto de navegador nuevo por test
+        // pueden tardar en servir los chunks lazy; márgenes amplios para
+        // evitar falsos negativos de entorno.
+        timeout: 60000,
+        actionTimeout: 15000,
+        navigationTimeout: 25000
+    },
+
+    expect: {
+        timeout: 10000
     },
 
     projects: [

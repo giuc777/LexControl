@@ -111,10 +111,36 @@ public class ExpedientesControllerTests : IClassFixture<TestWebApplicationFactor
 
         var response = await _client.PostAsJsonAsync("/api/expedientes", expediente);
 
-        // 201 = creado, 401 = auth, 409 = duplicado, 500 = error SP
+        // 201 = creado, 401 = auth, 400 = validacion de catalogos (id o texto),
+        // 409 = duplicado, 500 = error SP
         response.StatusCode.Should().BeOneOf(
             HttpStatusCode.Created, HttpStatusCode.Unauthorized,
-            HttpStatusCode.Conflict, HttpStatusCode.InternalServerError);
+            HttpStatusCode.BadRequest, HttpStatusCode.Conflict,
+            HttpStatusCode.InternalServerError);
+    }
+
+    [Fact]
+    public async Task Crear_SinJuzgadoNiTexto_Devuelve400()
+    {
+        var token = AuthHelper.GenerarTokenAdmin();
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var expediente = new
+        {
+            ClienteId = 1,
+            RolProcesalId = 1,
+            RamaId = 1,
+            NoExpediente = $"CIV-2026-SJZ-{DateTime.Now:HHmmss}",
+            EstadoId = 1,
+            AbogadoId = 2
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/expedientes", expediente);
+
+        // Sin JuzgadoId ni JuzgadoTexto la validación del servicio rechaza el alta
+        // antes de tocar la base de datos.
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]

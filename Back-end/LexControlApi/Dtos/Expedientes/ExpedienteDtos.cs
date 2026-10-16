@@ -322,21 +322,33 @@ public class ExpedienteCrearDto
     [Required(ErrorMessage = "El cliente es obligatorio.")]
     public int ClienteId { get; set; }
 
-    [Required(ErrorMessage = "El rol procesal es obligatorio.")]
-    public int RolProcesalId { get; set; }
+    /// <summary>ID de rol procesal existente. Alternativa: <see cref="RolProcesalTexto"/>.</summary>
+    public int? RolProcesalId { get; set; }
+
+    /// <summary>Rol procesal capturado a mano cuando no existe en el catálogo.</summary>
+    [MaxLength(30)]
+    public string? RolProcesalTexto { get; set; }
 
     [Required(ErrorMessage = "El número de expediente es obligatorio.")]
     [MaxLength(50)]
     public string NoExpediente { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "La rama es obligatoria.")]
-    public int RamaId { get; set; }
+    /// <summary>ID de rama existente. Alternativa: <see cref="RamaTexto"/>.</summary>
+    public int? RamaId { get; set; }
+
+    /// <summary>Rama capturada a mano cuando no existe en el catálogo.</summary>
+    [MaxLength(50)]
+    public string? RamaTexto { get; set; }
 
     [MaxLength(50)]
     public string? TipoProceso { get; set; }
 
-    [Required(ErrorMessage = "El juzgado es obligatorio.")]
-    public int JuzgadoId { get; set; }
+    /// <summary>ID de juzgado existente. Alternativa: <see cref="JuzgadoTexto"/>.</summary>
+    public int? JuzgadoId { get; set; }
+
+    /// <summary>Juzgado capturado a mano (se crea en el catálogo si no existe).</summary>
+    [MaxLength(100)]
+    public string? JuzgadoTexto { get; set; }
 
     public DateTime? FechaIngreso { get; set; }
 
@@ -365,12 +377,26 @@ public class ExpedienteActualizarDto
 {
     public int? ClienteId { get; set; }
     public int? RolProcesalId { get; set; }
+
+    /// <summary>Rol procesal capturado a mano (se resuelve si RolProcesalId viene vacío).</summary>
+    [MaxLength(30)]
+    public string? RolProcesalTexto { get; set; }
+
     public int? RamaId { get; set; }
+
+    /// <summary>Rama capturada a mano (se resuelve si RamaId viene vacío).</summary>
+    [MaxLength(50)]
+    public string? RamaTexto { get; set; }
 
     [MaxLength(50)]
     public string? TipoProceso { get; set; }
 
     public int? JuzgadoId { get; set; }
+
+    /// <summary>Juzgado capturado a mano (se resuelve si JuzgadoId viene vacío).</summary>
+    [MaxLength(100)]
+    public string? JuzgadoTexto { get; set; }
+
     public int? EstadoId { get; set; }
 
     [MaxLength(500)]

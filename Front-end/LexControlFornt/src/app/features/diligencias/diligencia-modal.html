@@ -51,7 +51,14 @@
                             @for (t of tiposDiligencia(); track t.id) {
                                 <option [value]="t.id">{{ t.nombre }}</option>
                             }
+                            <option [value]="valorOtro">Otro (escribir&hellip;)</option>
                         </select>
+                        @if (esOtro(tipoId())) {
+                            <input type="text" class="form-control" data-testid="input-tipo-otro"
+                                   [ngModel]="tipoTexto()"
+                                   (ngModelChange)="tipoTexto.set($event)"
+                                   maxlength="50" placeholder="Escriba el nuevo tipo de diligencia..." />
+                        }
                     </div>
                     <div class="form-grupo">
                         <label>Fecha <span class="obligatorio">*</span></label>

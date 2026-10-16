@@ -1,5 +1,7 @@
 using LexControlApi.Data;
 using LexControlApi.Dtos.Audiencias;
+using LexControlApi.Excepciones;
+using Microsoft.AspNetCore.Http;
 
 namespace LexControlApi.Services;
 
@@ -16,10 +18,12 @@ public interface IAudienciaService
 public class AudienciaService : IAudienciaService
 {
     private readonly IRepositorio _repositorio;
+    private readonly ICatalogoTextoResolver _resolverTexto;
 
-    public AudienciaService(IRepositorio repositorio)
+    public AudienciaService(IRepositorio repositorio, ICatalogoTextoResolver resolverTexto)
     {
         _repositorio = repositorio;
+        _resolverTexto = resolverTexto;
     }
 
     public async Task<List<AudienciaDto>> ListarAsync(int? expedienteId, DateTime? fechaInicio,
@@ -48,6 +52,14 @@ public class AudienciaService : IAudienciaService
 
     public async Task<int> CrearAsync(AudienciaCrearDto dto, int usuarioId)
     {
+        // Tipo y juzgado aceptan ID existente o texto manual ("Otro...").
+        var tipoId = await _resolverTexto.ResolverAsync("TIPO_AUDIENCIA", dto.TipoId, dto.TipoTexto)
+            ?? throw new ExcepcionNegocio(-2, "El tipo de audiencia es obligatorio.",
+                StatusCodes.Status400BadRequest);
+        var juzgadoId = await _resolverTexto.ResolverJuzgadoAsync(dto.JuzgadoId, dto.JuzgadoTexto)
+            ?? throw new ExcepcionNegocio(-2, "El juzgado es obligatorio.",
+                StatusCodes.Status400BadRequest);
+
         return await _repositorio.InsertarAsync(
             "SP_Audiencia_Insertar",
             new
@@ -56,8 +68,8 @@ public class AudienciaService : IAudienciaService
                 Fecha = dto.Fecha,
                 HoraInicio = dto.HoraInicio,
                 HoraFin = dto.HoraFin,
-                Tipo_ID = dto.TipoId,
-                Juzgado_ID = dto.JuzgadoId,
+                Tipo_ID = tipoId,
+                Juzgado_ID = juzgadoId,
                 Sala = dto.Sala,
                 Estado_ID = dto.EstadoId,
                 DescripcionResultado = dto.DescripcionResultado,

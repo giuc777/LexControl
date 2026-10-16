@@ -3,7 +3,7 @@
 -- Procedimientos de ESCRITURA SIMPLE
 --
 -- Criterio: el SP referencia (lee o escribe) UNA sola tabla de LexControl. Van aqui tambien los SP genericos de catalogo (SP_Catalogo_*), que usan SQL dinamico con @Tabla y por eso no referencian ninguna tabla de forma estatica.
--- Total: 48 procedimientos almacenados (definicion
+-- Total: 50 procedimientos almacenados (definicion
 -- consolidada: cuando un SP se redefine en varios scripts de
 -- ScriptsDB/ se conserva la ULTIMA definicion por orden numerico).
 -- Requiere ejecutar antes 01_schema.sql.
@@ -1248,6 +1248,89 @@ END
 GO
 
 -- ------------------------------------------------------------
+-- [24-Formularios-Manuales-Texto.sql] SP_Catalogo_ResolverPorNombre
+-- ------------------------------------------------------------
+CREATE OR ALTER PROCEDURE SP_Catalogo_ResolverPorNombre
+    @Tabla NVARCHAR(50),
+    @Nombre NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        IF @Tabla NOT IN (
+            'RAMA', 'ESTADO_EXPEDIENTE', 'TIPO_AUDIENCIA',
+            'ESTADO_AUDIENCIA', 'RESULTADO_AUDIENCIA',
+            'TIPO_TRAMITE', 'ESTADO_TRAMITE',
+            'TIPO_DILIGENCIA', 'ESTADO_DILIGENCIA', 'RESULTADO_DILIGENCIA',
+            'TIPO_NOTIFICACION_OJ', 'ESTADO_NOTIFICACION_OJ',
+            'TIPO_PROCESO', 'ETIQUETA_NOTA', 'ESTADO_EVENTO',
+            'TIPO_JUZGADO', 'ROL_PROCESAL'
+        )
+        BEGIN
+            RAISERROR('Nombre de tabla no permitido: %s', 16, 1, @Tabla);
+            RETURN;
+        END
+
+        IF @Nombre IS NULL OR LTRIM(RTRIM(@Nombre)) = ''
+        BEGIN
+            RAISERROR('El nombre del valor del catalogo no puede estar vacio.', 16, 1);
+            RETURN;
+        END
+
+        SET @Nombre = LTRIM(RTRIM(@Nombre));
+
+        DECLARE @ID INT;
+        DECLARE @SqlBuscar NVARCHAR(MAX) = N'
+            SELECT TOP 1 @ID = ID
+            FROM ' + QUOTENAME(@Tabla) + N'
+            WHERE LOWER(Nombre) = LOWER(@Nombre)
+            ORDER BY Activo DESC, ID ASC;';
+
+        EXEC sp_executesql @SqlBuscar,
+             N'@Nombre NVARCHAR(50), @ID INT OUTPUT',
+             @Nombre, @ID OUTPUT;
+
+        IF @ID IS NULL
+        BEGIN
+            BEGIN TRY
+                DECLARE @SqlInsert NVARCHAR(MAX) = N'
+                    INSERT INTO ' + QUOTENAME(@Tabla) + N' (Nombre, Activo, FechaCreacion)
+                    VALUES (@Nombre, 1, GETDATE());';
+
+                EXEC sp_executesql @SqlInsert, N'@Nombre NVARCHAR(50)', @Nombre;
+            END TRY
+            BEGIN CATCH
+                -- Carrera por nombre unico: otra transaccion lo creo primero.
+                -- Si tampoco existe ahora, propaga el error original.
+                SET @ID = NULL;
+                EXEC sp_executesql @SqlBuscar,
+                     N'@Nombre NVARCHAR(50), @ID INT OUTPUT',
+                     @Nombre, @ID OUTPUT;
+                IF @ID IS NULL
+                    THROW;
+            END CATCH
+
+            IF @ID IS NULL
+            BEGIN
+                -- SCOPE_IDENTITY() no ve el INSERT hecho dentro de sp_executesql:
+                -- se recupera el ID recien creado consultando por nombre.
+                EXEC sp_executesql @SqlBuscar,
+                     N'@Nombre NVARCHAR(50), @ID INT OUTPUT',
+                     @Nombre, @ID OUTPUT;
+                IF @ID IS NULL
+                    THROW 50000, 'No se pudo crear ni encontrar el valor del catalogo.', 1;
+            END
+        END
+
+        SELECT @ID AS ID;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END
+GO
+
+-- ------------------------------------------------------------
 -- [07-Catalogos_Juzgados.sql] SP_Catalogo_ObtenerPorID
 -- ------------------------------------------------------------
 CREATE OR ALTER PROCEDURE SP_Catalogo_ObtenerPorID
@@ -1283,14 +1366,14 @@ END
 GO
 
 -- ------------------------------------------------------------
--- [07-Catalogos_Juzgados.sql] SP_Juzgado_Insertar
+-- [24-Formularios-Manuales-Texto.sql] SP_Juzgado_Insertar
 -- ------------------------------------------------------------
 CREATE OR ALTER PROCEDURE SP_Juzgado_Insertar
     @Nombre NVARCHAR(200),
     @Direccion NVARCHAR(500) = NULL,
     @Telefono NVARCHAR(30) = NULL,
     @Email NVARCHAR(200) = NULL,
-    @Tipo_Juzgado_ID INT,
+    @Tipo_Juzgado_ID INT = NULL,
     @Municipio_ID INT = NULL
 AS
 BEGIN
@@ -1314,7 +1397,7 @@ END
 GO
 
 -- ------------------------------------------------------------
--- [07-Catalogos_Juzgados.sql] SP_Juzgado_Actualizar
+-- [24-Formularios-Manuales-Texto.sql] SP_Juzgado_Actualizar
 -- ------------------------------------------------------------
 CREATE OR ALTER PROCEDURE SP_Juzgado_Actualizar
     @ID INT,
@@ -1322,7 +1405,7 @@ CREATE OR ALTER PROCEDURE SP_Juzgado_Actualizar
     @Direccion NVARCHAR(500) = NULL,
     @Telefono NVARCHAR(30) = NULL,
     @Email NVARCHAR(200) = NULL,
-    @Tipo_Juzgado_ID INT,
+    @Tipo_Juzgado_ID INT = NULL,
     @Municipio_ID INT = NULL
 AS
 BEGIN
@@ -1351,6 +1434,44 @@ BEGIN
     END TRY
     BEGIN CATCH
         THROW;
+    END CATCH
+END
+GO
+
+-- ------------------------------------------------------------
+-- [24-Formularios-Manuales-Texto.sql] SP_Juzgado_ResolverPorNombre
+-- ------------------------------------------------------------
+CREATE OR ALTER PROCEDURE SP_Juzgado_ResolverPorNombre
+    @Nombre NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        DECLARE @ID INT;
+
+        SELECT TOP 1 @ID = ID
+        FROM JUZGADO
+        WHERE LOWER(Nombre) = LOWER(@Nombre)
+        ORDER BY Activo DESC, ID ASC;
+
+        IF @ID IS NULL
+        BEGIN
+            INSERT INTO JUZGADO (Nombre, Tipo_Juzgado_ID, Municipio_ID, Activo, FechaCreacion)
+            VALUES (@Nombre, NULL, NULL, 1, GETDATE());
+            SET @ID = CAST(SCOPE_IDENTITY() AS INT);
+        END
+
+        SELECT @ID AS ID;
+    END TRY
+    BEGIN CATCH
+        -- Carrera por nombre unico: si otra transaccion ya lo creo, lo devuelve.
+        IF EXISTS (SELECT 1 FROM JUZGADO WHERE LOWER(Nombre) = LOWER(@Nombre))
+            SELECT TOP 1 ID
+            FROM JUZGADO
+            WHERE LOWER(Nombre) = LOWER(@Nombre)
+            ORDER BY Activo DESC, ID ASC;
+        ELSE
+            THROW;
     END CATCH
 END
 GO

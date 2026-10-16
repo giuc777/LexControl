@@ -46,4 +46,36 @@ test.describe('Módulo Expedientes', () => {
         const text = await sidebar.textContent();
         expect(text).toContain('Expedientes');
     });
+
+    test('TC-EXP-007: Crear expediente con rol y juzgado "Otro (escribir…)"', async ({ adminPage }) => {
+        const expedientes = new ExpedientesPage(adminPage);
+        await expedientes.navigate();
+        await expedientes.openNewExpedienteModal();
+
+        const modal = adminPage.locator('app-expediente-modal [data-testid="btn-guardar-expediente"]');
+        await expect(modal).toBeVisible({ timeout: 10000 });
+
+        await adminPage.locator('[data-testid="exp-no"]')
+            .fill(`CIV-2026-E2E-${Date.now()}`);
+        await adminPage.locator('[data-testid="exp-cliente"]').selectOption({ index: 1 });
+        await adminPage.locator('[data-testid="exp-rama"]').selectOption({ index: 1 });
+
+        // Rol procesal: valor nuevo capturado a mano.
+        await adminPage.locator('[data-testid="exp-rol"]').selectOption({ label: 'Otro (escribir…)' });
+        const inputRol = adminPage.locator('[data-testid="exp-rol-otro"]');
+        await expect(inputRol).toBeVisible();
+        await inputRol.fill('Rol E2E Otro');
+
+        // Juzgado: valor nuevo capturado a mano.
+        await adminPage.locator('[data-testid="exp-juzgado"]').selectOption({ label: 'Otro (escribir…)' });
+        const inputJuzgado = adminPage.locator('[data-testid="exp-juzgado-otro"]');
+        await expect(inputJuzgado).toBeVisible();
+        await inputJuzgado.fill('Juzgado E2E Otro');
+
+        await adminPage.locator('[data-testid="exp-abogado"]').selectOption({ index: 1 });
+        await adminPage.locator('[data-testid="btn-guardar-expediente"]').click();
+
+        // El modal se cierra solo si el backend aceptó el alta (201 con resolución de textos).
+        await expect(modal).toBeHidden({ timeout: 15000 });
+    });
 });

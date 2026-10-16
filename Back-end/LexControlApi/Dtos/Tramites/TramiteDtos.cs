@@ -120,8 +120,12 @@ public class TramiteCrearDto
     [Required(ErrorMessage = "El expediente es obligatorio.")]
     public int ExpedienteId { get; set; }
 
-    [Required(ErrorMessage = "El tipo de trámite es obligatorio.")]
-    public int TipoId { get; set; }
+    /// <summary>ID de tipo de trámite existente. Alternativa: <see cref="TipoTexto"/>.</summary>
+    public int? TipoId { get; set; }
+
+    /// <summary>Tipo de trámite capturado a mano cuando no existe en el catálogo.</summary>
+    [MaxLength(50)]
+    public string? TipoTexto { get; set; }
 
     [Required(ErrorMessage = "La institución es obligatoria.")]
     [MaxLength(100)]
@@ -160,8 +164,12 @@ public class TramiteActualizarEstadoDto
 /// <summary>Datos de entrada para editar el detalle y la resolución de un trámite.</summary>
 public class TramiteActualizarDto
 {
-    [Required(ErrorMessage = "El tipo de trámite es obligatorio.")]
-    public int TipoId { get; set; }
+    /// <summary>ID de tipo de trámite existente. Alternativa: <see cref="TipoTexto"/>.</summary>
+    public int? TipoId { get; set; }
+
+    /// <summary>Tipo de trámite capturado a mano (se resuelve si TipoId viene vacío).</summary>
+    [MaxLength(50)]
+    public string? TipoTexto { get; set; }
 
     [Required(ErrorMessage = "La institución es obligatoria.")]
     [MaxLength(100)]

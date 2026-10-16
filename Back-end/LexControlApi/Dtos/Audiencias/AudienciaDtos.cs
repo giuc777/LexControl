@@ -166,8 +166,12 @@ public class AudienciaCrearDto
     [Required(ErrorMessage = "El expediente es obligatorio.")]
     public int ExpedienteId { get; set; }
 
-    [Required(ErrorMessage = "El tipo de audiencia es obligatorio.")]
-    public int TipoId { get; set; }
+    /// <summary>ID de tipo de audiencia existente. Alternativa: <see cref="TipoTexto"/>.</summary>
+    public int? TipoId { get; set; }
+
+    /// <summary>Tipo de audiencia capturado a mano cuando no existe en el catálogo.</summary>
+    [MaxLength(50)]
+    public string? TipoTexto { get; set; }
 
     [Required(ErrorMessage = "La fecha es obligatoria.")]
     public DateTime Fecha { get; set; }
@@ -177,8 +181,12 @@ public class AudienciaCrearDto
 
     public string? HoraFin { get; set; }
 
-    [Required(ErrorMessage = "El juzgado es obligatorio.")]
-    public int JuzgadoId { get; set; }
+    /// <summary>ID de juzgado existente. Alternativa: <see cref="JuzgadoTexto"/>.</summary>
+    public int? JuzgadoId { get; set; }
+
+    /// <summary>Juzgado capturado a mano (se crea en el catálogo si no existe).</summary>
+    [MaxLength(100)]
+    public string? JuzgadoTexto { get; set; }
 
     [MaxLength(50)]
     public string? Sala { get; set; }

@@ -43,11 +43,13 @@ export interface AudienciaDetalle {
 
 export interface AudienciaCrear {
     expedienteId: number;
-    tipoId: number;
+    tipoId: number | null;
+    tipoTexto: string | null;
     fecha: string;
     horaInicio: string;
     horaFin: string | null;
-    juzgadoId: number;
+    juzgadoId: number | null;
+    juzgadoTexto: string | null;
     sala: string | null;
     estadoId: number;
     descripcionResultado: string | null;

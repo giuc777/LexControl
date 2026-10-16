@@ -32,7 +32,14 @@
                             @for (j of juzgados; track j.id) {
                                 <option [value]="j.id">{{ j.nombre }}</option>
                             }
+                            <option [value]="valorOtro">Otro (escribir&hellip;)</option>
                         </select>
+                        @if (esOtro(juzgadoId())) {
+                            <input type="text" class="form-control" data-testid="input-juzgado-otro"
+                                   [ngModel]="juzgadoTexto()"
+                                   (ngModelChange)="juzgadoTexto.set($event)"
+                                   maxlength="100" placeholder="Escriba el nuevo juzgado..." />
+                        }
                     </div>
                     <div class="form-grupo">
                         <label>Tipo <span class="obligatorio">*</span></label>
@@ -44,7 +51,14 @@
                             @for (t of tiposNotificacion(); track t.id) {
                                 <option [value]="t.id">{{ t.nombre }}</option>
                             }
+                            <option [value]="valorOtro">Otro (escribir&hellip;)</option>
                         </select>
+                        @if (esOtro(tipoId())) {
+                            <input type="text" class="form-control" data-testid="input-tipo-otro"
+                                   [ngModel]="tipoTexto()"
+                                   (ngModelChange)="tipoTexto.set($event)"
+                                   maxlength="50" placeholder="Escriba el nuevo tipo de notificación..." />
+                        }
                     </div>
                     <div class="form-grupo">
                         <label>Fecha Recepcion <span class="obligatorio">*</span></label>

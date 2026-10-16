@@ -30,6 +30,7 @@ export class DiligenciaModal implements OnInit {
     protected readonly expedienteId = signal<number | null>(null);
     protected readonly clienteId = signal<number | null>(null);
     protected readonly tipoId = signal<number>(0);
+    protected readonly tipoTexto = signal<string>('');
     protected readonly titulo = signal<string>('');
     protected readonly descripcion = signal<string>('');
     protected readonly fecha = signal<string>(new Date().toISOString().split('T')[0]);
@@ -42,6 +43,13 @@ export class DiligenciaModal implements OnInit {
     protected readonly tiempoDedicado = signal<string>('');
 
     protected readonly guardando = signal(false);
+
+    /** Valor reservado del select para "Otro (escribir…)". */
+    protected readonly valorOtro = -1;
+
+    protected esOtro(valor: number | string): boolean {
+        return Number(valor) === this.valorOtro;
+    }
 
     ngOnInit(): void {
         if (this.fechaInicial) {
@@ -68,6 +76,7 @@ export class DiligenciaModal implements OnInit {
     onCerrar(): void { this.cerrar.emit(); }
 
     guardar(): void {
+        const tipoOtro = this.esOtro(this.tipoId());
         if (!this.titulo().trim() || !this.fecha()) {
             this.toast.mostrar('Complete los campos obligatorios.', 3000);
             return;
@@ -76,11 +85,16 @@ export class DiligenciaModal implements OnInit {
             this.toast.mostrar('Seleccione un cliente.', 3000);
             return;
         }
+        if (tipoOtro && !this.tipoTexto().trim()) {
+            this.toast.mostrar('Escriba el nuevo tipo de diligencia.', 3000);
+            return;
+        }
         this.guardando.set(true);
         const dto: DiligenciaCrear = {
             expedienteId: this.expedienteId(),
             clienteId: this.clienteId(),
-            tipoId: this.tipoId() || null,
+            tipoId: tipoOtro ? null : (this.tipoId() || null),
+            tipoTexto: tipoOtro ? this.tipoTexto().trim() : null,
             titulo: this.titulo().trim(),
             descripcion: this.descripcion() || null,
             fecha: this.fecha(),

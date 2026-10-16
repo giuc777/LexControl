@@ -45,6 +45,7 @@ export class TramiteDetallePage implements OnInit {
 
     protected readonly modalEditarAbierto = signal(false);
     protected readonly editTipoId = signal<number>(0);
+    protected readonly editTipoTexto = signal<string>('');
     protected readonly editInstitucion = signal<string>('');
     protected readonly editFechaIngreso = signal<string>('');
     protected readonly editOficioReferencia = signal<string>('');
@@ -60,6 +61,13 @@ export class TramiteDetallePage implements OnInit {
     protected readonly notaContenido = signal('');
     protected readonly guardandoNota = signal(false);
     protected readonly errorNota = signal('');
+
+    /** Valor reservado del select para "Otro (escribir…)". */
+    protected readonly valorOtro = -1;
+
+    protected esOtro(valor: number | string): boolean {
+        return Number(valor) === this.valorOtro;
+    }
 
     protected readonly documentos = signal<DocTramite[]>([]);
     protected readonly cargandoDocumentos = signal(false);
@@ -102,7 +110,7 @@ export class TramiteDetallePage implements OnInit {
     }
 
     cargarTipos(): void {
-        this.catalogosSvc.buscarCatalogo('TIPO_TRAMITE').subscribe({
+        this.catalogosSvc.buscarCatalogo('TIPO_TRAMITE', { incluirInactivos: true }).subscribe({
             next: (data) => { this.tiposTramite.set(data.items); }
         });
     }
@@ -176,6 +184,7 @@ export class TramiteDetallePage implements OnInit {
         const t = this.tramite();
         if (!t) return;
         this.editTipoId.set(t.tipoId);
+        this.editTipoTexto.set('');
         this.editInstitucion.set(t.institucion ?? '');
         this.editFechaIngreso.set(t.fechaIngreso ?? '');
         this.editOficioReferencia.set(t.oficioReferencia ?? '');
@@ -195,8 +204,11 @@ export class TramiteDetallePage implements OnInit {
         const id = this.tramite()?.id;
         if (!id || this.guardandoEdicion()) return;
 
-        if (!this.editTipoId()) {
-            this.errorEdicion.set('Seleccione el tipo de trámite.');
+        const tipoOtro = this.esOtro(this.editTipoId());
+        if (tipoOtro ? !this.editTipoTexto().trim() : !this.editTipoId()) {
+            this.errorEdicion.set(tipoOtro
+                ? 'Escriba el nuevo tipo de trámite.'
+                : 'Seleccione el tipo de trámite.');
             return;
         }
         if (!this.editInstitucion().trim()) {
@@ -205,7 +217,8 @@ export class TramiteDetallePage implements OnInit {
         }
 
         const dto: TramiteActualizar = {
-            tipoId: this.editTipoId(),
+            tipoId: tipoOtro ? null : this.editTipoId(),
+            tipoTexto: tipoOtro ? this.editTipoTexto().trim() : null,
             institucion: this.editInstitucion().trim(),
             fechaIngreso: this.editFechaIngreso() || null,
             descripcion: this.editDescripcion().trim() || null,

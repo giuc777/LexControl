@@ -31,13 +31,22 @@ export class AudienciaModal implements OnInit {
 
     protected expedienteId = 0;
     protected tipoId = 0;
+    protected tipoTexto = '';
     protected estadoId = 0;
     protected fecha = '';
     protected horaInicio = '';
     protected horaFin = '';
     protected juzgadoId = 0;
+    protected juzgadoTexto = '';
     protected sala = '';
     protected notas = '';
+
+    /** Valor reservado del select para "Otro (escribir…)". */
+    protected readonly valorOtro = -1;
+
+    protected esOtro(valor: number | string): boolean {
+        return Number(valor) === this.valorOtro;
+    }
 
     ngOnInit(): void {
         this.expedientesSvc.listar({ tamanioPagina: 100 }).subscribe({
@@ -75,8 +84,12 @@ export class AudienciaModal implements OnInit {
             this.error.set('Seleccione un expediente.');
             return;
         }
-        if (!this.tipoId) {
-            this.error.set('Seleccione un tipo de audiencia.');
+        const tipoOtro = this.esOtro(this.tipoId);
+        const juzgadoOtro = this.esOtro(this.juzgadoId);
+        if (tipoOtro ? !this.tipoTexto.trim() : !this.tipoId) {
+            this.error.set(tipoOtro
+                ? 'Escriba el nuevo tipo de audiencia.'
+                : 'Seleccione un tipo de audiencia.');
             return;
         }
         if (!this.estadoId) {
@@ -91,20 +104,24 @@ export class AudienciaModal implements OnInit {
             this.error.set('La hora de inicio es obligatoria.');
             return;
         }
-        if (!this.juzgadoId) {
-            this.error.set('Seleccione un juzgado.');
+        if (juzgadoOtro ? !this.juzgadoTexto.trim() : !this.juzgadoId) {
+            this.error.set(juzgadoOtro
+                ? 'Escriba el nuevo juzgado.'
+                : 'Seleccione un juzgado.');
             return;
         }
 
         this.guardando.set(true);
         this.audienciasSvc.crear({
             expedienteId: this.expedienteId,
-            tipoId: this.tipoId,
+            tipoId: tipoOtro ? null : this.tipoId,
+            tipoTexto: tipoOtro ? this.tipoTexto.trim() : null,
             estadoId: this.estadoId,
             fecha: this.fecha,
             horaInicio: this.horaInicio,
             horaFin: this.horaFin || null,
-            juzgadoId: this.juzgadoId,
+            juzgadoId: juzgadoOtro ? null : this.juzgadoId,
+            juzgadoTexto: juzgadoOtro ? this.juzgadoTexto.trim() : null,
             sala: this.sala.trim() || null,
             descripcionResultado: null,
             proximaActuacion: null,

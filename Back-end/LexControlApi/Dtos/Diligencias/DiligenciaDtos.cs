@@ -178,6 +178,10 @@ public class DiligenciaCrearDto
     /// puede quedar sin filas activas.</summary>
     public int? TipoId { get; set; }
 
+    /// <summary>Tipo de diligencia capturado a mano cuando no existe en el catálogo.</summary>
+    [MaxLength(50)]
+    public string? TipoTexto { get; set; }
+
     [Required(ErrorMessage = "El titulo es obligatorio.")]
     [MaxLength(200)]
     public string Titulo { get; set; } = string.Empty;
@@ -218,6 +222,10 @@ public class DiligenciaActualizarDto
     public int? ClienteId { get; set; }
 
     public int? TipoId { get; set; }
+
+    /// <summary>Tipo de diligencia capturado a mano (se resuelve si TipoId viene vacío).</summary>
+    [MaxLength(50)]
+    public string? TipoTexto { get; set; }
 
     [MaxLength(200)]
     public string? Titulo { get; set; }

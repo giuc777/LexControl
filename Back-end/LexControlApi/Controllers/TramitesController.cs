@@ -170,7 +170,7 @@ public class TramitesController : ControllerBase
         if (doc is null)
             return NotFound();
 
-        return ServirArchivo(doc.RutaArchivo, inline: true);
+        return await ServirArchivo(doc.RutaArchivo);
     }
 
     [HttpGet("documentos/{documentoId:int}/download")]
@@ -180,7 +180,7 @@ public class TramitesController : ControllerBase
         if (doc is null)
             return NotFound();
 
-        return ServirArchivo(doc.RutaArchivo, inline: false, nombre: doc.NombreArchivo);
+        return await ServirArchivo(doc.RutaArchivo);
     }
 
     [HttpDelete("documentos/{documentoId:int}")]
@@ -192,28 +192,19 @@ public class TramitesController : ControllerBase
         if (doc is null)
             return NotFound();
 
-        // Retira también el archivo físico; si ya no existe, se ignora.
+        // Retira también el archivo en Cloudinary; si ya no existe, se ignora.
         await _storage.EliminarAsync(doc.RutaArchivo);
         await _service.EliminarDocumentoAsync(documentoId);
         return NoContent();
     }
 
-    /// <summary>Sirve un archivo validando que la ruta permanezca en el directorio base.</summary>
-    private IActionResult ServirArchivo(string rutaRelativa, bool inline, string? nombre = null)
+    /// <summary>Redirige a la URL firmada de Cloudinary del archivo.</summary>
+    private async Task<IActionResult> ServirArchivo(string almacenamiento)
     {
-        var rutaAbsoluta = _storage.ResolverRutaSegura(rutaRelativa);
-        if (rutaAbsoluta is null || !System.IO.File.Exists(rutaAbsoluta))
+        var url = await _storage.ObtenerUrlAsync(almacenamiento);
+        if (url is null)
             return NotFound();
 
-        var stream = new FileStream(rutaAbsoluta, FileMode.Open, FileAccess.Read, FileShare.Read);
-        var contentType = ArchivoContentType.Obtener(rutaAbsoluta);
-
-        if (inline)
-        {
-            Response.Headers.Append("Content-Disposition", "inline");
-            return File(stream, contentType);
-        }
-
-        return File(stream, contentType, nombre ?? Path.GetFileName(rutaAbsoluta));
+        return Redirect(url);
     }
 }

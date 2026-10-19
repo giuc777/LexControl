@@ -465,9 +465,21 @@ El sistema implementa **validación en 3 capas** para evitar que archivos renomb
 
 1. **HTML** — Atributo `accept` en el input file (filtro UX, bypasseable).
 2. **Frontend TS** — Lee los primeros 8 bytes con `FileReader` y compara contra firmas conocidas antes de enviar al backend (error inmediato sin esperar upload).
-3. **Backend** — `FileStorageService.GuardarAsync()` lee los primeros 8 bytes del `IFormFile` vía `OpenReadStream()` y valida contra `MagicBytes.Validar()`. Si no coincide → `ExcepcionNegocio` con HTTP 400.
+3. **Backend** — `CloudinaryStorageService.SubirInternoAsync()` lee los primeros 8 bytes del `IFormFile` vía `OpenReadStream()` y valida contra `MagicBytes.Validar()`. Si no coincide → `ExcepcionNegocio` con HTTP 400.
 
-### 11.3 Clase `MagicBytes` (Services/FileStorageService.cs)
+### 11.3 Almacenamiento en Cloudinary
+
+Los archivos se almacenan en **Cloudinary** (no en disco local). El servicio `Services/CloudinaryStorageService.cs` implementa `IFileStorageService`:
+
+- **Credenciales**: sección `Cloudinary` de `appsettings.json` (`CloudName`, `ApiKey`, `ApiSecret`, `Carpeta`). En desarrollo se cargan con `dotnet user-secrets set "Cloudinary:ApiKey" "..."`; en producción con variables de entorno (`Cloudinary__ApiKey`). Nunca se versionan valores reales.
+- **Carpetas**: `lexcontrol/expedientes/{id}` y `lexcontrol/tramites/{id}`.
+- **Resource type**: `.jpg/.jpeg/.png` → `image`; `.pdf/.doc/.docx/.txt` → `raw`.
+- **Identificador en BD**: en `RutaArchivo`/`PDF_Ruta` se guarda `"{tipo}/{publicId}"` (p. ej. `raw/lexcontrol/expedientes/1/demanda_20260118120000.pdf`), nunca una URL.
+- **URLs firmadas con expiración**: `ObtenerUrlAsync()` genera una URL de descarga de la **API** de Cloudinary (`api.cloudinary.com/v1_1/{cloud}/{tipo}/download`) con `expires_at` de 600 s (10 min). Firma v1: SHA-1 en hex de `expires_at=…&public_id=…&timestamp=…&type=upload` + `ApiSecret` (valores sin codificar). Sin firma válida dentro del plazo, Cloudinary responde 401; los documentos no son públicos ni reutilizables tras expirar. Esta vía de la API **no** está afectada por la restricción de PDF/ZIP del CDN.
+- **Requisitos de consola** (Console → Settings → Security): activar *Allow delivery of PDF and ZIP files* para la entrega vía CDN (`res.cloudinary.com`, sólo informativa en la Media Library). *Token authentication* es una feature de pago y **no** se usa.
+- **Borrado**: `EliminarAsync()` destruye el asset en Cloudinary por public_id.
+
+### 11.4 Clase `MagicBytes` (Services/MagicBytes.cs)
 
 ```csharp
 internal static class MagicBytes
@@ -489,7 +501,7 @@ internal static class MagicBytes
 }
 ```
 
-### 11.4 Flujo de validación en `GuardarAsync()`
+### 11.5 Flujo de validación en la subida
 
 ```
 1. Obtener extensión del nombre del archivo
@@ -497,10 +509,10 @@ internal static class MagicBytes
 3. Leer primeros 8 bytes del stream del archivo
 4. Llamar MagicBytes.Validar(buffer, bytesRead, extension)
 5. Si no es válido → ExcepcionNegocio("El contenido del archivo no coincide con la extension {ext} indicada.", 400)
-6. Si es válido → proceder a escribir a disco
+6. Si es válido → subir a Cloudinary y persistir el identificador en la BD
 ```
 
-### 11.5 Mensajes de error
+### 11.6 Mensajes de error
 
 | Capa | Mensaje |
 |---|---|
@@ -509,26 +521,29 @@ internal static class MagicBytes
 | Frontend (extensión) | `Tipo de archivo no permitido. Solo se aceptan PDF, Word, JPG, PNG y TXT.` |
 | Frontend (magic bytes) | `El contenido del archivo no coincide con la extension {ext} indicada.` |
 
-### 11.6 Servido de archivos por ID (vista previa / descarga)
+### 11.7 Servido de archivos por ID (vista previa / descarga)
 
 La vista previa y la descarga **nunca aceptan una ruta desde el cliente**. Se resuelven por ID y
-el backend obtiene la ruta desde la BD:
+el backend obtiene el identificador desde la BD:
 
 | Endpoint | Descripción |
 |---|---|
-| `GET /api/documentos/{id}/preview` | Vista previa inline (`Content-Disposition: inline`) |
-| `GET /api/documentos/{id}/download` | Descarga (`Content-Disposition: attachment`) |
+| `GET /api/documentos/{id}/preview` | Vista previa inline |
+| `GET /api/documentos/{id}/download` | Descarga |
 | `GET /api/notificaciones/{id}/pdf/preview` | Vista previa del PDF adjunto |
 | `GET /api/notificaciones/{id}/pdf/download` | Descarga del PDF adjunto |
+| `GET /api/tramites/documentos/{id}/preview` | Vista previa del documento del trámite |
+| `GET /api/tramites/documentos/{id}/download` | Descarga del documento del trámite |
 
 Reglas de seguridad:
 
 - **No usar rutas en el segmento de URL**: ASP.NET Core no decodifica `%2F` en valores de ruta,
   por lo que `/download/{ruta}` recibía `24%2Farchivo.pdf` y fallaba con 404.
-- `FileStorageService.ResolverRutaSegura()` normaliza y valida que la ruta resuelta permanezca
-  **dentro del directorio base** (bloquea `../`, rutas absolutas y path traversal). Devuelve `null`
-  si es inválida.
-- La ruta base de almacenamiento se ancla a `IWebHostEnvironment.ContentRootPath` (no al directorio
-  de trabajo), de modo que el almacenamiento es determinista.
+- `CloudinaryStorageService.ObtenerUrlAsync()` valida el identificador (`img|raw/{publicId}`):
+  solo acepta caracteres seguros, bloquea `../` y exige que el public_id pertenezca a la carpeta
+  del proyecto. Devuelve `null` si es inválido.
+- Los endpoints responden **`302 Redirect`** a la URL de descarga de la API de Cloudinary,
+  firmada y con expiración de 10 min (`expires_at`). Vencido el plazo —o con firma inválida—
+  Cloudinary responde 401, incluso con el public_id.
 - El frontend obtiene el archivo vía `HttpClient` (`responseType: 'blob'`) para que el interceptor
   adjunte el JWT; nunca se usa `window.open()` con la URL del endpoint protegido.

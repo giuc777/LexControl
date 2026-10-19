@@ -292,7 +292,7 @@ El módulo de expedientes permite subir documentos adjuntos. La validación de a
 |---|---|---|
 | HTML | `expediente-detalle-page.html` | Atributo `accept` en `<input type="file">` (filtro UX) |
 | Frontend | `expediente-detalle-page.ts` | Extensión + magic bytes antes del HTTP |
-| Backend | `FileStorageService.cs` | Extensión + magic bytes antes de escribir a disco |
+| Backend | `CloudinaryStorageService.cs` | Extensión + magic bytes antes de subir a Cloudinary |
 
 **Tipos permitidos**: `.pdf`, `.doc`, `.docx`, `.jpg`, `.jpeg`, `.png`, `.txt`
 
@@ -311,6 +311,8 @@ El módulo de expedientes permite subir documentos adjuntos. La validación de a
 4. Si pasa ambas validaciones → enviar al backend via `DocumentosService.subir()`
 
 **Importante**: La validación frontend es UX (error inmediato). La validación backend es la seguridad obligatoria. Nunca confiar solo en la capa de UI.
+
+**Almacenamiento**: los archivos se guardan en **Cloudinary** (gestionado por el backend). Los endpoints de preview/download responden `302 Redirect` a una URL de descarga de Cloudinary firmada con expiración de 10 min; el `HttpClient` del frontend la sigue automáticamente y el blob se maneja igual que antes (sin cambios en el cliente).
 
 ### 10.4 HTTP y datos
 

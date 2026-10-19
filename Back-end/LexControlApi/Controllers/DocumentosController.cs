@@ -70,7 +70,7 @@ public class DocumentosController : ControllerBase
         });
     }
 
-    /// <summary>Descarga un documento por su ID (resuelve la ruta en el servidor).</summary>
+    /// <summary>Descarga un documento por su ID (redirige a la URL firmada de Cloudinary).</summary>
     [HttpGet("{documentoId:int}/download")]
     [Authorize(Roles = "Administrador,Abogado,Secretaria")]
     public async Task<IActionResult> Descargar(int documentoId)
@@ -79,7 +79,7 @@ public class DocumentosController : ControllerBase
         if (doc is null)
             return NotFound();
 
-        return ServirArchivo(doc.RutaArchivo, inline: false, nombre: doc.NombreArchivo);
+        return await ServirArchivo(doc.RutaArchivo);
     }
 
     /// <summary>Vista previa inline de un documento por su ID.</summary>
@@ -91,35 +91,32 @@ public class DocumentosController : ControllerBase
         if (doc is null)
             return NotFound();
 
-        return ServirArchivo(doc.RutaArchivo, inline: true);
+        return await ServirArchivo(doc.RutaArchivo);
     }
 
-    /// <summary>Elimina un archivo del disco y su registro.</summary>
+    /// <summary>Elimina el archivo en Cloudinary y su registro.</summary>
     [HttpDelete("{documentoId:int}")]
     [Authorize(Roles = "Administrador,Abogado")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Eliminar(int documentoId)
     {
+        var doc = await _expedienteService.ObtenerDocumentoPorIdAsync(documentoId);
+        if (doc is not null)
+        {
+            // Retira también el archivo en Cloudinary; si ya no existe, se ignora.
+            await _storage.EliminarAsync(doc.RutaArchivo);
+        }
         await _expedienteService.EliminarDocumentoAsync(documentoId);
         return NoContent();
     }
 
-    /// <summary>Sirve un archivo validando que la ruta permanezca en el directorio base.</summary>
-    private IActionResult ServirArchivo(string rutaRelativa, bool inline, string? nombre = null)
+    /// <summary>Redirige a la URL firmada de Cloudinary del archivo.</summary>
+    private async Task<IActionResult> ServirArchivo(string almacenamiento)
     {
-        var rutaAbsoluta = _storage.ResolverRutaSegura(rutaRelativa);
-        if (rutaAbsoluta is null || !System.IO.File.Exists(rutaAbsoluta))
+        var url = await _storage.ObtenerUrlAsync(almacenamiento);
+        if (url is null)
             return NotFound();
 
-        var stream = new FileStream(rutaAbsoluta, FileMode.Open, FileAccess.Read, FileShare.Read);
-        var contentType = ArchivoContentType.Obtener(rutaAbsoluta);
-
-        if (inline)
-        {
-            Response.Headers.Append("Content-Disposition", "inline");
-            return File(stream, contentType);
-        }
-
-        return File(stream, contentType, nombre ?? Path.GetFileName(rutaAbsoluta));
+        return Redirect(url);
     }
 }

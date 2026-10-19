@@ -1,5 +1,6 @@
 using FluentAssertions;
 using LexControlApi.Tests.Fixtures;
+using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 using System.Net.Http.Json;
 
@@ -9,9 +10,11 @@ namespace LexControlApi.Tests;
 public class TramitesControllerTests : IClassFixture<TestWebApplicationFactory>
 {
     private readonly HttpClient _client;
+    private readonly TestWebApplicationFactory _factory;
 
     public TramitesControllerTests(TestWebApplicationFactory factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
     }
 
@@ -269,8 +272,16 @@ public class TramitesControllerTests : IClassFixture<TestWebApplicationFactory>
         body!.Data.Should().NotBeNull();
         body.Data!.Id.Should().BeGreaterThan(0);
 
-        var preview = await _client.GetAsync($"/api/tramites/documentos/{body.Data.Id}/preview");
-        preview.StatusCode.Should().Be(HttpStatusCode.OK);
+        // El preview redirige (302) a la URL firmada del almacenamiento.
+        using var clienteSinRedireccion = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
+        clienteSinRedireccion.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AuthHelper.GenerarTokenAdmin());
+
+        var preview = await clienteSinRedireccion.GetAsync($"/api/tramites/documentos/{body.Data.Id}/preview");
+        preview.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
         var eliminar = await _client.DeleteAsync($"/api/tramites/documentos/{body.Data.Id}");
         eliminar.StatusCode.Should().Be(HttpStatusCode.NoContent);

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
 namespace LexControlApi.Tests.Fixtures;
@@ -36,11 +37,18 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
                 ["Jwt:Issuer"] = "LexControlApi",
                 ["Jwt:Audience"] = "LexControlApp",
                 ["Jwt:AccessTokenMinutes"] = "60",
-                ["Jwt:RefreshTokenDays"] = "7",
-                ["FileStorage:BasePath"] = Path.Combine(Path.GetTempPath(), "lexcontrol_test_docs")
+                ["Jwt:RefreshTokenDays"] = "7"
             };
 
             config.AddInMemoryCollection(testSettings);
+        });
+
+        // Sustituye el almacenamiento de Cloudinary por un doble en memoria
+        // para que las pruebas no realicen llamadas de red.
+        builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<LexControlApi.Services.IFileStorageService>();
+            services.AddScoped<LexControlApi.Services.IFileStorageService, ArchivoStorageFalso>();
         });
     }
 }

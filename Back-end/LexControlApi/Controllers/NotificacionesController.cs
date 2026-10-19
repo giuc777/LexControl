@@ -122,33 +122,24 @@ public class NotificacionesController : ControllerBase
     /// <summary>Vista previa inline del PDF adjunto a una notificación.</summary>
     [HttpGet("{id:int}/pdf/preview")]
     [Authorize(Roles = "Administrador,Abogado,Secretaria")]
-    public async Task<IActionResult> PreviewPdf(int id) => await ServirPdf(id, inline: true);
+    public async Task<IActionResult> PreviewPdf(int id) => await ServirPdf(id);
 
     /// <summary>Descarga el PDF adjunto a una notificación.</summary>
     [HttpGet("{id:int}/pdf/download")]
     [Authorize(Roles = "Administrador,Abogado,Secretaria")]
-    public async Task<IActionResult> DescargarPdf(int id) => await ServirPdf(id, inline: false);
+    public async Task<IActionResult> DescargarPdf(int id) => await ServirPdf(id);
 
-    /// <summary>Sirve el PDF de una notificación validando la ruta en el directorio base.</summary>
-    private async Task<IActionResult> ServirPdf(int id, bool inline)
+    /// <summary>Redirige a la URL firmada de Cloudinary del PDF de la notificación.</summary>
+    private async Task<IActionResult> ServirPdf(int id)
     {
         var notificacion = await _service.ObtenerPorIdAsync(id);
         if (notificacion is null || string.IsNullOrWhiteSpace(notificacion.PdfRuta))
             return NotFound();
 
-        var rutaAbsoluta = _storage.ResolverRutaSegura(notificacion.PdfRuta);
-        if (rutaAbsoluta is null || !System.IO.File.Exists(rutaAbsoluta))
+        var url = await _storage.ObtenerUrlAsync(notificacion.PdfRuta);
+        if (url is null)
             return NotFound();
 
-        var stream = new FileStream(rutaAbsoluta, FileMode.Open, FileAccess.Read, FileShare.Read);
-        var contentType = ArchivoContentType.Obtener(rutaAbsoluta);
-
-        if (inline)
-        {
-            Response.Headers.Append("Content-Disposition", "inline");
-            return File(stream, contentType);
-        }
-
-        return File(stream, contentType, Path.GetFileName(rutaAbsoluta));
+        return Redirect(url);
     }
 }

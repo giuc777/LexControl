@@ -57,6 +57,7 @@ test.describe('Módulo Expedientes', () => {
 
         await adminPage.locator('[data-testid="exp-no"]')
             .fill(`CIV-2026-E2E-${Date.now()}`);
+        await adminPage.locator('[data-testid="exp-fecha"]').fill('2026-10-19');
         await adminPage.locator('[data-testid="exp-cliente"]').selectOption({ index: 1 });
         await adminPage.locator('[data-testid="exp-rama"]').selectOption({ index: 1 });
 

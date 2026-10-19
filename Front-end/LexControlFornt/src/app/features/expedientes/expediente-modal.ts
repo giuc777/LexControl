@@ -109,6 +109,10 @@ export class ExpedienteModal implements OnChanges {
             this.error.set('El cliente es obligatorio.');
             return;
         }
+        if (!this.fechaIngreso) {
+            this.error.set('La fecha de ingreso es obligatoria.');
+            return;
+        }
         const rolOtro = this.esOtro(this.rolProcesalId);
         const ramaOtro = this.esOtro(this.ramaId);
         const juzgadoOtro = this.esOtro(this.juzgadoId);

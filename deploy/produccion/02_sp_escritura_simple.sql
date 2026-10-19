@@ -9,8 +9,7 @@
 -- Requiere ejecutar antes 01_schema.sql.
 -- ============================================================
 
-USE DBLexControl;
-GO
+-- NOTA AZURE: conectar con sqlcmd -d <BD> (DB_Lexcontrol o DB_Lexcontrol_Test).
 SET ANSI_NULLS ON;
 GO
 -- sqlcmd arranca con QUOTED_IDENTIFIER OFF: obligatorio ON

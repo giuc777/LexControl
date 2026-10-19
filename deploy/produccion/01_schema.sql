@@ -1,31 +1,18 @@
 -- ============================================================
 -- LEXCONTROL - 01_schema.sql
--- Esquema de la base de datos: creacion de DBLexControl, tablas,
+-- Esquema de la base de datos (Azure SQL Database): tablas,
 -- indices, restricciones unicas y claves foraneas.
 -- SIN procedimientos almacenados y SIN datos (ver 02/03/04).
 -- ORDEN DE INSTALACION: 01_schema -> 02_sp_escritura_simple
 --                        -> 03_sp_transaccionales -> 04_seed
--- ADVERTENCIA: ejecutar este script ELIMINA la base DBLexControl
---              si ya existe (DROP DATABASE).
+-- ADVERTENCIA: la base destino debe existir y estar VACIA (los
+--              CREATE TABLE no llevan guard de idempotencia).
 -- Fuente: ScriptsDB/ (00, 01, 02, 08, 19) consolidada.
 -- ============================================================
 
-USE master;
-GO
-
-IF EXISTS (SELECT name FROM sys.databases WHERE name = 'DBLexControl')
-BEGIN
-    ALTER DATABASE DBLexControl SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-    DROP DATABASE DBLexControl;
-END
-GO
-
-CREATE DATABASE DBLexControl;
-GO
-
-USE DBLexControl;
-GO
-
+-- NOTA AZURE: la base de datos destino ya existe y se conecta con sqlcmd -d <BD>.
+-- Este script NO crea ni elimina la base; solo crea tablas, indices y FKs.
+-- Destino produccion: DB_Lexcontrol | Destino pruebas: DB_Lexcontrol_Test
 SET ANSI_NULLS ON;
 GO
 SET QUOTED_IDENTIFIER ON;

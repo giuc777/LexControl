@@ -1,16 +1,21 @@
 # Guía de despliegue — LexControl
 
-Guía de instalación limpia del sistema (base de datos + API + SPA) usando los
-scripts consolidados de `deploy/desarrollo/`.
+Guía de instalación limpia del sistema (base de datos + API + SPA).
 
-| Contenido | Ruta |
+| Carpeta | Uso |
 |---|---|
-| Esquema (tablas, índices, FKs) | `deploy/desarrollo/01_schema.sql` |
-| SP de una tabla (escritura simple) | `deploy/desarrollo/02_sp_escritura_simple.sql` |
-| SP multi-tabla (transaccionales) | `deploy/desarrollo/03_sp_transaccionales.sql` |
-| Datos iniciales de configuración | `deploy/desarrollo/04_seed.sql` |
+| `deploy/produccion/` | Scripts originales (instantánea consolidada de `ScriptsDB/`); `01_schema.sql` **crea y elimina** la BD local `DBLexControl` |
+| `deploy/migraciones/` | Copias adaptadas a **Azure SQL Database** para la BD de producción `DB_Lexcontrol` (sin `USE`/`CREATE DATABASE`/`DROP`) |
+| `deploy/Desarrollo/` | Copias adaptadas a **Azure SQL Database** para la BD de pruebas `DB_Lexcontrol_Test` (misma estructura; sirve para probar la web sin tocar producción) |
 
-> Los cuatro archivos son **UTF-8 sin BOM**: ejecutarlos siempre con
+| Contenido | Ruta (`produccion/` local; `migraciones/` y `Desarrollo/` Azure) |
+|---|---|
+| Esquema (tablas, índices, FKs) | `01_schema.sql` |
+| SP de una tabla (escritura simple) | `02_sp_escritura_simple.sql` |
+| SP multi-tabla (transaccionales) | `03_sp_transaccionales.sql` |
+| Datos iniciales de configuración | `04_seed.sql` |
+
+> Los doce archivos son **UTF-8 sin BOM**: ejecutarlos siempre con
 > `sqlcmd -f 65001` para que los acentos se lean bien.
 
 ---
@@ -69,30 +74,42 @@ Cambiar el servidor/instanciación si la BD vive en otra máquina. Autenticació
 integrada de Windows (`-E` en los ejemplos de `sqlcmd`); si usa SQL
 Authentication, reemplazar `-E` por `-U <usuario> -P <contraseña>`.
 
+Para **Azure SQL Database** (producción `DB_Lexcontrol` o pruebas
+`DB_Lexcontrol_Test`) la cadena es:
+
+```
+Server=tcp:<servidor>.database.windows.net,1433;Initial Catalog=DB_Lexcontrol;User ID=<usuario>;Password=<clave>;Encrypt=True;TrustServerCertificate=False
+```
+
+Azure **no admite** autenticación de Windows: usar `-U/-P` (SQL auth) o `-G`
+(Microsoft Entra). Ver §3.2.
+
 ### 2.3 Almacenamiento de documentos
 
-La API guarda los archivos adjuntos en `Back-end\LexControlApi\wwwroot\documentos`
-(`FileStorage:BasePath`). Crear la carpeta si no existe en la máquina destino.
+La API guarda los archivos adjuntos en **Cloudinary** (sección `Cloudinary` de
+`appsettings.json`; credenciales vía user-secrets/variables de entorno, nunca en
+el repo). En versiones previas se usaba
+`Back-end\LexControlApi\wwwroot\documentos` (`FileStorage:BasePath`).
 
 ---
 
-## 3. Base de datos (orden obligatorio: 01 → 04)
+## 3. Base de datos local (orden obligatorio: 01 → 04)
 
 ```powershell
 $S = "DESKTOP-V7G3G1I\SQLEXPRESS"     # instancia objetivo
-$i = "deploy\desarrollo"
+$i = "deploy\produccion"
 
 sqlcmd -S $S -E -b -f 65001 -i "$i\01_schema.sql"               # crea DBLexControl desde cero
 sqlcmd -S $S -E -b -f 65001 -i "$i\02_sp_escritura_simple.sql"  # 50 SP
-sqlcmd -S $S -E -b -f 65001 -i "$i\03_sp_transaccionales.sql"   # 72 SP
+sqlcmd -S $S -E -b -f 65001 -i "$i\03_sp_transaccionales.sql"   # 68 SP
 sqlcmd -S $S -E -b -f 65001 -i "$i\04_seed.sql"                 # datos mínimos
 ```
 
 - `-b` detiene la ejecución y devuelve código de error si algún lote falla.
-- **`01_schema.sql` ELIMINA la base `DBLexControl` si ya existe**
+- **`01_schema.sql` (produccion/) ELIMINA la base `DBLexControl` si ya existe**
   (`DROP DATABASE … SINGLE_USER WITH ROLLBACK IMMEDIATE`). No ejecutarlo sobre
   una BD con datos que se quieran conservar.
-- Los scripts 02/03/04 arrancan con `USE DBLexControl;` y fijan
+- Los scripts 02/03/04 de `produccion/` arrancan con `USE DBLexControl;` y fijan
   `SET ANSI_NULLS ON` / `SET QUOTED_IDENTIFIER ON` (necesario porque `PERSONA`
   tiene el índice filtrado `UX_PERSONA_DPI`; sin eso falla el INSERT del
   usuario admin).
@@ -115,7 +132,7 @@ Resultado esperado en una instalación limpia:
 | Métrica | Valor |
 |---|---|
 | `sys.tables` | 53 |
-| `sys.procedures` | 122 |
+| `sys.procedures` | 118 |
 | `sys.foreign_keys` | 79 |
 | `USUARIO` | 1 (admin) |
 | `ROL` / `MODULO` / `PERMISO_ROL` | 3 / 10 / 30 |
@@ -123,8 +140,50 @@ Resultado esperado en una instalación limpia:
 | `DEPARTAMENTO` / `MUNICIPIO` / `JUZGADO` | 22 / 35 / 8 |
 | Clientes, expedientes, audiencias, trámites | 0 (no se siembran datos de demo) |
 
-Los cuatro scripts son **idempotentes** excepto `01_schema.sql`: re-ejecutar
-02/03/04 no duplica datos.
+Los cuatro scripts son **idempotentes** excepto `01_schema.sql` (y sus copias
+Azure): re-ejecutar 02/03/04 no duplica datos.
+
+### 3.2 Azure SQL Database (producción y pruebas)
+
+`deploy/migraciones/` apunta a la BD de **producción** `DB_Lexcontrol` y
+`deploy/Desarrollo/` a la BD de **pruebas** `DB_Lexcontrol_Test` (misma
+estructura, para probar la aplicación web sin tocar producción). Las copias
+Azure **no contienen** `USE`, `CREATE DATABASE` ni `DROP DATABASE` (Azure los
+rechaza con error 40508 / no soporta `SINGLE_USER`): la BD debe **ya existir**
+y estar **vacía**, y el nombre se elige en la conexión (`-d`).
+
+```powershell
+$S  = "tcp:<servidor>.database.windows.net,1433"
+$U  = "<usuario-sql>"        # o -G para Microsoft Entra
+$P  = "<clave>"
+$db = "DB_Lexcontrol"        # producción | "DB_Lexcontrol_Test" para pruebas
+$i  = "deploy\migraciones"   # o "deploy\Desarrollo" para pruebas
+
+sqlcmd -S $S -U $U -P $P -d $db -b -f 65001 -i "$i\01_schema.sql"
+sqlcmd -S $S -U $U -P $P -d $db -b -f 65001 -i "$i\02_sp_escritura_simple.sql"
+sqlcmd -S $S -U $U -P $P -d $db -b -f 65001 -i "$i\03_sp_transaccionales.sql"
+sqlcmd -S $S -U $U -P $P -d $db -b -f 65001 -i "$i\04_seed.sql"
+```
+
+Verificación (mismos contadores que §3.1: 53 tablas / 118 procedures / 79 FK):
+
+```powershell
+sqlcmd -S $S -U $U -P $P -d $db -Q "SET NOCOUNT ON;
+SELECT 'tablas' q, COUNT(*) n FROM sys.tables
+UNION ALL SELECT 'procedures', COUNT(*) FROM sys.procedures
+UNION ALL SELECT 'fk', COUNT(*) FROM sys.foreign_keys;" -W -s"|"
+```
+
+Advertencias específicas de Azure:
+
+| Tema | Detalle |
+|---|---|
+| Sin `USE` | Conectar siempre con `-d <BD>`; ejecutar desde el portal de Azure no funciona porque no soporta el separador de lotes `GO` (usar `sqlcmd`, SSMS o Azure Data Studio) |
+| Sin autenticación Windows | `-E` no sirve; usar `-U/-P` o `-G` |
+| Collation | BD nueva usa `SQL_Latin1_General_CP1_CI_AS` (la local es `Modern_Spanish_CI_AS`). Ambos son CI_AS: los nombres acentuados del seed casan igual, pero cambia el orden de `ORDER BY`. Para paridad total, crear la BD con `COLLATION = Modern_Spanish_CI_AS` |
+| `GETDATE()` = UTC | Las marcas de tiempo quedarán 6 h por detrás de la hora de Guatemala; considerarlo en reportes/orden por fechas |
+| `01_schema.sql` no idempotente | Los `CREATE TABLE` no llevan guard: la BD destino debe estar vacía. Si falla a mitad, dropear y recrear la BD antes de reintentar |
+| Permisos | El login debe ser server admin o miembro de `dbmanager`/`db_owner` para crear tablas y SPs |
 
 ---
 
@@ -211,7 +270,7 @@ cd Front-end\LexControlFornt; npm run e2e
 
 ## 8. Cómo regenerar los scripts
 
-Los cuatro archivos de `deploy/desarrollo/` son una **instantánea consolidada**
+Los cuatro archivos de `deploy/produccion/` son una **instantánea consolidada**
 de `ScriptsDB/` (fuente histórica). Si se modifica un SP o una tabla:
 
 1. Editar el script correspondiente de `ScriptsDB/`.
@@ -223,11 +282,16 @@ de `ScriptsDB/` (fuente histórica). Si se modifica un SP o una tabla:
    - **INSERT/MERGE de configuración** → `04`
 3. Cuando un SP aparece en varios scripts se conserva la **última definición**
    por orden numérico (13 SP redefinidos: reportes → `10`/`14`, permisos → `99`,
-   autenticación → `02`, diligencias → `19`, etc.). Total: **122 SP únicos**.
-4. Re-validar en una BD temporal (ver §9).
+   autenticación → `02`, diligencias → `19`, etc.). Total: **118 SP únicos**.
+4. **Propagar a las copias Azure** (`deploy/migraciones/` y
+   `deploy/Desarrollo/`): copiar el archivo regenerado y quitar el preámbulo
+   — en `01` se eliminan las líneas `USE master;` … `USE DBLexControl;`
+   (bloque `DROP`/`CREATE DATABASE`) y en `02/03/04` la línea
+   `USE DBLexControl;` (ver nota AZURE en cada archivo).
+5. Re-validar en una BD temporal (ver §9).
 
 Los `.sql` están ignorados por `.gitignore` (`*.sql`): versionarlos con
-`git add -f deploy/desarrollo/*.sql`.
+`git add -f deploy/produccion/*.sql deploy/migraciones/*.sql deploy/Desarrollo/*.sql`.
 
 ---
 
@@ -238,7 +302,7 @@ $S = "DESKTOP-V7G3G1I\SQLEXPRESS"
 $T = "DBLexControl_DeployTest"
 $tmp = "$env:TEMP\deploytest"; New-Item -ItemType Directory -Force $tmp | Out-Null
 
-foreach ($f in Get-ChildItem deploy\desarrollo\*.sql) {
+foreach ($f in Get-ChildItem deploy\produccion\*.sql) {
     $t = [System.IO.File]::ReadAllText($f.FullName) -replace 'DBLexControl', $T
     [System.IO.File]::WriteAllText("$tmp\$($f.Name)", $t, (New-Object System.Text.UTF8Encoding($false)))
 }
@@ -274,7 +338,7 @@ La BD real `DBLexControl` no se toca en esta validación.
 | Sidebar vacío tras crear un usuario | No hay filas en `PERMISO_ROL` para ese rol: sembrar con `04_seed.sql` o guardar la matriz en **Ajustes → Permisos**. |
 | El API responde 429 en los tests E2E | Rate limit de login: esperar 80–90 s y re-ejecutar el spec. |
 | `401` o CORS desde el navegador | En desarrollo usar `npm start` (proxy `/api` → 5181); en producción el origen debe estar en la lista CORS de `Program.cs`. |
-| Los scripts no aparecen en `git status` | `.gitignore` contiene `*.sql`: usar `git add -f deploy/desarrollo/*.sql`. |
+| Los scripts no aparecen en `git status` | `.gitignore` contiene `*.sql`: usar `git add -f deploy/produccion/*.sql deploy/migraciones/*.sql deploy/Desarrollo/*.sql`. |
 
 ---
 
@@ -282,10 +346,10 @@ La BD real `DBLexControl` no se toca en esta validación.
 
 ```powershell
 # 1. BD (borra y recrea todo)
-sqlcmd -S $S -E -b -f 65001 -i deploy\desarrollo\01_schema.sql
-sqlcmd -S $S -E -b -f 65001 -i deploy\desarrollo\02_sp_escritura_simple.sql
-sqlcmd -S $S -E -b -f 65001 -i deploy\desarrollo\03_sp_transaccionales.sql
-sqlcmd -S $S -E -b -f 65001 -i deploy\desarrollo\04_seed.sql
+sqlcmd -S $S -E -b -f 65001 -i deploy\produccion\01_schema.sql
+sqlcmd -S $S -E -b -f 65001 -i deploy\produccion\02_sp_escritura_simple.sql
+sqlcmd -S $S -E -b -f 65001 -i deploy\produccion\03_sp_transaccionales.sql
+sqlcmd -S $S -E -b -f 65001 -i deploy\produccion\04_seed.sql
 
 # 2. API + SPA (ver §4 y §5)
 # 3. Login: admin / admin123

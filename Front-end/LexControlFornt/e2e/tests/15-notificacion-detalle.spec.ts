@@ -34,7 +34,7 @@ test.describe('Notificación Detalle', () => {
         const btnEditar = adminPage.locator('[data-testid="btn-editar-notificacion"]');
         if (await btnEditar.isVisible()) {
             await btnEditar.click();
-            await expect(adminPage.locator('app-notificacion-modal')).toBeVisible({ timeout: 10000 });
+            await expect(adminPage.locator('app-notificacion-modal .modal-contenido')).toBeVisible({ timeout: 10000 });
         }
     });
 

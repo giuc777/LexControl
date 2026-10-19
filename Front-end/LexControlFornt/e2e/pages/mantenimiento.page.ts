@@ -5,7 +5,7 @@ export class MantenimientoPage {
     readonly btnNuevoItem: Locator;
 
     constructor(private page: Page) {
-        this.listaCatalogos = page.locator('[data-testid="lista-catalogos"]');
+        this.listaCatalogos = page.locator('[data-testid="catalogos-grid"]');
         this.btnNuevoItem = page.locator('[data-testid="btn-nuevo-item"]');
     }
 

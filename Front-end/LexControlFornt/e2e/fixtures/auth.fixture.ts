@@ -14,7 +14,7 @@ export const test = base.extend<{ adminPage: Page }>({
         for (let intento = 1; intento <= 3 && !autenticado; intento++) {
             await page.goto('/login');
             await page.locator('[data-testid="usuario"]').fill('admin');
-            await page.locator('[data-testid="contrasena"]').fill('admin123');
+            await page.locator('[data-testid="contrasena"]').fill('admin123#');
             await page.locator('[data-testid="btn-login"]').click();
             try {
                 await page.waitForURL('**/dashboard', { timeout: 15000 });

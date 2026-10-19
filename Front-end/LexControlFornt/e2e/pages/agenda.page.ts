@@ -8,11 +8,11 @@ export class AgendaPage {
     readonly eventosDia: Locator;
 
     constructor(private page: Page) {
-        this.calendario = page.locator('[data-testid="calendario-agenda"]');
+        this.calendario = page.locator('[data-testid="calendario"]');
         this.btnNuevaAudiencia = page.locator('[data-testid="btn-nueva-audiencia"]');
         this.btnNuevaDiligencia = page.locator('[data-testid="btn-nueva-diligencia"]');
-        this.diasCalendario = page.locator('[data-testid="dia-calendario"]');
-        this.eventosDia = page.locator('[data-testid="evento-dia"]');
+        this.diasCalendario = page.locator('[data-testid^="dia-"]');
+        this.eventosDia = page.locator('[data-testid="eventos-dia"]');
     }
 
     async navigate(): Promise<void> {

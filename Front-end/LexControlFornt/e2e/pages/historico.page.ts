@@ -9,12 +9,12 @@ export class HistoricoPage {
     readonly btnLimpiar: Locator;
 
     constructor(private page: Page) {
-        this.tabla = page.locator('[data-testid="historico-table"]');
-        this.filas = page.locator('[data-testid="historico-table"] tbody tr');
-        this.filtroBusqueda = page.locator('[data-testid="filtro-busqueda"]');
-        this.filtroRama = page.locator('[data-testid="filtro-rama"]');
-        this.btnBuscar = page.locator('[data-testid="btn-buscar"]');
-        this.btnLimpiar = page.locator('[data-testid="btn-limpiar"]');
+        this.tabla = page.locator('table.tabla-datos');
+        this.filas = page.locator('table.tabla-datos tbody tr.fila-clickeable');
+        this.filtroBusqueda = page.locator('.historico-toolbar input.filtro-input').first();
+        this.filtroRama = page.locator('.historico-toolbar select.filtro-select').first();
+        this.btnBuscar = page.locator('.filtro-acciones .btn-primary', { hasText: 'Buscar' });
+        this.btnLimpiar = page.locator('.filtro-acciones .btn-secondary', { hasText: 'Limpiar' });
     }
 
     async navigate(): Promise<void> {

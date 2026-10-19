@@ -16,12 +16,12 @@ export class NotificacionesPage {
 
     constructor(private page: Page) {
         this.tabla = page.locator('[data-testid="notificaciones-tabla"]');
-        this.filas = page.locator('[data-testid="notificaciones-tabla"] tbody tr');
+        this.filas = page.locator('[data-testid="notificaciones-tabla"] tbody tr.fila-clickeable');
         this.btnNuevaNotificacion = page.locator('[data-testid="btn-nueva-notificacion"]');
         this.filtroEstado = page.locator('[data-testid="filtro-estado"]');
         this.filtroTipo = page.locator('[data-testid="filtro-tipo"]');
         this.badgeOj = page.locator('[data-testid="badge-oj"]');
-        this.modal = page.locator('app-notificacion-modal');
+        this.modal = page.locator('app-notificacion-modal .modal-contenido');
         this.selectExpediente = page.locator('[data-testid="select-expediente"]');
         this.selectTipo = page.locator('[data-testid="select-tipo"]');
         this.inputFecha = page.locator('[data-testid="input-fecha"]');

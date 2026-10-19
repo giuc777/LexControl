@@ -11,7 +11,7 @@ export class ExpedientesPage {
 
     constructor(private page: Page) {
         this.tabla = page.locator('[data-testid="expedientes-table"]');
-        this.filas = page.locator('[data-testid="expedientes-table"] tbody tr');
+        this.filas = page.locator('[data-testid="expedientes-table"] tbody tr.row-clickable');
         this.btnNuevoExpediente = page.locator('[data-testid="btn-nuevo-expediente"]');
         this.filtroEstado = page.locator('[data-testid="filtro-estado"]');
         this.filtroRama = page.locator('[data-testid="filtro-rama"]');

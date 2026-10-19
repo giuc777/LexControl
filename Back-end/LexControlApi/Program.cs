@@ -85,12 +85,14 @@ builder.Services
     });
 builder.Services.AddAuthorization();
 
-// Rate Limiting
+// Rate Limiting (el login se limita por minuto; en Development el límite
+// sube vía appsettings.Development.json para que la suite e2e no reciba 429)
 builder.Services.AddRateLimiter(options =>
 {
+    var permitesLogin = builder.Configuration.GetValue("RateLimit:LoginPorMinuto", 5);
     options.AddFixedWindowLimiter("login", limiterOptions =>
     {
-        limiterOptions.PermitLimit = 5;
+        limiterOptions.PermitLimit = permitesLogin;
         limiterOptions.Window = TimeSpan.FromMinutes(1);
         limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         limiterOptions.QueueLimit = 0; // Rechazar inmediatamente

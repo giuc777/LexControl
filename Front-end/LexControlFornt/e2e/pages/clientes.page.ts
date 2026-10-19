@@ -14,7 +14,9 @@ export class ClientesPage {
         this.filtroEstado = page.locator('[data-testid="filtro-estado"]');
         this.btnNuevoCliente = page.locator('[data-testid="btn-nuevo-cliente"]');
         this.paginacion = page.locator('[data-testid="paginacion"]');
-        this.filas = page.locator('[data-testid="clientes-table"] tbody tr');
+        // Solo filas con datos: la tabla renderiza una fila de empty-state
+        // mientras carga, que no tiene manejador de click.
+        this.filas = page.locator('[data-testid="clientes-table"] tbody tr.row-clickable');
     }
 
     async navigate(): Promise<void> {

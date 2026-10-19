@@ -9,7 +9,7 @@ export class DiligenciasPage {
 
     constructor(private page: Page) {
         this.tabla = page.locator('[data-testid="diligencias-table"]');
-        this.filas = page.locator('[data-testid="diligencias-table"] tbody tr');
+        this.filas = page.locator('[data-testid="diligencias-table"] tbody tr.fila-clickeable');
         this.btnNuevaDiligencia = page.locator('[data-testid="btn-nueva-diligencia"]');
         this.filtroEstado = page.locator('[data-testid="filtro-estado"]');
         this.filtroTipo = page.locator('[data-testid="filtro-tipo"]');

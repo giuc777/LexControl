@@ -9,7 +9,7 @@ export class TramitesPage {
 
     constructor(private page: Page) {
         this.tabla = page.locator('[data-testid="tramites-table"]');
-        this.filas = page.locator('[data-testid="tramites-table"] tbody tr');
+        this.filas = page.locator('[data-testid="tramites-table"] tbody tr.fila-clickeable');
         this.btnNuevoTramite = page.locator('[data-testid="btn-nuevo-tramite"]');
         this.filtroEstado = page.locator('[data-testid="filtro-estado"]');
         this.filtroTipo = page.locator('[data-testid="filtro-tipo"]');

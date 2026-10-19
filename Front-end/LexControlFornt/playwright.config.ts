@@ -7,6 +7,9 @@ export default defineConfig({
     retries: process.env['CI'] ? 1 : 0,
     workers: 1,
     reporter: [['html', { open: 'never' }]],
+    // Timeout global por test (en use se ignora): la BD de pruebas en Azure
+    // suma latencia a cada login/SP, así que 30s quedaba corto.
+    timeout: 90000,
 
     use: {
         baseURL: 'http://localhost:4200',

@@ -1,4 +1,5 @@
 using LexControlApi.Dtos.Perfil;
+using LexControlApi.Dtos.Usuarios;
 using LexControlApi.Excepciones;
 using LexControlApi.Helpers;
 
@@ -9,7 +10,7 @@ public interface IPerfilService
 {
     Task<PerfilDto> ObtenerAsync(int usuarioId);
     Task ActualizarAsync(int usuarioId, PerfilActualizarDto datos);
-    Task CambiarContrasenaAsync(int usuarioId, CambioContrasenaDto datos);
+    Task CambiarContrasenaAsync(int usuarioId, string cuenta, CambioContrasenaDto datos);
 }
 
 public class PerfilService : IPerfilService
@@ -56,35 +57,46 @@ public class PerfilService : IPerfilService
                 "No se pudo actualizar el perfil.", StatusCodes.Status500InternalServerError);
     }
 
-    public async Task CambiarContrasenaAsync(int usuarioId, CambioContrasenaDto datos)
+    public async Task CambiarContrasenaAsync(int usuarioId, string cuenta, CambioContrasenaDto datos)
     {
-        var hashActual = HashHelper.Sha256Hex(datos.ContrasenaActual);
-        var hashNuevo = HashHelper.Sha256Hex(datos.ContrasenaNueva);
-
         // Regla del prototipo: la nueva no puede ser igual a la actual.
-        if (hashNuevo == hashActual)
+        if (datos.ContrasenaNueva == datos.ContrasenaActual)
             throw new ExcepcionNegocio(-3,
                 "La nueva contraseña no puede ser igual a la actual.",
                 StatusCodes.Status400BadRequest);
 
-        var retorno = await _repositorio.EjecutarRetornoAsync(
-            "SP_Usuario_CambiarContrasena",
-            new { ID = usuarioId, HashActual = hashActual, HashNuevo = hashNuevo });
+        // El hash guardado puede ser BCrypt (tras la migracion del primer
+        // login) o SHA256 legacy; verificar segun el formato almacenado.
+        var candidato = await _repositorio.ConsultarPrimeroAsync<UsuarioAutenticacionFila>(
+            "SP_Usuario_ObtenerPorNombre", new { Usuario = cuenta });
 
-        switch (retorno)
-        {
-            case 0:
-                return;
-            case -1:
-                throw new ExcepcionNegocio(-1, "Usuario no encontrado.",
-                    StatusCodes.Status404NotFound);
-            case -2:
-                throw new ExcepcionNegocio(-2, "La contraseña actual no coincide.",
-                    StatusCodes.Status400BadRequest);
-            default:
-                throw new ExcepcionNegocio(retorno,
-                    "No se pudo cambiar la contraseña.",
-                    StatusCodes.Status500InternalServerError);
-        }
+        if (candidato is null || candidato.ID != usuarioId)
+            throw new ExcepcionNegocio(-1, "Usuario no encontrado.",
+                StatusCodes.Status404NotFound);
+
+        var hashGuardado = candidato.ContraseñaHash;
+        var actualCoincide = HashHelper.EsHashBcrypt(hashGuardado)
+            ? HashHelper.VerifyPassword(datos.ContrasenaActual, hashGuardado)
+            : string.Equals(HashHelper.Sha256Hex(datos.ContrasenaActual), hashGuardado,
+                StringComparison.OrdinalIgnoreCase);
+
+        if (!actualCoincide)
+            throw new ExcepcionNegocio(-2, "La contraseña actual no coincide.",
+                StatusCodes.Status400BadRequest);
+
+        // Guardar siempre en BCrypt (formato actual) y limpiar la bandera legacy.
+        var hashNuevo = HashHelper.HashPassword(datos.ContrasenaNueva);
+        var retorno = await _repositorio.EjecutarRetornoAsync(
+            "SP_Usuario_ActualizarHash",
+            new { ID = usuarioId, ContraseñaHash = hashNuevo, HashLegacy = false });
+
+        if (retorno == -1)
+            throw new ExcepcionNegocio(-1, "Usuario no encontrado.",
+                StatusCodes.Status404NotFound);
+
+        if (retorno != 0)
+            throw new ExcepcionNegocio(retorno,
+                "No se pudo cambiar la contraseña.",
+                StatusCodes.Status500InternalServerError);
     }
 }

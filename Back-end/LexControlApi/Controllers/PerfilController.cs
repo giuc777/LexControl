@@ -40,7 +40,8 @@ public class PerfilController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CambiarContrasena(CambioContrasenaDto datos)
     {
-        await _perfilService.CambiarContrasenaAsync(User.ObtenerUsuarioId(), datos);
+        await _perfilService.CambiarContrasenaAsync(
+            User.ObtenerUsuarioId(), User.ObtenerCuenta(), datos);
         return NoContent();
     }
 }

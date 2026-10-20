@@ -1,6 +1,5 @@
-base = "Front-end/LexControlFornt"
-
 [build]
+  base = "Front-end/LexControlFornt"
   command = "npm ci && npm run build"
   publish = "dist/LexControlFornt/browser"
 

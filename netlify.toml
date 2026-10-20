@@ -1,0 +1,15 @@
+base = "Front-end/LexControlFornt"
+
+[build]
+  command = "npm ci && npm run build"
+  publish = "dist/LexControlFornt/browser"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Angular Router usa rutas sin hash (/clientes/1, /tramites/1...):
+# todas las rutas caen en index.html (SPA fallback).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

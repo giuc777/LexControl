@@ -1,0 +1,8 @@
+bin/
+obj/
+.vs/
+*.user
+*.md
+*.http
+LexControlApi.sln
+appsettings.Development.json

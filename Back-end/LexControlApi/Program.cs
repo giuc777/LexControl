@@ -47,15 +47,23 @@ builder.Services.AddEndpointsApiExplorer();
 const string PoliticaCors = "LexControlCors";
 builder.Services.AddCors(opciones =>
 {
+    // Orígenes desde configuración (Cors:Origenes__0, Cors:Origenes__1, ...);
+    // si no se definen se usan los orígenes de desarrollo local.
+    var origenesConfigurados = builder.Configuration.GetSection("Cors:Origenes").Get<string[]>();
+    var origenes = origenesConfigurados is { Length: > 0 }
+        ? origenesConfigurados
+        : new[]
+        {
+            "http://localhost:5173",
+            "http://localhost:4200",
+            "https://localhost:4200",
+            "http://localhost:3000",
+            "https://localhost:3000",
+            "http://localhost:8080",
+            "https://localhost:8080"
+        };
     opciones.AddPolicy(PoliticaCors, policy =>
-        policy.WithOrigins(
-                "http://localhost:5173",
-                "http://localhost:4200",
-                "https://localhost:4200",
-                "http://localhost:3000",
-                "https://localhost:3000",
-                "http://localhost:8080",
-                "https://localhost:8080")
+        policy.WithOrigins(origenes)
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
@@ -145,6 +153,8 @@ builder.Services.AddScoped<INotificacionService, NotificacionService>();
 builder.Services.AddScoped<IReporteService, ReporteService>();
 builder.Services.AddScoped<IBuscarService, BuscarService>();
 
+builder.Services.AddHealthChecks();
+
 // Limite de upload: 50 MB
 builder.WebHost.ConfigureKestrel(opciones =>
     opciones.Limits.MaxRequestBodySize = 50 * 1024 * 1024);
@@ -172,5 +182,6 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();

@@ -212,9 +212,11 @@ public class CloudinaryStorageService : IFileStorageService
         if (string.IsNullOrWhiteSpace(almacenamiento))
             return false;
 
-        // Solo caracteres de ruta seguros; sin "..", sin barra invertida, sin comodines.
+        // Sin "..", sin barra invertida y sin caracteres de control: evita salir
+        // de la carpeta. Si se admiten espacios, acentos y simbolos habituales
+        // en nombres de archivo (p. ej. "Invitacion Tecnologias Sem. de Proyectos.pdf").
         if (almacenamiento.Contains("..") || almacenamiento.Contains('\\')
-            || almacenamiento.Any(c => !(char.IsLetterOrDigit(c) || "-_./".Contains(c))))
+            || almacenamiento.Any(char.IsControl))
         {
             _logger.LogWarning("Identificador de almacenamiento invalido: {Almacenamiento}", almacenamiento);
             return false;

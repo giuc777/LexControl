@@ -113,8 +113,9 @@ test.describe('Módulo Trámites', () => {
         const nota = adminPage.locator('.nota-card').filter({ hasText: contenido });
         await expect(nota).toBeVisible({ timeout: 10000 });
 
-        adminPage.once('dialog', dialog => dialog.accept());
         await nota.locator('[data-testid="btn-eliminar-nota"]').click();
+        await expect(adminPage.locator('app-confirmacion-modal .modal-card')).toBeVisible({ timeout: 5000 });
+        await adminPage.locator('app-confirmacion-modal [data-testid="btn-confirmar-eliminar"]').click();
 
         await expect(nota).toBeHidden({ timeout: 10000 });
     });
@@ -161,8 +162,9 @@ test.describe('Módulo Trámites', () => {
         const doc = adminPage.locator('.doc-file').filter({ hasText: nombre });
         await expect(doc).toBeVisible({ timeout: 10000 });
 
-        adminPage.once('dialog', dialog => dialog.accept());
         await doc.locator('[data-testid="btn-eliminar-doc"]').click();
+        await expect(adminPage.locator('app-confirmacion-modal .modal-card')).toBeVisible({ timeout: 5000 });
+        await adminPage.locator('app-confirmacion-modal [data-testid="btn-confirmar-eliminar"]').click();
 
         await expect(doc).toBeHidden({ timeout: 10000 });
     });

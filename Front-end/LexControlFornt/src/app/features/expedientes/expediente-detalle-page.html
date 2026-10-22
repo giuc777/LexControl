@@ -97,7 +97,7 @@
                                 <div class="nota-meta">
                                     <span>{{ nota.usuarioNombre || 'Anonimo' }}</span>
                                     <span>{{ formatearFecha(nota.fechaCreacion) }}</span>
-                                    <button type="button" class="btn-link-danger" (click)="eliminarNota(nota)">Eliminar</button>
+                                    <button type="button" class="btn-link-danger" (click)="pedirEliminarNota(nota)">Eliminar</button>
                                 </div>
                             </div>
                         }
@@ -134,7 +134,7 @@
                                         </td>
                                         <td>{{ parte.abogadoDefensor || '—' }}</td>
                                         <td>
-                                            <button type="button" class="btn-link-danger" (click)="eliminarParte(parte)">Eliminar</button>
+                                            <button type="button" class="btn-link-danger" (click)="pedirEliminarParte(parte)">Eliminar</button>
                                         </td>
                                     </tr>
                                 }
@@ -186,7 +186,7 @@
                                     </svg>
                                 </button>
                                 <button type="button" class="btn-icon" title="Eliminar"
-                                    (click)="eliminarDocumento(doc)">
+                                    (click)="pedirEliminarDocumento(doc)">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <polyline points="3 6 5 6 21 6"/>
@@ -295,4 +295,12 @@
         <app-visor-archivos [abierto]="true" [archivo]="archivoPreview()!"
             (cerrado)="cerrarPreview()" />
     }
+
+    <!-- Modal: Confirmar eliminación -->
+    <app-confirmacion-modal
+        [abierto]="confirmacionBorrado() !== null"
+        [titulo]="confirmacionBorrado()?.titulo ?? 'Confirmar eliminación'"
+        [mensaje]="confirmacionBorrado()?.mensaje ?? ''"
+        (confirmado)="alConfirmarEliminacion()"
+        (cerrado)="cerrarConfirmacion()" />
 }

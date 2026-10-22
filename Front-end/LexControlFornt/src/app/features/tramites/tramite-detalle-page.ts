@@ -10,6 +10,7 @@ import { CatalogoItem } from '../../core/models/catalogo.model';
 import { PageHeader } from '../../shared/components/page-header/page-header';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { Modal } from '../../shared/components/modal/modal';
+import { ConfirmacionModal } from '../../shared/components/confirmacion-modal/confirmacion-modal';
 import { ArchivoVisor, VisorArchivosComponent } from '../../shared/components/visor-archivos/visor-archivos';
 import { ToastService } from '../../layout/toast/toast-service';
 
@@ -17,10 +18,17 @@ const MESES_CORTO = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Se
 
 const EXTENSIONES_PERMITIDAS = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.txt'];
 
+interface PeticionBorradoTramite {
+    titulo: string;
+    mensaje: string;
+    accion: 'nota' | 'documento';
+    item: NotaTramite | DocTramite;
+}
+
 @Component({
     selector: 'app-tramite-detalle-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, PageHeader, EmptyState, Modal, VisorArchivosComponent],
+    imports: [FormsModule, PageHeader, EmptyState, Modal, ConfirmacionModal, VisorArchivosComponent],
     templateUrl: './tramite-detalle-page.html'
 })
 export class TramiteDetallePage implements OnInit {
@@ -76,6 +84,7 @@ export class TramiteDetallePage implements OnInit {
     protected readonly subiendo = signal(false);
     protected readonly errorArchivo = signal('');
     protected readonly archivoPreview = signal<ArchivoVisor | null>(null);
+    protected readonly confirmacionBorrado = signal<PeticionBorradoTramite | null>(null);
 
     ngOnInit(): void {
         const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -301,18 +310,49 @@ export class TramiteDetallePage implements OnInit {
         });
     }
 
-    eliminarNota(nota: NotaTramite): void {
-        if (!confirm('¿Eliminar esta nota?')) return;
-        this.tramitesSvc.eliminarNota(nota.id).subscribe({
-            next: () => {
-                const tramiteId = this.tramite()?.id;
-                if (tramiteId) this.cargarNotas(tramiteId);
-                this.toast.mostrar('Nota eliminada.', 3000);
-            },
-            error: (err) => {
-                this.toast.mostrar(err.error?.error || 'Error al eliminar la nota.', 3000);
-            }
+    pedirEliminarNota(nota: NotaTramite): void {
+        this.confirmacionBorrado.set({
+            titulo: 'Eliminar nota',
+            mensaje: '¿Está seguro de eliminar esta nota interna? Esta acción no se puede deshacer.',
+            accion: 'nota',
+            item: nota
         });
+    }
+
+    cerrarConfirmacion(): void {
+        this.confirmacionBorrado.set(null);
+    }
+
+    alConfirmarEliminacion(): void {
+        const peticion = this.confirmacionBorrado();
+        if (!peticion) return;
+        this.confirmacionBorrado.set(null);
+
+        if (peticion.accion === 'nota') {
+            const nota = peticion.item as NotaTramite;
+            this.tramitesSvc.eliminarNota(nota.id).subscribe({
+                next: () => {
+                    const tramiteId = this.tramite()?.id;
+                    if (tramiteId) this.cargarNotas(tramiteId);
+                    this.toast.mostrar('Nota eliminada.', 3000);
+                },
+                error: (err) => {
+                    this.toast.mostrar(err.error?.error || 'Error al eliminar la nota.', 3000);
+                }
+            });
+        } else {
+            const doc = peticion.item as DocTramite;
+            this.tramitesSvc.eliminarDocumento(doc.id).subscribe({
+                next: () => {
+                    const tramiteId = this.tramite()?.id;
+                    if (tramiteId) this.cargarDocumentos(tramiteId);
+                    this.toast.mostrar('Documento eliminado.', 3000);
+                },
+                error: (err) => {
+                    this.toast.mostrar(err.error?.error || 'Error al eliminar el documento.', 3000);
+                }
+            });
+        }
     }
 
     formatearFecha(iso: string | null): string {
@@ -450,17 +490,12 @@ export class TramiteDetallePage implements OnInit {
         this.tramitesSvc.descargarDocumento(doc.id, doc.nombreArchivo);
     }
 
-    eliminarDocumento(doc: DocTramite): void {
-        if (!confirm(`¿Eliminar el documento "${doc.nombreArchivo}"?`)) return;
-        this.tramitesSvc.eliminarDocumento(doc.id).subscribe({
-            next: () => {
-                const tramiteId = this.tramite()?.id;
-                if (tramiteId) this.cargarDocumentos(tramiteId);
-                this.toast.mostrar('Documento eliminado.', 3000);
-            },
-            error: (err) => {
-                this.toast.mostrar(err.error?.error || 'Error al eliminar el documento.', 3000);
-            }
+    pedirEliminarDocumento(doc: DocTramite): void {
+        this.confirmacionBorrado.set({
+            titulo: 'Eliminar documento',
+            mensaje: `¿Está seguro de eliminar el documento "${doc.nombreArchivo}"? Esta acción no se puede deshacer.`,
+            accion: 'documento',
+            item: doc
         });
     }
 

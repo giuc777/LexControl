@@ -104,7 +104,7 @@
                             <span>{{ formatearFecha(nota.fechaCreacion) }}</span>
                             <button type="button" class="btn-link-danger"
                                     data-testid="btn-eliminar-nota"
-                                    (click)="eliminarNota(nota)">
+                                    (click)="pedirEliminarNota(nota)">
                                 Eliminar
                             </button>
                         </div>
@@ -166,7 +166,7 @@
                         </button>
                         <button type="button" class="btn-icon" title="Eliminar"
                             data-testid="btn-eliminar-doc"
-                            (click)="eliminarDocumento(doc)">
+                            (click)="pedirEliminarDocumento(doc)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <polyline points="3 6 5 6 21 6"/>
@@ -450,6 +450,14 @@
         <app-visor-archivos [abierto]="true" [archivo]="archivoPreview()!"
             (cerrado)="cerrarPreview()" />
     }
+
+    <!-- Modal: Confirmar eliminación -->
+    <app-confirmacion-modal
+        [abierto]="confirmacionBorrado() !== null"
+        [titulo]="confirmacionBorrado()?.titulo ?? 'Confirmar eliminación'"
+        [mensaje]="confirmacionBorrado()?.mensaje ?? ''"
+        (confirmado)="alConfirmarEliminacion()"
+        (cerrado)="cerrarConfirmacion()" />
 
     <div class="detalle-meta">
         <span>Creado: {{ tramite()?.fechaCreacion }}</span>

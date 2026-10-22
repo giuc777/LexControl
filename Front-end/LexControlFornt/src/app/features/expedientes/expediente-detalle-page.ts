@@ -16,15 +16,25 @@ import {
 } from '../../core/models/expediente.model';
 import { CatalogoItem } from '../../core/models/catalogo.model';
 import { Modal } from '../../shared/components/modal/modal';
+import { ConfirmacionModal } from '../../shared/components/confirmacion-modal/confirmacion-modal';
 import { VisorArchivosComponent, ArchivoVisor } from '../../shared/components/visor-archivos/visor-archivos';
 import { ExpedienteModal } from './expediente-modal';
 
 const MESES_CORTO = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
+type AccionBorrado = 'documento' | 'nota' | 'parte';
+
+interface PeticionBorrado {
+    titulo: string;
+    mensaje: string;
+    accion: AccionBorrado;
+    item: DocExpediente | NotaExpediente | ParteProcesal;
+}
+
 @Component({
     selector: 'app-expediente-detalle-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [RouterLink, FormsModule, Modal, ExpedienteModal, VisorArchivosComponent],
+    imports: [RouterLink, FormsModule, Modal, ConfirmacionModal, ExpedienteModal, VisorArchivosComponent],
     templateUrl: './expediente-detalle-page.html'
 })
 export class ExpedienteDetallePage implements OnInit {
@@ -49,6 +59,7 @@ export class ExpedienteDetallePage implements OnInit {
     protected readonly modalUploadAbierto = signal(false);
     protected readonly modalEditarAbierto = signal(false);
     protected readonly archivoPreview = signal<ArchivoVisor | null>(null);
+    protected readonly confirmacionBorrado = signal<PeticionBorrado | null>(null);
 
     private expedienteId = 0;
 
@@ -90,10 +101,12 @@ export class ExpedienteDetallePage implements OnInit {
         this.documentosSvc.descargar(doc.id, doc.nombreArchivo);
     }
 
-    eliminarDocumento(doc: DocExpediente): void {
-        if (!confirm(`Eliminar el documento "${doc.nombreArchivo}"?`)) return;
-        this.documentosSvc.eliminar(doc.id).subscribe({
-            next: () => this.cargarDocumentos()
+    pedirEliminarDocumento(doc: DocExpediente): void {
+        this.confirmacionBorrado.set({
+            titulo: 'Eliminar documento',
+            mensaje: `¿Está seguro de eliminar el documento "${doc.nombreArchivo}"? Esta acción no se puede deshacer.`,
+            accion: 'documento',
+            item: doc
         });
     }
 
@@ -169,10 +182,12 @@ export class ExpedienteDetallePage implements OnInit {
         });
     }
 
-    eliminarNota(nota: NotaExpediente): void {
-        if (!confirm('Eliminar esta nota?')) return;
-        this.expedientesSvc.eliminarNota(nota.id).subscribe({
-            next: () => this.cargarNotas()
+    pedirEliminarNota(nota: NotaExpediente): void {
+        this.confirmacionBorrado.set({
+            titulo: 'Eliminar nota',
+            mensaje: '¿Está seguro de eliminar esta nota? Esta acción no se puede deshacer.',
+            accion: 'nota',
+            item: nota
         });
     }
 
@@ -200,11 +215,56 @@ export class ExpedienteDetallePage implements OnInit {
         });
     }
 
-    eliminarParte(parte: ParteProcesal): void {
-        if (!confirm(`Eliminar la parte "${parte.nombreCompleto}"?`)) return;
-        this.expedientesSvc.eliminarParte(parte.id).subscribe({
-            next: () => this.cargarPartes()
+    pedirEliminarParte(parte: ParteProcesal): void {
+        this.confirmacionBorrado.set({
+            titulo: 'Eliminar parte procesal',
+            mensaje: `¿Está seguro de eliminar la parte "${parte.nombreCompleto}"? Esta acción no se puede deshacer.`,
+            accion: 'parte',
+            item: parte
         });
+    }
+
+    cerrarConfirmacion(): void {
+        this.confirmacionBorrado.set(null);
+    }
+
+    alConfirmarEliminacion(): void {
+        const peticion = this.confirmacionBorrado();
+        if (!peticion) return;
+        this.confirmacionBorrado.set(null);
+
+        switch (peticion.accion) {
+            case 'documento': {
+                const doc = peticion.item as DocExpediente;
+                this.documentosSvc.eliminar(doc.id).subscribe({
+                    next: () => {
+                        this.cargarDocumentos();
+                        this.toastSvc.mostrar('Documento eliminado.');
+                    }
+                });
+                break;
+            }
+            case 'nota': {
+                const nota = peticion.item as NotaExpediente;
+                this.expedientesSvc.eliminarNota(nota.id).subscribe({
+                    next: () => {
+                        this.cargarNotas();
+                        this.toastSvc.mostrar('Nota eliminada.');
+                    }
+                });
+                break;
+            }
+            case 'parte': {
+                const parte = peticion.item as ParteProcesal;
+                this.expedientesSvc.eliminarParte(parte.id).subscribe({
+                    next: () => {
+                        this.cargarPartes();
+                        this.toastSvc.mostrar('Parte procesal eliminada.');
+                    }
+                });
+                break;
+            }
+        }
     }
 
     // ── Upload ───────────────────────────────────────────────

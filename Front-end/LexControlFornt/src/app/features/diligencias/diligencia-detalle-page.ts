@@ -130,7 +130,11 @@ export class DiligenciaDetallePage implements OnInit {
     puedeGestionarResultado(): boolean {
         const d = this.diligencia();
         if (!d) return false;
-        return !this.esCancelada() && (this.esPendiente() || !!d.resultado);
+        // El resultado es texto libre (DescripcionResultado): el catalogo
+        // RESULTADO_DILIGENCIA quedo inactivo, por eso resultado (nombre del
+        // catalogo) puede ser null aunque ya exista un resultado registrado.
+        return !this.esCancelada() && (this.esPendiente() || d.estado === 'Completada'
+            || !!d.resultado || !!d.descripcionResultado);
     }
 
     esPendiente(): boolean {
@@ -140,7 +144,8 @@ export class DiligenciaDetallePage implements OnInit {
     }
 
     tieneResultado(): boolean {
-        return !!this.diligencia()?.resultado;
+        const d = this.diligencia();
+        return !!d?.resultado || !!d?.descripcionResultado;
     }
 
     abrirModalResultado(): void {

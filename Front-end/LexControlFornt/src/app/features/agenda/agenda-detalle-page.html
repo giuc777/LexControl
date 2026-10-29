@@ -102,7 +102,7 @@
         }
 
         <!-- Resultado registrado -->
-        @if (aud.resultado) {
+        @if (aud.resultado || aud.descripcionResultado) {
             <div class="panel resultado-panel">
                 <div class="resultado-header">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -123,10 +123,12 @@
                     }
                 </div>
                 <div class="detalle-grid">
-                    <div class="detalle-campo">
-                        <span class="detalle-label">Resultado</span>
-                        <span class="detalle-valor detalle-valor-resultado">{{ aud.resultado }}</span>
-                    </div>
+                    @if (aud.resultado) {
+                        <div class="detalle-campo">
+                            <span class="detalle-label">Resultado</span>
+                            <span class="detalle-valor detalle-valor-resultado">{{ aud.resultado }}</span>
+                        </div>
+                    }
                     @if (aud.descripcionResultado) {
                         <div class="detalle-campo detalle-campo-full">
                             <span class="detalle-label">Descripción</span>

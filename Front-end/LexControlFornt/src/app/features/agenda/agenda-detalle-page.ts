@@ -66,11 +66,16 @@ export class AgendaDetallePage implements OnInit {
     puedeGestionarResultado(): boolean {
         const aud = this.audiencia();
         if (!aud) return false;
-        return this.esPendiente() || !!aud.resultado;
+        // El resultado es texto libre (DescripcionResultado): el catalogo
+        // RESULTADO_AUDIENCIA quedo inactivo, por eso resultado (nombre del
+        // catalogo) puede ser null aunque ya exista un resultado registrado.
+        return this.esPendiente() || aud.estado === 'Realizada'
+            || !!aud.resultado || !!aud.descripcionResultado;
     }
 
     tieneResultado(): boolean {
-        return !!this.audiencia()?.resultado;
+        const aud = this.audiencia();
+        return !!aud?.resultado || !!aud?.descripcionResultado;
     }
 
     colorEstado(estado: string): string {

@@ -2,15 +2,12 @@
     <div>
         <span class="page-overline">Configuración</span>
         <h1 class="page-title">Ajustes</h1>
-        <p class="page-desc">Perfil del usuario, preferencias, datos del bufete y seguridad del sistema.</p>
+        <p class="page-desc">Perfil del usuario, datos del bufete y seguridad del sistema.</p>
     </div>
 </section>
 
-<section class="aj-grid" data-testid="ajustes-grid" [class.aj-grid-uno]="!esAdmin()" aria-label="Perfil y preferencias">
+<section class="aj-grid" data-testid="ajustes-grid" aria-label="Perfil del usuario">
     <app-perfil-card />
-    @if (esAdmin()) {
-        <app-preferencias-card />
-    }
 </section>
 
 <div class="aj-stack">

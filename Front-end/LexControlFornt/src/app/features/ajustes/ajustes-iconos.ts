@@ -2,8 +2,6 @@
 
 export const ICONO_USUARIO =
     'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75';
-export const ICONO_CAMPANA =
-    'M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0';
 export const ICONO_EDIFICIO =
     'M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14M9 21v-4h6v4M9 10h.01M15 10h.01M9 14h.01M15 14h.01';
 export const ICONO_USUARIOS =

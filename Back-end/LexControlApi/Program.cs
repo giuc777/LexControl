@@ -65,7 +65,10 @@ builder.Services.AddCors(opciones =>
     opciones.AddPolicy(PoliticaCors, policy =>
         policy.WithOrigins(origenes)
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              // Sin esto el navegador oculta X-Total-Count de JavaScript
+              // y el dashboard mostraba 0 en Expedientes Activos.
+              .WithExposedHeaders("X-Total-Count"));
 });
 
 // Autenticación JWT

@@ -118,14 +118,14 @@ GO
 
 IF NOT EXISTS (SELECT 1 FROM [TIPO_DILIGENCIA])
 BEGIN
--- 9.8 TIPO_DILIGENCIA (manual: catalogo vacio, todos desactivados)
+-- 9.8 TIPO_DILIGENCIA (activos: los 6 tipos)
 INSERT INTO TIPO_DILIGENCIA (Nombre, Valor, Descripcion, Color, Orden, Activo) VALUES
-('Asesoría', 'ASE', 'Asesoría con cliente', '#3498DB', 1, 0),
-('Redacción', 'RED', 'Redacción de documentos', '#2ECC71', 2, 0),
-('Revisión', 'REV', 'Revisión de expediente', '#F39C12', 3, 0),
-('Llamada', 'LLA', 'Llamada de seguimiento', '#9B59B6', 4, 0),
-('Visita', 'VIS', 'Visita a institución', '#E74C3C', 5, 0),
-('Correo', 'COR', 'Correo electrónico', '#1ABC9C', 6, 0);
+('Asesoría', 'ASE', 'Asesoría con cliente', '#3498DB', 1, 1),
+('Redacción', 'RED', 'Redacción de documentos', '#2ECC71', 2, 1),
+('Revisión', 'REV', 'Revisión de expediente', '#F39C12', 3, 1),
+('Llamada', 'LLA', 'Llamada de seguimiento', '#9B59B6', 4, 1),
+('Visita', 'VIS', 'Visita a institución', '#E74C3C', 5, 1),
+('Correo', 'COR', 'Correo electrónico', '#1ABC9C', 6, 1);
 END
 GO
 

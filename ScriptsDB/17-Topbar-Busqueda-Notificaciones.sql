@@ -103,13 +103,13 @@ BEGIN
     -- Diligencias
     SELECT 'Diligencia' AS Tipo, D.ID AS Id,
            D.Titulo AS Titulo,
-           TD.Nombre + ' - ' + ISNULL(P.NombreCompleto, '') AS Subtitulo,
+           ISNULL(TD.Nombre, N'Sin tipo') + ' - ' + ISNULL(P.NombreCompleto, '') AS Subtitulo,
            '/agenda/' + CAST(D.ID AS NVARCHAR(10)) AS Ruta
     FROM DILIGENCIA D
     LEFT JOIN EXPEDIENTE E ON D.Expediente_ID = E.ID
     LEFT JOIN CLIENTE C ON D.Cliente_ID = C.ID
     LEFT JOIN PERSONA P ON C.Persona_ID = P.ID
-    INNER JOIN TIPO_DILIGENCIA TD ON D.Tipo_ID = TD.ID
+    LEFT JOIN TIPO_DILIGENCIA TD ON D.Tipo_ID = TD.ID
     WHERE D.Titulo LIKE @Patron
        OR P.NombreCompleto LIKE @Patron
        OR D.Ubicacion LIKE @Patron

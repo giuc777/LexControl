@@ -6,7 +6,7 @@ Guía de instalación limpia del sistema (base de datos + API + SPA).
 |---|---|
 | `deploy/produccion/` | Scripts SQL para la BD de **producción** `DB_Lexcontrol` (Azure SQL Database) |
 | `deploy/Desarrollo/` | Scripts SQL para la BD de **pruebas** `DB_Lexcontrol_Test` (misma estructura; probar la web sin tocar producción) |
-| `deploy/migraciones/` | Reservada para futuras migraciones (por ahora vacía) |
+| `deploy/migraciones/` | Migraciones incrementales sobre una BD ya instalada (ej. `01_diligencias_tipo_opcional.sql`, 2026-10-22: SPs de diligencias con `LEFT JOIN TIPO_DILIGENCIA` + tipos de diligencia activados). Se ejecutan con `sqlcmd -b -f 65001 -i` contra la BD destino (`-d DB_Lexcontrol_Test` o `-d DB_Lexcontrol`) |
 
 | Contenido | Ruta (igual en `produccion/` y `Desarrollo/`) |
 |---|---|

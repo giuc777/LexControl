@@ -70,7 +70,7 @@ BEGIN
         E.NoExpediente,
         D.Cliente_ID,
         PC.NombreCompleto AS Cliente,
-        TD.Nombre AS Tipo,
+        ISNULL(TD.Nombre, N'Sin tipo') AS Tipo,
         D.Titulo,
         D.Fecha,
         D.HoraInicio,
@@ -91,7 +91,7 @@ BEGIN
     LEFT JOIN CLIENTE C ON D.Cliente_ID = C.ID
     LEFT JOIN PERSONA PC ON C.Persona_ID = PC.ID
     LEFT JOIN RESULTADO_DILIGENCIA RD ON D.Resultado_ID = RD.ID
-    INNER JOIN TIPO_DILIGENCIA TD ON D.Tipo_ID = TD.ID
+    LEFT JOIN TIPO_DILIGENCIA TD ON D.Tipo_ID = TD.ID
     INNER JOIN ESTADO_DILIGENCIA ED ON D.Estado_ID = ED.ID
     INNER JOIN USUARIO U ON D.Usuario_ID = U.ID
     INNER JOIN PERSONA PU ON U.Persona_ID = PU.ID
@@ -119,8 +119,8 @@ BEGIN
         E.NoExpediente,
         D.Cliente_ID,
         PC.NombreCompleto AS Cliente,
-        TD.ID AS Tipo_ID,
-        TD.Nombre AS Tipo,
+        ISNULL(TD.ID, 0) AS Tipo_ID,
+        ISNULL(TD.Nombre, N'Sin tipo') AS Tipo,
         TD.Color AS TipoColor,
         D.Titulo,
         D.Descripcion,
@@ -146,7 +146,7 @@ BEGIN
     LEFT JOIN CLIENTE C ON D.Cliente_ID = C.ID
     LEFT JOIN PERSONA PC ON C.Persona_ID = PC.ID
     LEFT JOIN RESULTADO_DILIGENCIA RD ON D.Resultado_ID = RD.ID
-    INNER JOIN TIPO_DILIGENCIA TD ON D.Tipo_ID = TD.ID
+    LEFT JOIN TIPO_DILIGENCIA TD ON D.Tipo_ID = TD.ID
     INNER JOIN ESTADO_DILIGENCIA ED ON D.Estado_ID = ED.ID
     INNER JOIN USUARIO U ON D.Usuario_ID = U.ID
     INNER JOIN PERSONA PU ON U.Persona_ID = PU.ID

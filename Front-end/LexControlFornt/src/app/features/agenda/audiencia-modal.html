@@ -1,4 +1,4 @@
-<app-modal titulo="Nueva Audiencia" [abierto]="true" (cerrado)="alCerrar()">
+<app-modal [titulo]="esEdicion ? 'Editar Audiencia' : 'Nueva Audiencia'" [abierto]="true" (cerrado)="alCerrar()">
     <form class="modal-form" (submit)="alEnviar($event)" novalidate>
         <fieldset>
             <legend>Datos de la audiencia</legend>

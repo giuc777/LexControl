@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 import { RespuestaApi } from '../api/respuesta-api';
 import {
     Audiencia,
+    AudienciaActualizar,
     AudienciaCrear,
     AudienciaDetalle,
     AudienciaResultado
@@ -42,6 +43,10 @@ export class AudienciasService {
         return this.http
             .post<RespuestaApi<number>>(this.base, dto)
             .pipe(map(r => r.data));
+    }
+
+    actualizar(id: number, dto: AudienciaActualizar): Observable<void> {
+        return this.http.put<void>(`${this.base}/${id}`, dto);
     }
 
     registrarResultado(id: number, dto: AudienciaResultado): Observable<void> {

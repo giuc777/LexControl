@@ -73,6 +73,7 @@ export interface DiligenciaActualizar {
     expedienteId: number | null;
     clienteId: number | null;
     tipoId: number | null;
+    tipoTexto?: string | null;
     titulo: string | null;
     descripcion: string | null;
     fecha: string | null;

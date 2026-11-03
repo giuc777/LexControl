@@ -221,3 +221,46 @@ public class AudienciaResultadoDto
     [MaxLength(200)]
     public string? ProximaActuacion { get; set; }
 }
+
+/// <summary>Datos de entrada para actualizar una audiencia.
+/// Todos los campos son anulables: null = sin cambio (convención COALESCE
+/// de SP_Audiencia_Actualizar). No toca el resultado (se edita con
+/// <see cref="AudienciaResultadoDto"/>).</summary>
+public class AudienciaActualizarDto
+{
+    public int? ExpedienteId { get; set; }
+
+    public DateTime? Fecha { get; set; }
+
+    public string? HoraInicio { get; set; }
+
+    public string? HoraFin { get; set; }
+
+    /// <summary>Limpia la hora fin (COALESCE no puede vaciar campos TIME).</summary>
+    public bool QuitarHoraFin { get; set; }
+
+    /// <summary>ID de tipo existente. Alternativa: <see cref="TipoTexto"/>.</summary>
+    public int? TipoId { get; set; }
+
+    /// <summary>Tipo de audiencia capturado a mano ("Otro...").</summary>
+    [MaxLength(50)]
+    public string? TipoTexto { get; set; }
+
+    /// <summary>ID de juzgado existente. Alternativa: <see cref="JuzgadoTexto"/>.</summary>
+    public int? JuzgadoId { get; set; }
+
+    /// <summary>Juzgado capturado a mano (se crea en el catálogo si no existe).</summary>
+    [MaxLength(100)]
+    public string? JuzgadoTexto { get; set; }
+
+    [MaxLength(50)]
+    public string? Sala { get; set; }
+
+    public int? EstadoId { get; set; }
+
+    [MaxLength(500)]
+    public string? Notas { get; set; }
+
+    [MaxLength(500)]
+    public string? Documentos { get; set; }
+}

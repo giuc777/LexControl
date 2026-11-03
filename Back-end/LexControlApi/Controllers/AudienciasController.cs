@@ -45,6 +45,14 @@ public class AudienciasController : ControllerBase
         return Ok(ApiResponse<int>.Correcto(id));
     }
 
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = "Administrador,Abogado")]
+    public async Task<IActionResult> Actualizar(int id, AudienciaActualizarDto dto)
+    {
+        await _service.ActualizarAsync(id, dto);
+        return NoContent();
+    }
+
     [HttpPut("{id:int}/resultado")]
     [Authorize(Roles = "Administrador,Abogado")]
     public async Task<IActionResult> RegistrarResultado(int id, AudienciaResultadoDto dto)

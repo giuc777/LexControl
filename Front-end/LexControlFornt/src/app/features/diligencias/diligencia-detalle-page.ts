@@ -4,17 +4,20 @@ import { FormsModule } from '@angular/forms';
 
 import { DiligenciasService } from '../../core/services/diligencias-service';
 import { CatalogosService } from '../../core/services/catalogos-service';
+import { ExpedientesService } from '../../core/services/expedientes-service';
+import { ClientesService } from '../../core/services/clientes-service';
 import { DiligenciaDetalle, DiligenciaActualizar } from '../../core/models/diligencia.model';
 import { CatalogoItem } from '../../core/models/catalogo.model';
 import { PageHeader } from '../../shared/components/page-header/page-header';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { ToastService } from '../../layout/toast/toast-service';
 import { ResultadoDiligenciaModal } from './resultado-diligencia-modal';
+import { DiligenciaModal } from './diligencia-modal';
 
 @Component({
     selector: 'app-diligencia-detalle-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, PageHeader, EmptyState, ResultadoDiligenciaModal],
+    imports: [FormsModule, PageHeader, EmptyState, ResultadoDiligenciaModal, DiligenciaModal],
     templateUrl: './diligencia-detalle-page.html'
 })
 export class DiligenciaDetallePage implements OnInit {
@@ -22,15 +25,20 @@ export class DiligenciaDetallePage implements OnInit {
     private readonly router = inject(Router);
     private readonly diligenciasSvc = inject(DiligenciasService);
     private readonly catalogosSvc = inject(CatalogosService);
+    private readonly expedientesSvc = inject(ExpedientesService);
+    private readonly clientesSvc = inject(ClientesService);
     private readonly toast = inject(ToastService);
 
     protected readonly diligencia = signal<DiligenciaDetalle | null>(null);
     protected readonly cargando = signal(true);
     protected readonly estadosDiligencia = signal<CatalogoItem[]>([]);
+    protected readonly expedientes = signal<{ id: number; noExpediente: string }[]>([]);
+    protected readonly clientes = signal<{ id: number; nombre: string }[]>([]);
 
     protected readonly mostrarFormEstado = signal(false);
     protected readonly nuevoEstadoId = signal<number>(0);
     protected readonly modalResultadoAbierto = signal(false);
+    protected readonly modalEdicionAbierto = signal(false);
 
     ngOnInit(): void {
         const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -160,5 +168,43 @@ export class DiligenciaDetallePage implements OnInit {
         this.cerrarModalResultado();
         const id = this.diligencia()?.id;
         if (id) this.cargarDetalle(id);
+    }
+
+    abrirModalEdicion(): void {
+        this.modalEdicionAbierto.set(true);
+        if (!this.expedientes().length) this.cargarExpedientes();
+        if (!this.clientes().length) this.cargarClientes();
+    }
+
+    cerrarModalEdicion(): void {
+        this.modalEdicionAbierto.set(false);
+    }
+
+    alGuardarEdicion(): void {
+        this.cerrarModalEdicion();
+        const id = this.diligencia()?.id;
+        if (id) this.cargarDetalle(id);
+    }
+
+    cargarExpedientes(): void {
+        this.expedientesSvc.listar({}).subscribe({
+            next: (data) => this.expedientes.set(
+                data.expedientes.map((e: { id: number; noExpediente: string }) => ({
+                    id: e.id,
+                    noExpediente: e.noExpediente
+                }))
+            )
+        });
+    }
+
+    cargarClientes(): void {
+        this.clientesSvc.listar({}).subscribe({
+            next: (data) => this.clientes.set(
+                data.clientes.map((c: { id: number; nombreCompleto: string }) => ({
+                    id: c.id,
+                    nombre: c.nombreCompleto
+                }))
+            )
+        });
     }
 }

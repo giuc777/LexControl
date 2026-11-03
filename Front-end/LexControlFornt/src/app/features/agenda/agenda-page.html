@@ -112,7 +112,7 @@
 </section>
 
 @if (modalAudienciaAbierto()) {
-    <app-audiencia-modal (cerrar)="cerrarModalAudiencia()" (creado)="alCrearAudiencia()" />
+    <app-audiencia-modal (cerrar)="cerrarModalAudiencia()" (guardado)="alGuardarAudiencia()" />
 }
 
 @if (modalDiligenciaAbierto()) {
@@ -121,5 +121,5 @@
         [clientes]="clientes()"
         [fechaInicial]="fechaSeleccionada()"
         (cerrar)="cerrarModalDiligencia()"
-        (alCrear)="alCrearDiligencia()" />
+        (alGuardar)="alGuardarDiligencia()" />
 }

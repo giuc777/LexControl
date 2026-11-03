@@ -137,5 +137,5 @@ export class DiligenciasPage implements OnInit {
 
     abrirModal(): void { this.modalAbierto.set(true); }
     cerrarModal(): void { this.modalAbierto.set(false); }
-    alCrearDiligencia(): void { this.cerrarModal(); this.cargarDiligencias(); }
+    alGuardarDiligencia(): void { this.cerrarModal(); this.cargarDiligencias(); }
 }

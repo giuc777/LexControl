@@ -6,12 +6,13 @@ import { AudienciaDetalle } from '../../core/models/audiencia.model';
 import { PageHeader } from '../../shared/components/page-header/page-header';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { ResultadoModal } from './resultado-modal';
+import { AudienciaModal } from './audiencia-modal';
 import { ToastService } from '../../layout/toast/toast-service';
 
 @Component({
     selector: 'app-agenda-detalle-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [PageHeader, EmptyState, ResultadoModal],
+    imports: [PageHeader, EmptyState, ResultadoModal, AudienciaModal],
     templateUrl: './agenda-detalle-page.html'
 })
 export class AgendaDetallePage implements OnInit {
@@ -23,6 +24,7 @@ export class AgendaDetallePage implements OnInit {
     protected readonly audiencia = signal<AudienciaDetalle | null>(null);
     protected readonly cargando = signal(true);
     protected readonly modalAbierto = signal(false);
+    protected readonly modalEdicionAbierto = signal(false);
 
     ngOnInit(): void {
         const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -54,6 +56,20 @@ export class AgendaDetallePage implements OnInit {
 
     alRegistrarResultado(): void {
         this.cerrarModal();
+        const id = this.audiencia()?.id;
+        if (id) this.cargarDetalle(id);
+    }
+
+    abrirModalEdicion(): void {
+        this.modalEdicionAbierto.set(true);
+    }
+
+    cerrarModalEdicion(): void {
+        this.modalEdicionAbierto.set(false);
+    }
+
+    alGuardarEdicion(): void {
+        this.cerrarModalEdicion();
         const id = this.audiencia()?.id;
         if (id) this.cargarDetalle(id);
     }

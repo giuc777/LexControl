@@ -292,7 +292,7 @@ export class AgendaPage implements OnInit {
         this.modalAudienciaAbierto.set(false);
     }
 
-    alCrearAudiencia(): void {
+    alGuardarAudiencia(): void {
         this.cerrarModalAudiencia();
         this.cargarDatos();
     }
@@ -305,7 +305,7 @@ export class AgendaPage implements OnInit {
         this.modalDiligenciaAbierto.set(false);
     }
 
-    alCrearDiligencia(): void {
+    alGuardarDiligencia(): void {
         this.cerrarModalDiligencia();
         this.cargarDatos();
     }

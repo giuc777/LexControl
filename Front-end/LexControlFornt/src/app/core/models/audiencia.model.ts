@@ -63,3 +63,21 @@ export interface AudienciaResultado {
     descripcionResultado: string;
     proximaActuacion: string | null;
 }
+
+/** PUT /api/audiencias/{id} — null = sin cambio (convención del SP);
+    quitarHoraFin limpia HoraFin porque el SP usa COALESCE. */
+export interface AudienciaActualizar {
+    expedienteId: number;
+    fecha: string;
+    horaInicio: string;
+    horaFin: string | null;
+    quitarHoraFin: boolean;
+    tipoId: number | null;
+    tipoTexto: string | null;
+    juzgadoId: number | null;
+    juzgadoTexto: string | null;
+    sala: string;
+    estadoId: number;
+    notas: string;
+    documentos: string | null;
+}

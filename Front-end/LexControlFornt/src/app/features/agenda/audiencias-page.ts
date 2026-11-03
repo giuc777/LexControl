@@ -124,7 +124,7 @@ export class AudienciasPage implements OnInit {
 
     cerrarModal(): void { this.modalAbierto.set(false); }
 
-    alCrearAudiencia(): void {
+    alGuardarAudiencia(): void {
         this.cerrarModal();
         this.cargarAudiencias();
     }

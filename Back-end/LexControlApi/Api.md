@@ -325,6 +325,7 @@ public static string Sha256Hash(string input)
 - [ ] `GET /api/audiencias` — listar con filtros
 - [ ] `GET /api/audiencias/proximas` — `SP_Audiencia_Proximas`
 - [ ] `POST /api/audiencias` — `SP_Audiencia_Insertar`
+- [x] `PUT /api/audiencias/{id:int}` — `SP_Audiencia_Actualizar` (edición de datos; no toca resultado; migración `Deploy/migraciones/02_audiencia_actualizar.sql`)
 - [x] `PUT /api/audiencias/{id:int}/resultado` — `SP_Audiencia_RegistrarResultado` (registra o edita resultado)
 - [ ] Necesita `SP_Audiencia_Listar` y `SP_Audiencia_ObtenerPorID` (no existen → crear)
 

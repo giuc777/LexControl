@@ -59,6 +59,7 @@ Documentos, Usuario_Creacion_ID, FechaCreacion
 | `ListarAsync()` | SP_Audiencia_Listar | Lista con filtros (expediente, fechas, estado, tipo) |
 | `ObtenerPorIdAsync()` | SP_Audiencia_ObtenerPorID | Detalle completo con joins |
 | `CrearAsync()` | SP_Audiencia_Insertar | Crea nueva audiencia (con OUTPUT @NuevoID) |
+| `ActualizarAsync()` | SP_Audiencia_Actualizar | Actualiza datos (NULL = sin cambio; no toca resultado) |
 | `RegistrarResultadoAsync()` | SP_Audiencia_RegistrarResultado | Registra resultado y cambia estado a "Realizada" |
 | `ProximasAsync()` | SP_Audiencia_Proximas | Audiencias próximas (default 30 días) |
 
@@ -71,6 +72,7 @@ Documentos, Usuario_Creacion_ID, FechaCreacion
 | GET | `/api/audiencias` | [Authorize] | Listar con filtros query string |
 | GET | `/api/audiencias/{id}` | [Authorize] | Obtener detalle por ID |
 | POST | `/api/audiencias` | [Authorize(Roles="Administrador,Abogado")] | Crear audiencia |
+| PUT | `/api/audiencias/{id}` | [Authorize(Roles="Administrador,Abogado")] | Editar datos de la audiencia |
 | PUT | `/api/audiencias/{id}/resultado` | [Authorize(Roles="Administrador,Abogado")] | Registrar resultado |
 | GET | `/api/audiencias/proximas` | [Authorize] | Próximas audiencias |
 
@@ -94,6 +96,7 @@ builder.Services.AddScoped<IAudienciaService, AudienciaService>();
 | `Audiencia` | Listado y proximas |
 | `AudienciaDetalle` | Detalle completo |
 | `AudienciaCrear` | DTO de creación |
+| `AudienciaActualizar` | DTO de edición (null = sin cambio) |
 | `AudienciaResultado` | DTO de registro de resultado |
 
 ### 4.2 Service
@@ -105,6 +108,7 @@ builder.Services.AddScoped<IAudienciaService, AudienciaService>();
 | `listar()` | GET `/api/audiencias` | `Observable<Audiencia[]>` |
 | `obtenerPorId()` | GET `/api/audiencias/{id}` | `Observable<AudienciaDetalle>` |
 | `crear()` | POST `/api/audiencias` | `Observable<number>` |
+| `actualizar()` | PUT `/api/audiencias/{id}` | `Observable<void>` |
 | `registrarResultado()` | PUT `/api/audiencias/{id}/resultado` | `Observable<void>` |
 | `proximas()` | GET `/api/audiencias/proximas` | `Observable<Audiencia[]>` |
 

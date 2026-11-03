@@ -1,6 +1,14 @@
 @if (audiencia(); as aud) {
     <app-page-header [titulo]="'Audiencia — ' + aud.tipo"
         [subtitulo]="'Expediente ' + aud.noExpediente">
+        <button type="button" class="btn-secondary" data-testid="btn-editar-audiencia"
+            (click)="abrirModalEdicion()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+            Editar Audiencia
+        </button>
         <button type="button" class="btn-secondary" data-testid="btn-volver" (click)="irAVolver()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -149,6 +157,10 @@
     @if (modalAbierto()) {
         <app-resultado-modal [audiencia]="aud"
             (cerrar)="cerrarModal()" (registrado)="alRegistrarResultado()" />
+    }
+    @if (modalEdicionAbierto()) {
+        <app-audiencia-modal [audiencia]="aud"
+            (cerrar)="cerrarModalEdicion()" (guardado)="alGuardarEdicion()" />
     }
 } @else if (cargando()) {
     <div class="panel loading-state">

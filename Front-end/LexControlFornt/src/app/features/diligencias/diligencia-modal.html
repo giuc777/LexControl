@@ -1,7 +1,7 @@
 <div class="modal-overlay" (click)="onCerrar()">
     <div class="modal-contenido modal-amplio" data-testid="modal-diligencia" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2>Nueva Diligencia</h2>
+            <h2>{{ esEdicion ? 'Editar Diligencia' : 'Nueva Diligencia' }}</h2>
             <button class="btn-cerrar" (click)="onCerrar()">&times;</button>
         </div>
 
@@ -121,7 +121,7 @@
         <div class="modal-footer">
             <button class="btn-secondary" (click)="onCerrar()" [disabled]="guardando()">Cancelar</button>
             <button class="btn-primary" (click)="guardar()" [disabled]="guardando()">
-                @if (guardando()) { Guardando... } @else { Crear Diligencia }
+                @if (guardando()) { Guardando... } @else if (esEdicion) { Guardar Cambios } @else { Crear Diligencia }
             </button>
         </div>
     </div>

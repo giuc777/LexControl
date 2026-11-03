@@ -1746,6 +1746,52 @@ BEGIN
 END
 GO
 
+-- Actualizacion de datos de la audiencia (no toca el resultado:
+-- Resultado_ID/DescripcionResultado/ProximaActuacion se editan con
+-- SP_Audiencia_RegistrarResultado). Convencion: NULL = sin cambio;
+-- para vaciar un campo de texto se envia cadena vacia. HoraFin se
+-- limpia con @QuitarHoraFin porque COALESCE no puede vaciar TIME.
+CREATE OR ALTER PROCEDURE SP_Audiencia_Actualizar
+    @ID INT,
+    @Expediente_ID INT = NULL,
+    @Fecha DATE = NULL,
+    @HoraInicio TIME = NULL,
+    @HoraFin TIME = NULL,
+    @QuitarHoraFin BIT = 0,
+    @Tipo_ID INT = NULL,
+    @Juzgado_ID INT = NULL,
+    @Sala NVARCHAR(50) = NULL,
+    @Estado_ID INT = NULL,
+    @Notas NVARCHAR(500) = NULL,
+    @Documentos NVARCHAR(500) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        UPDATE AUDIENCIA SET
+            Expediente_ID = COALESCE(@Expediente_ID, Expediente_ID),
+            Fecha         = COALESCE(@Fecha, Fecha),
+            HoraInicio    = COALESCE(@HoraInicio, HoraInicio),
+            HoraFin       = CASE WHEN @QuitarHoraFin = 1 THEN NULL
+                                 ELSE COALESCE(@HoraFin, HoraFin) END,
+            Tipo_ID       = COALESCE(@Tipo_ID, Tipo_ID),
+            Juzgado_ID    = COALESCE(@Juzgado_ID, Juzgado_ID),
+            Sala          = COALESCE(@Sala, Sala),
+            Estado_ID     = COALESCE(@Estado_ID, Estado_ID),
+            Notas         = COALESCE(@Notas, Notas),
+            Documentos    = COALESCE(@Documentos, Documentos)
+        WHERE ID = @ID;
+
+        IF @@ROWCOUNT = 0
+            RETURN -2; -- No encontrado
+        RETURN 0;
+    END TRY
+    BEGIN CATCH
+        RETURN ERROR_NUMBER();
+    END CATCH
+END
+GO
+
 CREATE OR ALTER PROCEDURE SP_Audiencia_Proximas
     @Dias INT = 30,
     @Usuario_ID INT = NULL
@@ -2568,6 +2614,7 @@ FROM (VALUES
     ('SP_Expediente_CambiarEstado',          'LexControlDB.sql'),
     ('SP_Expediente_Eliminar',               'LexControlDB.sql'),
     ('SP_Audiencia_Insertar',                'LexControlDB.sql'),
+    ('SP_Audiencia_Actualizar',              'LexControlDB.sql'),
     ('SP_Audiencia_RegistrarResultado',      'LexControlDB.sql'),
     ('SP_Audiencia_Proximas',                'LexControlDB.sql'),
     ('SP_Tramite_Insertar',                  'LexControlDB.sql'),

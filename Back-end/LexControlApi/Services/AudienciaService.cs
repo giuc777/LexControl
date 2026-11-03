@@ -11,6 +11,7 @@ public interface IAudienciaService
         int? estadoId, int? tipoId);
     Task<AudienciaDetalleDto?> ObtenerPorIdAsync(int id);
     Task<int> CrearAsync(AudienciaCrearDto dto, int usuarioId);
+    Task ActualizarAsync(int id, AudienciaActualizarDto dto);
     Task RegistrarResultadoAsync(int id, AudienciaResultadoDto dto, int usuarioId);
     Task<List<AudienciaDto>> ProximasAsync(int dias, int? usuarioId);
 }
@@ -79,6 +80,46 @@ public class AudienciaService : IAudienciaService
                 Usuario_Creacion_ID = usuarioId
             },
             "@NuevoID");
+    }
+
+    public async Task ActualizarAsync(int id, AudienciaActualizarDto dto)
+    {
+        if (dto.ExpedienteId is not null && dto.ExpedienteId <= 0)
+            throw new ExcepcionNegocio(-2, "El expediente seleccionado no es válido.",
+                StatusCodes.Status400BadRequest);
+        if (dto.EstadoId is not null && dto.EstadoId <= 0)
+            throw new ExcepcionNegocio(-2, "El estado seleccionado no es válido.",
+                StatusCodes.Status400BadRequest);
+
+        // Tipo y juzgado: ID existente, texto manual ("Otro...") o
+        // null (= sin cambio, misma convención del SP).
+        var tipoId = await _resolverTexto.ResolverAsync("TIPO_AUDIENCIA", dto.TipoId, dto.TipoTexto);
+        var juzgadoId = await _resolverTexto.ResolverJuzgadoAsync(dto.JuzgadoId, dto.JuzgadoTexto);
+
+        TimeSpan? horaInicio = null;
+        if (!string.IsNullOrEmpty(dto.HoraInicio) && TimeSpan.TryParse(dto.HoraInicio, out var hi))
+            horaInicio = hi;
+        TimeSpan? horaFin = null;
+        if (!string.IsNullOrEmpty(dto.HoraFin) && TimeSpan.TryParse(dto.HoraFin, out var hf))
+            horaFin = hf;
+
+        await _repositorio.EjecutarRetornoAsync(
+            "SP_Audiencia_Actualizar",
+            new
+            {
+                ID = id,
+                Expediente_ID = dto.ExpedienteId,
+                Fecha = dto.Fecha,
+                HoraInicio = horaInicio,
+                HoraFin = horaFin,
+                QuitarHoraFin = dto.QuitarHoraFin,
+                Tipo_ID = tipoId,
+                Juzgado_ID = juzgadoId,
+                Sala = dto.Sala,
+                Estado_ID = dto.EstadoId,
+                Notas = dto.Notas,
+                Documentos = dto.Documentos
+            });
     }
 
     public async Task RegistrarResultadoAsync(int id, AudienciaResultadoDto dto, int usuarioId)

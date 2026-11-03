@@ -249,6 +249,7 @@ Lista todos los catálogos maestros en un solo request (evita múltiples round-t
 | GET | `/api/audiencias` | (nuevo) | Lista con filtros: Expediente_ID, Fecha, Estado |
 | GET | `/api/audiencias/{id}` | — | Obtener por ID |
 | POST | `/api/audiencias` | `SP_Audiencia_Insertar` | Registrar audiencia |
+| PUT | `/api/audiencias/{id}` | `SP_Audiencia_Actualizar` | Actualizar datos de la audiencia (no toca el resultado) |
 | PUT | `/api/audiencias/{id}/resultado` | `SP_Audiencia_RegistrarResultado` | Registrar o editar resultado (sobreescribe; estado = Realizada) |
 | GET | `/api/audiencias/proximas` | `SP_Audiencia_Proximas` | Audiencias próximas (default 30 días) |
 

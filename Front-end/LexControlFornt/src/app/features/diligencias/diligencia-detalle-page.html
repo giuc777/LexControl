@@ -112,6 +112,10 @@
 
     <div class="detalle-acciones">
         @if (!esCancelada()) {
+            <button class="btn-secondary" data-testid="btn-editar-diligencia"
+                (click)="abrirModalEdicion()">
+                Editar
+            </button>
             @if (puedeGestionarResultado()) {
                 <button class="btn-primary" data-testid="btn-registrar-resultado"
                     (click)="abrirModalResultado()">
@@ -160,5 +164,11 @@
     @if (modalResultadoAbierto() && diligencia(); as d) {
         <app-resultado-diligencia-modal [diligencia]="d"
             (cerrar)="cerrarModalResultado()" (registrado)="alRegistrarResultado()" />
+    }
+
+    @if (modalEdicionAbierto() && diligencia(); as d) {
+        <app-diligencia-modal [diligencia]="d"
+            [expedientes]="expedientes()" [clientes]="clientes()"
+            (cerrar)="cerrarModalEdicion()" (alGuardar)="alGuardarEdicion()" />
     }
 }

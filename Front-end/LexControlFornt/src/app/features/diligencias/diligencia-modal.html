@@ -37,7 +37,7 @@
                     </div>
                     <div class="form-grupo">
                         <label>Titulo <span class="obligatorio">*</span></label>
-                        <input type="text" class="form-control"
+                        <input type="text" class="form-control" data-testid="input-titulo"
                                [ngModel]="titulo()"
                                (ngModelChange)="titulo.set($event)"
                                placeholder="Ej: Asesoria con cliente" />
@@ -110,7 +110,7 @@
                 </div>
                 <div class="form-grupo form-grupo-full">
                     <label>Notas</label>
-                    <textarea class="form-control" rows="2"
+                    <textarea class="form-control" rows="2" data-testid="input-notas"
                               [ngModel]="notas()"
                               (ngModelChange)="notas.set($event)"
                               placeholder="Notas internas..."></textarea>
@@ -120,7 +120,7 @@
 
         <div class="modal-footer">
             <button class="btn-secondary" (click)="onCerrar()" [disabled]="guardando()">Cancelar</button>
-            <button class="btn-primary" (click)="guardar()" [disabled]="guardando()">
+            <button class="btn-primary" data-testid="btn-guardar-diligencia" (click)="guardar()" [disabled]="guardando()">
                 @if (guardando()) { Guardando... } @else if (esEdicion) { Guardar Cambios } @else { Crear Diligencia }
             </button>
         </div>

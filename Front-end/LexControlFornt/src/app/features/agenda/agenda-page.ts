@@ -194,10 +194,11 @@ export class AgendaPage implements OnInit {
     }
 
     cargarExpedientes(): void {
-        this.expedientesSvc.listar({}).subscribe({
-            next: (data) => {
+        // Sin expedientes archivados: no deben ofrecerse para crear diligencias.
+        this.expedientesSvc.listarParaSeleccion().subscribe({
+            next: (items) => {
                 this.expedientes.set(
-                    data.expedientes.map((e: { id: number; noExpediente: string }) => ({
+                    items.map((e) => ({
                         id: e.id,
                         noExpediente: e.noExpediente
                     }))

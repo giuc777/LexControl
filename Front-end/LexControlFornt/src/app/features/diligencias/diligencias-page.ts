@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { DiligenciasService } from '../../core/services/diligencias-service';
 import { CatalogosService } from '../../core/services/catalogos-service';
-import { ExpedientesService } from '../../core/services/expedientes-service';
+import { ExpedientesService, ESTADO_EXPEDIENTE_ARCHIVADO } from '../../core/services/expedientes-service';
 import { ClientesService } from '../../core/services/clientes-service';
 import { Diligencia } from '../../core/models/diligencia.model';
 import { CatalogoItem } from '../../core/models/catalogo.model';
@@ -41,8 +41,14 @@ export class DiligenciasPage implements OnInit {
 
     protected readonly tiposDiligencia = signal<CatalogoItem[]>([]);
     protected readonly estadosDiligencia = signal<CatalogoItem[]>([]);
-    protected readonly expedientes = signal<{ id: number; noExpediente: string }[]>([]);
+    protected readonly expedientes = signal<{ id: number; noExpediente: string; estadoId: number }[]>([]);
     protected readonly clientes = signal<{ id: number; nombre: string }[]>([]);
+
+    /* Opciones para el modal de creación: sin expedientes archivados
+       (el select de filtro de la tabla sí los conserva). */
+    protected readonly expedientesParaModal = computed(() =>
+        this.expedientes().filter(e => e.estadoId !== ESTADO_EXPEDIENTE_ARCHIVADO)
+    );
 
     protected readonly filtroTipoId = signal<number | null>(null);
     protected readonly filtroEstadoId = signal<number | null>(null);
@@ -67,12 +73,13 @@ export class DiligenciasPage implements OnInit {
     }
 
     cargarExpedientes(): void {
-        this.expedientesSvc.listar({}).subscribe({
+        this.expedientesSvc.listar({ tamanioPagina: 1000 }).subscribe({
             next: (data) => {
                 this.expedientes.set(
-                    data.expedientes.map((e: { id: number; noExpediente: string }) => ({
+                    data.expedientes.map((e: { id: number; noExpediente: string; estadoId: number }) => ({
                         id: e.id,
-                        noExpediente: e.noExpediente
+                        noExpediente: e.noExpediente,
+                        estadoId: e.estadoId
                     }))
                 );
             }

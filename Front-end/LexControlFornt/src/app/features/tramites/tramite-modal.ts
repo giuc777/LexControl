@@ -67,9 +67,10 @@ export class TramiteModal implements OnInit {
     }
 
     cargarExpedientes(): void {
-        this.expedientesSvc.listar({}).subscribe({
-            next: (data) => {
-                this.expedientes.set(data.expedientes.map((e: { id: number; noExpediente: string }) => ({ id: e.id, noExpediente: e.noExpediente })));
+        // Sin expedientes archivados: no deben ofrecerse para crear tramites.
+        this.expedientesSvc.listarParaSeleccion().subscribe({
+            next: (items) => {
+                this.expedientes.set(items.map((e) => ({ id: e.id, noExpediente: e.noExpediente })));
             }
         });
     }

@@ -19,6 +19,10 @@ import {
 
 /* Servicio HTTP del modulo Expedientes. Consume los endpoints de
    ExpedientesController.cs y los endpoints anidados de partes, notas. */
+
+/* Estado "Archivado" del catalogo ESTADO_EXPEDIENTE (4). */
+export const ESTADO_EXPEDIENTE_ARCHIVADO = 4;
+
 @Injectable({ providedIn: 'root' })
 export class ExpedientesService {
     private readonly http = inject(HttpClient);
@@ -52,6 +56,14 @@ export class ExpedientesService {
                     total: Number(resp.headers.get('X-Total-Count') ?? 0)
                 }))
             );
+    }
+
+    /* Opciones para los selects de creacion (tramites, audiencias,
+       diligencias): excluye los expedientes archivados. */
+    listarParaSeleccion(): Observable<ExpedienteLista[]> {
+        return this.listar({ tamanioPagina: 1000 }).pipe(
+            map(r => r.expedientes.filter(e => e.estadoId !== ESTADO_EXPEDIENTE_ARCHIVADO))
+        );
     }
 
     obtenerPorId(id: number): Observable<ExpedienteDetalle> {

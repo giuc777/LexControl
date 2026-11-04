@@ -57,6 +57,17 @@ export class DiligenciaModal implements OnInit {
         return Number(valor) === this.valorOtro;
     }
 
+    /** Opciones del select de expediente: las recibidas (sin archivados)
+        más el expediente actual en edición si quedó fuera de la lista. */
+    protected get opcionesExpediente(): { id: number; noExpediente: string }[] {
+        const lista = [...this.expedientes];
+        const d = this.diligencia;
+        if (d?.expedienteId && !lista.some(e => e.id === d.expedienteId)) {
+            lista.unshift({ id: d.expedienteId, noExpediente: d.noExpediente ?? `Expediente #${d.expedienteId}` });
+        }
+        return lista;
+    }
+
     ngOnInit(): void {
         if (this.diligencia) this.precargar();
         else if (this.fechaInicial) this.fecha.set(this.fechaInicial);

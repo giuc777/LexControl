@@ -7,6 +7,7 @@ import { DocumentosService } from '../../core/services/documentos-service';
 import { CatalogosService } from '../../core/services/catalogos-service';
 import { AudienciasService } from '../../core/services/audiencias-service';
 import { TramitesService } from '../../core/services/tramites-service';
+import { NotificacionesService } from '../../core/services/notificaciones-service';
 import { PermisosService } from '../../core/permisos/permisos';
 import { ToastService } from '../../layout/toast/toast-service';
 import {
@@ -19,6 +20,7 @@ import {
 } from '../../core/models/expediente.model';
 import { Audiencia } from '../../core/models/audiencia.model';
 import { Tramite } from '../../core/models/tramite.model';
+import { NotificacionLista } from '../../core/models/notificacion.model';
 import { CatalogoItem } from '../../core/models/catalogo.model';
 import { Modal } from '../../shared/components/modal/modal';
 import { ConfirmacionModal } from '../../shared/components/confirmacion-modal/confirmacion-modal';
@@ -41,6 +43,16 @@ const COLORES_ESTADO_TRAMITE: Record<string, string> = {
     'En Proceso': '#f39c12',
     'Resuelto': '#2ecc71',
     'Rechazado': '#e74c3c'
+};
+
+/* Réplica de notificaciones-page (incluye estados legacy). */
+const COLORES_ESTADO_NOTIFICACION: Record<string, string> = {
+    'Recibida': '#3498db',
+    'Atendida': '#2ecc71',
+    'Pendiente': '#f39c12',
+    'En Tramite': '#3498db',
+    'Vencida': '#e74c3c',
+    'Rechazada': '#95a5a6'
 };
 
 type AccionBorrado = 'documento' | 'nota' | 'parte';
@@ -66,6 +78,7 @@ export class ExpedienteDetallePage implements OnInit {
     private readonly catalogosSvc = inject(CatalogosService);
     private readonly audienciasSvc = inject(AudienciasService);
     private readonly tramitesSvc = inject(TramitesService);
+    private readonly notificacionesSvc = inject(NotificacionesService);
     private readonly permisosSvc = inject(PermisosService);
     private readonly toastSvc = inject(ToastService);
 
@@ -75,12 +88,14 @@ export class ExpedienteDetallePage implements OnInit {
     protected readonly documentos = signal<DocExpediente[]>([]);
     protected readonly cargando = signal(true);
 
-    /* Audiencias y trámites relacionados; los paneles solo se pintan si el
-       rol tiene el módulo (evita el redirect a /dashboard del moduloGuard). */
+    /* Audiencias, trámites y notificaciones relacionados; los paneles solo
+       se pintan si el rol tiene el módulo (evita el redirect del moduloGuard). */
     protected readonly audiencias = signal<Audiencia[]>([]);
     protected readonly tramites = signal<Tramite[]>([]);
+    protected readonly notificaciones = signal<NotificacionLista[]>([]);
     protected readonly puedeAudiencias = computed(() => this.permisosSvc.tiene('audiencias'));
     protected readonly puedeTramites = computed(() => this.permisosSvc.tiene('tramites'));
+    protected readonly puedeNotificaciones = computed(() => this.permisosSvc.tiene('notificaciones'));
 
     protected rolesProcesales: CatalogoItem[] = [];
 
@@ -117,12 +132,20 @@ export class ExpedienteDetallePage implements OnInit {
         this.router.navigate(['/tramites', id]);
     }
 
+    irANotificacion(id: number): void {
+        this.router.navigate(['/notificaciones-oj', id]);
+    }
+
     colorEstadoAudiencia(estado: string): string {
         return COLORES_ESTADO_AUDIENCIA[estado] ?? '#6c757d';
     }
 
     colorEstadoTramite(estado: string): string {
         return COLORES_ESTADO_TRAMITE[estado] ?? '#6c757d';
+    }
+
+    colorEstadoNotificacion(estado: string): string {
+        return COLORES_ESTADO_NOTIFICACION[estado] ?? '#6c757d';
     }
 
     formatearFecha(iso: string | null): string {
@@ -416,6 +439,12 @@ export class ExpedienteDetallePage implements OnInit {
             this.tramitesSvc.listar({ expedienteId: this.expedienteId }).subscribe({
                 next: trs => this.tramites.set(trs),
                 error: () => this.tramites.set([])
+            });
+        }
+        if (this.puedeNotificaciones()) {
+            this.notificacionesSvc.listar({ expedienteId: this.expedienteId }).subscribe({
+                next: nots => this.notificaciones.set(nots),
+                error: () => this.notificaciones.set([])
             });
         }
     }

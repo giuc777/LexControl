@@ -26,11 +26,11 @@
                     </div>
                     <div class="form-grupo">
                         <label>Expediente</label>
-                        <select class="form-control"
+                        <select class="form-control" data-testid="select-expediente"
                                 [ngModel]="expedienteId()"
                                 (ngModelChange)="expedienteId.set($event ? +$event : null)">
                             <option [ngValue]="null">Sin expediente</option>
-                            @for (e of expedientes; track e.id) {
+                            @for (e of opcionesExpediente; track e.id) {
                                 <option [value]="e.id">{{ e.noExpediente }}</option>
                             }
                         </select>

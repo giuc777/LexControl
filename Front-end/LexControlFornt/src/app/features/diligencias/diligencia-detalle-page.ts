@@ -187,9 +187,10 @@ export class DiligenciaDetallePage implements OnInit {
     }
 
     cargarExpedientes(): void {
-        this.expedientesSvc.listar({}).subscribe({
-            next: (data) => this.expedientes.set(
-                data.expedientes.map((e: { id: number; noExpediente: string }) => ({
+        // Sin expedientes archivados: no deben ofrecerse al editar la diligencia.
+        this.expedientesSvc.listarParaSeleccion().subscribe({
+            next: (items) => this.expedientes.set(
+                items.map((e) => ({
                     id: e.id,
                     noExpediente: e.noExpediente
                 }))

@@ -261,6 +261,38 @@
                     }
                 </section>
             }
+
+            <!-- Notificaciones OJ relacionadas -->
+            @if (puedeNotificaciones()) {
+                <section class="panel" aria-label="Notificaciones OJ del expediente" data-testid="panel-notificaciones">
+                    <header class="panel-head">
+                        <h2 class="panel-title">Notificaciones OJ</h2>
+                    </header>
+                    @if (notificaciones().length === 0) {
+                        <div class="empty-inline">No hay notificaciones registradas.</div>
+                    } @else {
+                        <div class="relacionados-lista">
+                            @for (n of notificaciones(); track n.id) {
+                                <button type="button" class="relacionado-item"
+                                    data-testid="item-notificacion"
+                                    (click)="irANotificacion(n.id)">
+                                    <span class="relacionado-main">
+                                        <span class="relacionado-titulo">{{ n.tipo }}</span>
+                                        <span class="relacionado-sub">
+                                            {{ formatearFecha(n.fechaRecepcion) }}
+                                            @if (n.numeroResolucion) { &middot; Res. {{ n.numeroResolucion }} }
+                                        </span>
+                                    </span>
+                                    <span class="pill-estado"
+                                        [style.background-color]="colorEstadoNotificacion(n.estado)">
+                                        {{ n.estado }}
+                                    </span>
+                                </button>
+                            }
+                        </div>
+                    }
+                </section>
+            }
         </div>
     </div>
 

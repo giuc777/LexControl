@@ -15,7 +15,7 @@
                 <div class="form-grid">
                     <div class="form-grupo">
                         <label>No. Expediente <span class="obligatorio">*</span></label>
-                        <select class="form-control"
+                        <select class="form-control" data-testid="select-expediente"
                                 [ngModel]="expedienteId()"
                                 (ngModelChange)="expedienteId.set(+$event)">
                             <option [value]="0">Seleccione expediente</option>

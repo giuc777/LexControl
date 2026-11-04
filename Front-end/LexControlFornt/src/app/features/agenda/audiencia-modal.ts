@@ -58,12 +58,25 @@ export class AudienciaModal implements OnInit {
     ngOnInit(): void {
         if (this.audiencia) this.precargar(this.audiencia);
 
-        this.expedientesSvc.listar({ tamanioPagina: 100 }).subscribe({
-            next: (datos) => this.expedientes.set(datos.expedientes.map(e => ({
-                id: e.id,
-                noExpediente: e.noExpediente,
-                cliente: e.cliente
-            })))
+        this.expedientesSvc.listarParaSeleccion().subscribe({
+            next: (items) => {
+                const opciones = items.map(e => ({
+                    id: e.id,
+                    noExpediente: e.noExpediente,
+                    cliente: e.cliente
+                }));
+                // En edición, si el expediente actual quedó archivado, se
+                // conserva en el select para no perder el valor ya asignado.
+                const aud = this.audiencia;
+                if (aud && !opciones.some(o => o.id === aud.expedienteId)) {
+                    opciones.unshift({
+                        id: aud.expedienteId,
+                        noExpediente: aud.noExpediente,
+                        cliente: aud.cliente ?? ''
+                    });
+                }
+                this.expedientes.set(opciones);
+            }
         });
 
         // En edición se incluyen inactivos para que el valor ya asignado

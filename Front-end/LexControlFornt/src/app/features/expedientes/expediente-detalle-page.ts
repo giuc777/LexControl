@@ -1,10 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { ExpedientesService } from '../../core/services/expedientes-service';
 import { DocumentosService } from '../../core/services/documentos-service';
 import { CatalogosService } from '../../core/services/catalogos-service';
+import { AudienciasService } from '../../core/services/audiencias-service';
+import { TramitesService } from '../../core/services/tramites-service';
+import { PermisosService } from '../../core/permisos/permisos';
 import { ToastService } from '../../layout/toast/toast-service';
 import {
     DocExpediente,
@@ -14,6 +17,8 @@ import {
     NotaExpediente,
     ParteProcesal
 } from '../../core/models/expediente.model';
+import { Audiencia } from '../../core/models/audiencia.model';
+import { Tramite } from '../../core/models/tramite.model';
 import { CatalogoItem } from '../../core/models/catalogo.model';
 import { Modal } from '../../shared/components/modal/modal';
 import { ConfirmacionModal } from '../../shared/components/confirmacion-modal/confirmacion-modal';
@@ -21,6 +26,22 @@ import { VisorArchivosComponent, ArchivoVisor } from '../../shared/components/vi
 import { ExpedienteModal } from './expediente-modal';
 
 const MESES_CORTO = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+/* Colores de estado réplica de audiencias-page / tramites-page. */
+const COLORES_ESTADO_AUDIENCIA: Record<string, string> = {
+    'Programada': '#3498db',
+    'Realizada': '#2ecc71',
+    'Cancelada': '#e74c3c',
+    'Suspendida': '#f39c12',
+    'Reprogramada': '#f39c12'
+};
+
+const COLORES_ESTADO_TRAMITE: Record<string, string> = {
+    'Ingresado': '#3498db',
+    'En Proceso': '#f39c12',
+    'Resuelto': '#2ecc71',
+    'Rechazado': '#e74c3c'
+};
 
 type AccionBorrado = 'documento' | 'nota' | 'parte';
 
@@ -43,6 +64,9 @@ export class ExpedienteDetallePage implements OnInit {
     private readonly expedientesSvc = inject(ExpedientesService);
     private readonly documentosSvc = inject(DocumentosService);
     private readonly catalogosSvc = inject(CatalogosService);
+    private readonly audienciasSvc = inject(AudienciasService);
+    private readonly tramitesSvc = inject(TramitesService);
+    private readonly permisosSvc = inject(PermisosService);
     private readonly toastSvc = inject(ToastService);
 
     protected readonly expediente = signal<ExpedienteDetalle | null>(null);
@@ -50,6 +74,13 @@ export class ExpedienteDetallePage implements OnInit {
     protected readonly notas = signal<NotaExpediente[]>([]);
     protected readonly documentos = signal<DocExpediente[]>([]);
     protected readonly cargando = signal(true);
+
+    /* Audiencias y trámites relacionados; los paneles solo se pintan si el
+       rol tiene el módulo (evita el redirect a /dashboard del moduloGuard). */
+    protected readonly audiencias = signal<Audiencia[]>([]);
+    protected readonly tramites = signal<Tramite[]>([]);
+    protected readonly puedeAudiencias = computed(() => this.permisosSvc.tiene('audiencias'));
+    protected readonly puedeTramites = computed(() => this.permisosSvc.tiene('tramites'));
 
     protected rolesProcesales: CatalogoItem[] = [];
 
@@ -73,6 +104,25 @@ export class ExpedienteDetallePage implements OnInit {
         this.cargarPartes();
         this.cargarNotas();
         this.cargarDocumentos();
+        this.cargarRelacionados();
+    }
+
+    // ── Navegación a relacionados ────────────────────────────
+
+    irAAudiencia(id: number): void {
+        this.router.navigate(['/agenda', id]);
+    }
+
+    irATramite(id: number): void {
+        this.router.navigate(['/tramites', id]);
+    }
+
+    colorEstadoAudiencia(estado: string): string {
+        return COLORES_ESTADO_AUDIENCIA[estado] ?? '#6c757d';
+    }
+
+    colorEstadoTramite(estado: string): string {
+        return COLORES_ESTADO_TRAMITE[estado] ?? '#6c757d';
     }
 
     formatearFecha(iso: string | null): string {
@@ -353,6 +403,21 @@ export class ExpedienteDetallePage implements OnInit {
         this.documentosSvc.listar(this.expedienteId).subscribe({
             next: docs => this.documentos.set(docs)
         });
+    }
+
+    private cargarRelacionados(): void {
+        if (this.puedeAudiencias()) {
+            this.audienciasSvc.listar({ expedienteId: this.expedienteId }).subscribe({
+                next: auds => this.audiencias.set(auds),
+                error: () => this.audiencias.set([])
+            });
+        }
+        if (this.puedeTramites()) {
+            this.tramitesSvc.listar({ expedienteId: this.expedienteId }).subscribe({
+                next: trs => this.tramites.set(trs),
+                error: () => this.tramites.set([])
+            });
+        }
     }
 
     private cargarCatalogos(): void {

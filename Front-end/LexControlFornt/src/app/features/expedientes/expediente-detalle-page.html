@@ -198,6 +198,69 @@
                     </div>
                 }
             </section>
+
+            <!-- Audiencias relacionadas -->
+            @if (puedeAudiencias()) {
+                <section class="panel" aria-label="Audiencias del expediente" data-testid="panel-audiencias">
+                    <header class="panel-head">
+                        <h2 class="panel-title">Audiencias</h2>
+                    </header>
+                    @if (audiencias().length === 0) {
+                        <div class="empty-inline">No hay audiencias registradas.</div>
+                    } @else {
+                        <div class="relacionados-lista">
+                            @for (a of audiencias(); track a.id) {
+                                <button type="button" class="relacionado-item"
+                                    data-testid="item-audiencia"
+                                    (click)="irAAudiencia(a.id)">
+                                    <span class="relacionado-main">
+                                        <span class="relacionado-titulo">{{ a.tipo }}</span>
+                                        <span class="relacionado-sub">
+                                            {{ formatearFecha(a.fecha) }} &middot; {{ a.horaInicio }}
+                                            @if (a.sala) { &middot; {{ a.sala }} }
+                                        </span>
+                                    </span>
+                                    <span class="pill-estado"
+                                        [style.background-color]="colorEstadoAudiencia(a.estado)">
+                                        {{ a.estado }}
+                                    </span>
+                                </button>
+                            }
+                        </div>
+                    }
+                </section>
+            }
+
+            <!-- Trámites relacionados -->
+            @if (puedeTramites()) {
+                <section class="panel" aria-label="Trámites del expediente" data-testid="panel-tramites">
+                    <header class="panel-head">
+                        <h2 class="panel-title">Trámites</h2>
+                    </header>
+                    @if (tramites().length === 0) {
+                        <div class="empty-inline">No hay trámites registrados.</div>
+                    } @else {
+                        <div class="relacionados-lista">
+                            @for (t of tramites(); track t.id) {
+                                <button type="button" class="relacionado-item"
+                                    data-testid="item-tramite"
+                                    (click)="irATramite(t.id)">
+                                    <span class="relacionado-main">
+                                        <span class="relacionado-titulo">{{ t.tipo }}</span>
+                                        <span class="relacionado-sub">
+                                            {{ t.institucion }} &middot; {{ formatearFecha(t.fechaIngreso) }}
+                                        </span>
+                                    </span>
+                                    <span class="pill-estado"
+                                        [style.background-color]="colorEstadoTramite(t.estado)">
+                                        {{ t.estado }}
+                                    </span>
+                                </button>
+                            }
+                        </div>
+                    }
+                </section>
+            }
         </div>
     </div>
 

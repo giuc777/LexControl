@@ -280,6 +280,59 @@
     color: var(--subtle);
 }
 
+/* ============ Relacionados (audiencias / tramites) ============ */
+
+.relacionados-lista {
+    padding: 4px 14px 14px;
+    display: flex;
+    flex-direction: column;
+}
+
+.relacionado-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #f0f3f4;
+    padding: 11px 6px;
+    font: inherit;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.15s ease;
+}
+
+.relacionado-item:last-child {
+    border-bottom: none;
+}
+
+.relacionado-item:hover {
+    background: #f0f7f9;
+}
+
+.relacionado-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.relacionado-titulo {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+}
+
+.relacionado-sub {
+    font-size: 12px;
+    color: var(--subtle);
+    overflow-wrap: anywhere;
+}
+
 /* ============ Modal grande ============ */
 
 .modal-card-lg {

@@ -84,11 +84,12 @@ public class PerfilService : IPerfilService
             throw new ExcepcionNegocio(-2, "La contraseña actual no coincide.",
                 StatusCodes.Status400BadRequest);
 
-        // Guardar siempre en BCrypt (formato actual) y limpiar la bandera legacy.
+        // Guardar siempre en BCrypt (formato actual), limpiar la bandera legacy
+        // y la bandera de cambio obligatorio (el usuario ya definió su contraseña).
         var hashNuevo = HashHelper.HashPassword(datos.ContrasenaNueva);
         var retorno = await _repositorio.EjecutarRetornoAsync(
             "SP_Usuario_ActualizarHash",
-            new { ID = usuarioId, ContraseñaHash = hashNuevo, HashLegacy = false });
+            new { ID = usuarioId, ContraseñaHash = hashNuevo, HashLegacy = false, DebeCambiarContrasena = (bool?)false });
 
         if (retorno == -1)
             throw new ExcepcionNegocio(-1, "Usuario no encontrado.",

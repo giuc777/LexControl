@@ -46,7 +46,7 @@ public class AuthService : IAuthService
                     new { ID = fila.ID, ContraseñaHash = nuevoHash, HashLegacy = false });
             }
 
-            return await GenerarRespuestaAsync(fila.ID, fila.NombreCompleto, fila.Usuario, fila.Rol_ID, fila.RolNombre, userAgent, ipAddress);
+            return await GenerarRespuestaAsync(fila.ID, fila.NombreCompleto, fila.Usuario, fila.Rol_ID, fila.RolNombre, fila.DebeCambiarContrasena, userAgent, ipAddress);
         }
 
         // Paso 2: Fallback — intentar con BCrypt
@@ -59,7 +59,7 @@ public class AuthService : IAuthService
             && Helpers.HashHelper.EsHashBcrypt(candidato.ContraseñaHash)
             && Helpers.HashHelper.VerifyPassword(solicitud.Contrasena, candidato.ContraseñaHash))
         {
-            return await GenerarRespuestaAsync(candidato.ID, candidato.NombreCompleto, candidato.Usuario, candidato.Rol_ID, candidato.Rol, userAgent, ipAddress);
+            return await GenerarRespuestaAsync(candidato.ID, candidato.NombreCompleto, candidato.Usuario, candidato.Rol_ID, candidato.Rol, candidato.DebeCambiarContrasena, userAgent, ipAddress);
         }
 
         // Paso 3: Credenciales inválidas — registrar intento fallido
@@ -70,7 +70,7 @@ public class AuthService : IAuthService
     }
 
     private async Task<LoginResponseDto> GenerarRespuestaAsync(
-        int usuarioId, string nombreCompleto, string usuario, int rolId, string rol,
+        int usuarioId, string nombreCompleto, string usuario, int rolId, string rol, bool debeCambiarContrasena,
         string? userAgent, string? ipAddress)
     {
         // Generar access token (15 min)
@@ -92,7 +92,8 @@ public class AuthService : IAuthService
             Usuario = usuario,
             NombreCompleto = nombreCompleto,
             RolId = rolId,
-            Rol = rol
+            Rol = rol,
+            DebeCambiarContrasena = debeCambiarContrasena
         };
     }
 }

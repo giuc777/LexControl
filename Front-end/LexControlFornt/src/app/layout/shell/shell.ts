@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { RouterOutlet } from '@angular/router';
 
 import { PermisosService } from '../../core/permisos/permisos';
+import { CambioObligatorioModal } from '../cambio-obligatorio/cambio-obligatorio-modal';
 import { Sidebar } from '../sidebar/sidebar';
 import { Toast } from '../toast/toast';
 import { Topbar } from '../topbar/topbar';
@@ -10,7 +11,7 @@ import { Topbar } from '../topbar/topbar';
    El host lleva la clase .app-shell que usa styles/layout.css. */
 @Component({
     selector: 'app-shell',
-    imports: [RouterOutlet, Sidebar, Topbar, Toast],
+    imports: [RouterOutlet, Sidebar, Topbar, Toast, CambioObligatorioModal],
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         class: 'app-shell',

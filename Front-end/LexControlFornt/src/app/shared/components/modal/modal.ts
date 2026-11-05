@@ -21,12 +21,14 @@ let contador = 0;
             [attr.aria-labelledby]="tituloId" [style.width]="ancho()" tabindex="-1">
             <header class="modal-header">
                 <h2 class="modal-title" [id]="tituloId">{{ titulo() }}</h2>
-                <button type="button" class="modal-close" aria-label="Cerrar" (click)="cerrado.emit()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path [attr.d]="xPath" />
-                    </svg>
-                </button>
+                @if (puedeCerrar()) {
+                    <button type="button" class="modal-close" aria-label="Cerrar" (click)="cerrado.emit()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path [attr.d]="xPath" />
+                        </svg>
+                    </button>
+                }
             </header>
             <ng-content />
         </div>
@@ -36,6 +38,9 @@ export class Modal {
     readonly titulo = input.required<string>();
     readonly ancho = input('min(560px,94vw)');
     readonly abierto = input.required<boolean>();
+    /* false: oculta la X del header (modales bloqueantes, p. ej. cambio
+       obligatorio de contraseña). El cierre real sigue vía (cerrado). */
+    readonly puedeCerrar = input(true);
     readonly cerrado = output<void>();
 
     protected readonly xPath = X_PATH;

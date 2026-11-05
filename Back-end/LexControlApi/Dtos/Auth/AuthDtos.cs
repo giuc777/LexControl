@@ -23,6 +23,9 @@ public class LoginResponseDto
     public string NombreCompleto { get; set; } = string.Empty;
     public int RolId { get; set; }
     public string Rol { get; set; } = string.Empty;
+
+    /// <summary>True si la contraseña actual es temporal y debe cambiarse antes de usar el sistema.</summary>
+    public bool DebeCambiarContrasena { get; set; }
 }
 
 /// <summary>Solicitud de refresh de token.</summary>

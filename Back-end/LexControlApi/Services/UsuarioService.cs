@@ -127,7 +127,7 @@ public class UsuarioService : IUsuarioService
 
         var retorno = await _repositorio.EjecutarRetornoAsync(
             "SP_Usuario_ActualizarHash",
-            new { ID = id, ContraseñaHash = hash, HashLegacy = false });
+            new { ID = id, ContraseñaHash = hash, HashLegacy = false, DebeCambiarContrasena = (bool?)true });
         VerificarAccion(retorno);
 
         // Limpia intentos fallidos y desbloquea la cuenta

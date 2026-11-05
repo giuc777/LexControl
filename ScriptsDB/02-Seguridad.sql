@@ -46,6 +46,19 @@ SET HashLegacy = 1,
 WHERE HashLegacy = 0;
 GO
 
+-- 1.4 Agregar columna DebeCambiarContrasena a USUARIO
+--     Señala que la contraseña actual es temporal (alta o
+--     restablecimiento por administrador) y debe cambiarse en
+--     el primer inicio de sesión. La limpia SP_Usuario_ActualizarHash.
+IF NOT EXISTS (
+    SELECT 1 FROM sys.columns
+    WHERE object_id = OBJECT_ID('USUARIO') AND name = 'DebeCambiarContrasena'
+)
+BEGIN
+    ALTER TABLE USUARIO ADD DebeCambiarContrasena BIT NOT NULL DEFAULT 0;
+END
+GO
+
 -- ============================================================
 -- PARTE 2: TABLA REFRESH_TOKEN
 -- ============================================================
@@ -108,11 +121,15 @@ GO
 
 -- 4.1 SP_Usuario_ActualizarHash
 --     Actualiza el hash de contraseña de un usuario (migración SHA256 → BCrypt)
+--     @DebeCambiarContrasena: NULL conserva el valor actual; true marca la
+--     contraseña como temporal (restablecimiento); false la limpia (cambio
+--     por el propio usuario vía perfil).
 --     Retorna: 0 OK, -1 usuario no existe
 CREATE OR ALTER PROCEDURE SP_Usuario_ActualizarHash
     @ID INT,
     @ContraseñaHash NVARCHAR(255),
-    @HashLegacy BIT = 0
+    @HashLegacy BIT = 0,
+    @DebeCambiarContrasena BIT = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -123,7 +140,8 @@ BEGIN
         UPDATE USUARIO
         SET ContraseñaHash = @ContraseñaHash,
             HashLegacy = @HashLegacy,
-            FechaUltimoCambioHash = GETDATE()
+            FechaUltimoCambioHash = GETDATE(),
+            DebeCambiarContrasena = ISNULL(@DebeCambiarContrasena, DebeCambiarContrasena)
         WHERE ID = @ID;
 
         RETURN 0;
@@ -150,6 +168,7 @@ BEGIN
             U.Usuario,
             U.ContraseñaHash,
             ISNULL(U.HashLegacy, 0) AS HashLegacy,
+            ISNULL(U.DebeCambiarContrasena, 0) AS DebeCambiarContrasena,
             ISNULL(U.IntentosFallidos, 0) AS IntentosFallidos,
             CAST(U.Bloqueado AS BIT) AS Bloqueado,
             P.NombreCompleto,
@@ -171,6 +190,7 @@ GO
 
 -- 4.3 SP_Usuario_Autenticar (ACTUALIZADO)
 --     Ahora también retorna HashLegacy para decidir migración
+--     y DebeCambiarContrasena para el cambio obligatorio en el login
 CREATE OR ALTER PROCEDURE SP_Usuario_Autenticar
     @Usuario NVARCHAR(50),
     @ContraseñaHash NVARCHAR(255)
@@ -185,7 +205,8 @@ BEGIN
             U.Rol_ID,
             R.Nombre AS RolNombre,
             CAST(U.Bloqueado AS BIT) AS Bloqueado,
-            ISNULL(U.HashLegacy, 0) AS HashLegacy
+            ISNULL(U.HashLegacy, 0) AS HashLegacy,
+            ISNULL(U.DebeCambiarContrasena, 0) AS DebeCambiarContrasena
         FROM USUARIO U
         INNER JOIN PERSONA P ON U.Persona_ID = P.ID
         INNER JOIN ROL R ON U.Rol_ID = R.ID

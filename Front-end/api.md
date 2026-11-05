@@ -118,10 +118,17 @@ Inicia sesión.
     "usuario": "admin",
     "nombreCompleto": "Administrador del Sistema",
     "rolId": 1,
-    "rol": "Administrador"
+    "rol": "Administrador",
+    "debeCambiarContrasena": false
   }
 }
 ```
+
+`debeCambiarContrasena` solo lo envía el login (no el refresh): es `true`
+cuando la contraseña actual es temporal (alta o restablecimiento por el
+administrador, columna `USUARIO.DebeCambiarContrasena`). El frontend muestra
+entonces el modal bloqueante de cambio obligatorio del shell; la bandera se
+limpia al cambiar la contraseña (`PUT /api/perfil/contrasena`).
 
 **Errores**: `401` credenciales incorrectas · `400` campos vacíos.
 

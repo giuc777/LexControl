@@ -732,7 +732,8 @@ GO
 CREATE OR ALTER PROCEDURE SP_Usuario_ActualizarHash
     @ID INT,
     @ContraseñaHash NVARCHAR(255),
-    @HashLegacy BIT = 0
+    @HashLegacy BIT = 0,
+    @DebeCambiarContrasena BIT = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -743,7 +744,8 @@ BEGIN
         UPDATE USUARIO
         SET ContraseñaHash = @ContraseñaHash,
             HashLegacy = @HashLegacy,
-            FechaUltimoCambioHash = GETDATE()
+            FechaUltimoCambioHash = GETDATE(),
+            DebeCambiarContrasena = ISNULL(@DebeCambiarContrasena, DebeCambiarContrasena)
         WHERE ID = @ID;
 
         RETURN 0;

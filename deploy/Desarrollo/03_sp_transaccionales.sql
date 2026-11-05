@@ -909,12 +909,14 @@ BEGIN
             Persona_ID,
             Rol_ID,
             Usuario,
-            ContraseñaHash
+            ContraseñaHash,
+            DebeCambiarContrasena
         ) VALUES (
             @PersonaID,
             @Rol_ID,
             @Usuario,
-            @ContraseñaHash
+            @ContraseñaHash,
+            1
         );
 
         SET @NuevoID = SCOPE_IDENTITY();
@@ -929,6 +931,8 @@ BEGIN
 END
 GO
 
+-- ------------------------------------------------------------
+-- [01-Usuarios_Permisos.sql] SP_Usuario_Actualizar
 -- ------------------------------------------------------------
 -- [01-Usuarios_Permisos.sql] SP_Usuario_Actualizar
 -- ------------------------------------------------------------
@@ -1132,7 +1136,8 @@ BEGIN
             U.Rol_ID,
             R.Nombre AS RolNombre,
             CAST(U.Bloqueado AS BIT) AS Bloqueado,
-            ISNULL(U.HashLegacy, 0) AS HashLegacy
+            ISNULL(U.HashLegacy, 0) AS HashLegacy,
+            ISNULL(U.DebeCambiarContrasena, 0) AS DebeCambiarContrasena
         FROM USUARIO U
         INNER JOIN PERSONA P ON U.Persona_ID = P.ID
         INNER JOIN ROL R ON U.Rol_ID = R.ID
@@ -1280,6 +1285,7 @@ BEGIN
             U.Usuario,
             U.ContraseñaHash,
             ISNULL(U.HashLegacy, 0) AS HashLegacy,
+            ISNULL(U.DebeCambiarContrasena, 0) AS DebeCambiarContrasena,
             ISNULL(U.IntentosFallidos, 0) AS IntentosFallidos,
             CAST(U.Bloqueado AS BIT) AS Bloqueado,
             P.NombreCompleto,

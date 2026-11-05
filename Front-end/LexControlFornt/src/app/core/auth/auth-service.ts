@@ -24,14 +24,17 @@ const CLAVE_NOMBRE = 'lexcontrol_nombre';
 const CLAVE_ROL_ID = 'lexcontrol_rolId';
 const CLAVE_ROL = 'lexcontrol_rol';
 const CLAVE_EXPIRACION = 'lexcontrol_expiracion';
+const CLAVE_DEBE_CAMBIAR = 'lexcontrol_debeCambiar';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
     private readonly http = inject(HttpClient);
 
     private readonly _sesion = signal<SesionUsuario | null>(this.leerSesion());
+    private readonly _debeCambiar = signal(this.leerDebeCambiar());
 
     readonly sesion = this._sesion.asReadonly();
+    readonly debeCambiarContrasena = this._debeCambiar.asReadonly();
     readonly estaAutenticado = computed(() => this._sesion() !== null);
     readonly nombre = computed(() => this._sesion()?.nombre ?? '');
     readonly rol = computed(() => this._sesion()?.rol ?? '');
@@ -59,6 +62,7 @@ export class AuthService {
                     }
 
                     this.guardarSesion(respuesta.data);
+                    this.establecerDebeCambiar(respuesta.data.debeCambiarContrasena === true);
                     return respuesta.data;
                 })
             );
@@ -90,6 +94,22 @@ export class AuthService {
     cerrarSesion(): void {
         this.limpiarStorage();
         this._sesion.set(null);
+        this._debeCambiar.set(false);
+    }
+
+    /* Limpia la bandera de cambio obligatorio (contraseña ya cambiada). */
+    limpiarDebeCambiar(): void {
+        sessionStorage.removeItem(CLAVE_DEBE_CAMBIAR);
+        this._debeCambiar.set(false);
+    }
+
+    private establecerDebeCambiar(debe: boolean): void {
+        sessionStorage.setItem(CLAVE_DEBE_CAMBIAR, debe ? '1' : '0');
+        this._debeCambiar.set(debe);
+    }
+
+    private leerDebeCambiar(): boolean {
+        return sessionStorage.getItem(CLAVE_DEBE_CAMBIAR) === '1';
     }
 
     private guardarSesion(datos: SesionRespuesta): void {
@@ -148,5 +168,6 @@ export class AuthService {
         sessionStorage.removeItem(CLAVE_ROL_ID);
         sessionStorage.removeItem(CLAVE_ROL);
         sessionStorage.removeItem(CLAVE_EXPIRACION);
+        sessionStorage.removeItem(CLAVE_DEBE_CAMBIAR);
     }
 }

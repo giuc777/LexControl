@@ -1011,6 +1011,19 @@ BEGIN
 END
 GO
 
+-- 1.4 Agregar columna DebeCambiarContrasena a USUARIO
+--     Señala que la contraseña actual es temporal (alta o
+--     restablecimiento por administrador) y debe cambiarse en
+--     el primer inicio de sesión. La limpia SP_Usuario_ActualizarHash.
+IF NOT EXISTS (
+    SELECT 1 FROM sys.columns
+    WHERE object_id = OBJECT_ID('USUARIO') AND name = 'DebeCambiarContrasena'
+)
+BEGIN
+    ALTER TABLE USUARIO ADD DebeCambiarContrasena BIT NOT NULL DEFAULT 0;
+END
+GO
+
 
 -- ------------------------------------------------------------
 -- 4. Refresh tokens y blacklist de JWT (ScriptsDB/02-Seguridad.sql)

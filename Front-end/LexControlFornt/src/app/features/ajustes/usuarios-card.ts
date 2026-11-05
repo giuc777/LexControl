@@ -9,14 +9,18 @@ import { RolCatalogo, UsuarioFiltros, UsuarioLista } from '../../core/models/usu
 import { UsuariosService } from '../../core/services/usuarios-service';
 import { ToastService } from '../../layout/toast/toast-service';
 import { IconoSvg } from '../../shared/components/icono-svg/icono-svg';
+import { Modal } from '../../shared/components/modal/modal';
 import { ICONO_PLUS, ICONO_USUARIOS, colorRol } from './ajustes-iconos';
+import { ContrasenaTemporalModal } from './contrasena-temporal-modal';
 import { UsuarioModal } from './usuario-modal';
 
 /* Tarjeta «Usuarios del Sistema» conectada a /api/usuarios (api.md §4.3):
-   listado con filtros, alta/edición vía modal y activar/desactivar/desbloquear. */
+   listado con filtros, alta/edición vía modal y activar/desactivar/desbloquear.
+   El alta genera una contraseña temporal y restablecer usa POST /{id}/restablecer;
+   en ambos casos la clave se muestra una sola vez en contrasena-temporal-modal. */
 @Component({
     selector: 'app-usuarios-card',
-    imports: [ReactiveFormsModule, IconoSvg, UsuarioModal],
+    imports: [ReactiveFormsModule, IconoSvg, Modal, UsuarioModal, ContrasenaTemporalModal],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './usuarios-card.html'
 })
@@ -36,6 +40,12 @@ export class UsuariosCard {
 
     protected readonly modalAbierto = signal(false);
     protected readonly editando = signal<UsuarioLista | null>(null);
+
+    /* Confirmación previa al restablecimiento (rompe la contraseña actual). */
+    protected readonly confirmando = signal<UsuarioLista | null>(null);
+
+    /* Contraseña temporal generada (alta o restablecimiento), vista una sola vez. */
+    protected readonly temporal = signal<{ cuenta: string; contrasena: string } | null>(null);
 
     /* Filtros conectados a los query params del API. */
     protected readonly filtros = this.fb.group({
@@ -77,6 +87,43 @@ export class UsuariosCard {
         this.cerrarModal();
         this.toast.mostrar(eraEdicion ? 'Usuario actualizado.' : 'Usuario creado correctamente.');
         this.cargar();
+    }
+
+    mostrarTemporal(datos: { cuenta: string; contrasena: string }): void {
+        this.temporal.set(datos);
+    }
+
+    cerrarTemporal(): void {
+        this.temporal.set(null);
+    }
+
+    solicitarRestablecer(usuario: UsuarioLista): void {
+        this.confirmando.set(usuario);
+    }
+
+    cerrarConfirmacion(): void {
+        this.confirmando.set(null);
+    }
+
+    restablecer(): void {
+        const usuario = this.confirmando();
+        if (!usuario || this.procesando()) return;
+
+        this.procesando.set(true);
+        this.usuariosService.restablecerContrasena(usuario.id)
+            .pipe(finalize(() => this.procesando.set(false)))
+            .subscribe({
+                next: resultado => {
+                    this.confirmando.set(null);
+                    this.temporal.set({ cuenta: resultado.usuario, contrasena: resultado.contrasenaTemporal });
+                    this.toast.mostrar(`Contraseña de «${usuario.usuario}» restablecida.`);
+                    this.cargar();
+                },
+                error: (error: unknown) => {
+                    this.confirmando.set(null);
+                    this.errorOperacion(error);
+                }
+            });
     }
 
     alternarActivo(usuario: UsuarioLista): void {

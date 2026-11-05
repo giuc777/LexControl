@@ -77,3 +77,13 @@ public class UsuarioDto
         FechaCreacion = fila.FechaCreacion
     };
 }
+
+/// <summary>Respuesta de un restablecimiento de contraseña (la temporal se devuelve una sola vez).</summary>
+public class UsuarioRestablecerDto
+{
+    public int Id { get; set; }
+    public string Usuario { get; set; } = string.Empty;
+
+    /// <summary>Contraseña temporal generada. Solo se expone en la respuesta del restablecimiento.</summary>
+    public string ContrasenaTemporal { get; set; } = string.Empty;
+}

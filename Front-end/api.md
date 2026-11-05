@@ -247,6 +247,11 @@ Detalle de un usuario. Mismo shape que un elemento de la lista.
 
 Crea Persona + Usuario (transacción). **201 Created** con el usuario creado; header `Location` apunta a `GET /api/usuarios/{id}`.
 
+> El formulario **no expone** el campo contraseña: el frontend genera una
+> contraseña temporal (12 caracteres, cumple la política) y la muestra una
+> sola vez en un modal al guardar. Se envía en `contrasena` como cualquier
+> otra contraseña.
+
 **Body**
 
 ```json
@@ -285,6 +290,29 @@ Activa/desactiva una cuenta (borrado lógico). **204 No Content**.
 #### `POST /api/usuarios/{id}/desbloquear`
 
 Desbloquea una cuenta tras intentos fallidos. **204 No Content**. **Errores**: `404`.
+
+#### `POST /api/usuarios/{id}/restablecer`
+
+Restablece la contraseña con una **temporal aleatoria** generada por el
+backend (12 caracteres, cumple la política: 8+, un dígito y un especial),
+guardada como BCrypt, y además limpia intentos fallidos/desbloquea la
+cuenta. La contraseña anterior deja de funcionar de inmediato.
+
+**200 OK** — la temporal se expone **solo en esta respuesta** (no se
+guarda ni se puede consultar de nuevo):
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 5,
+    "usuario": "alopez",
+    "contrasenaTemporal": "kR7!mpQ2wXe9"
+  }
+}
+```
+
+**Errores**: `404`.
 
 ---
 

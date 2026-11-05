@@ -57,7 +57,8 @@ export interface UsuarioFiltros {
 }
 
 /* POST /api/usuarios · PUT /api/usuarios/{id}.
-   contrasena obligatoria al crear; vacío/nulo al editar conserva la actual. */
+   contrasena solo se envía en el alta (temporal generada automáticamente);
+   al editar se omite para conservar la actual. */
 export interface UsuarioGuardarDto {
     nombreCompleto: string;
     email: string;
@@ -65,4 +66,11 @@ export interface UsuarioGuardarDto {
     cuenta: string;
     rolId: number;
     contrasena?: string;
+}
+
+/* POST /api/usuarios/{id}/restablecer — la temporal se expone una sola vez. */
+export interface UsuarioRestablecer {
+    id: number;
+    usuario: string;
+    contrasenaTemporal: string;
 }

@@ -8,7 +8,6 @@ import { RolCatalogo, UsuarioGuardarDto, UsuarioLista } from '../../core/models/
 import { UsuariosService } from '../../core/services/usuarios-service';
 import { IconoSvg } from '../../shared/components/icono-svg/icono-svg';
 import { Modal } from '../../shared/components/modal/modal';
-import { ICONO_INFO } from './ajustes-iconos';
 
 const MENSAJE_ERROR = 'No fue posible guardar el usuario.';
 const PATRON_CUENTA = /^[A-Za-z0-9._-]+$/;
@@ -20,22 +19,43 @@ function cuentaValida(control: { value: string }): ValidationErrors | null {
     return null;
 }
 
-/* Política del backend: mínimo 8 caracteres, un dígito y un especial.
-   Vacío no es error aquí: al editar la contraseña es opcional. */
-function politicaContrasena(control: { value: string }): ValidationErrors | null {
-    const valor = String(control.value ?? '');
-    if (valor === '') return null;
-    if (valor.length < 8) return { politica: 'Mínimo 8 caracteres.' };
-    if (!/\d/.test(valor)) return { politica: 'Debe incluir al menos un número.' };
-    if (!/[^A-Za-z0-9]/.test(valor)) return { politica: 'Debe incluir al menos un carácter especial.' };
-    return null;
+/* Contraseña temporal para el alta: se genera en el navegador con
+   aleatoriedad criptográfica y cumple la política del backend
+   (8+, un dígito y un especial). El administrador no la elige. */
+const MINUSCULAS = 'abcdefghijkmnopqrstuvwxyz';
+const MAYUSCULAS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+const DIGITOS = '23456789';
+const ESPECIALES = '!@#$%&*?+-=';
+
+function azar(limite: number): number {
+    const buffer = new Uint32Array(1);
+    crypto.getRandomValues(buffer);
+    return buffer[0] % limite;
 }
 
-/* Modal crear/editar usuario (api.md §4.3). Al editar, la contraseña es
-   opcional: vacía conserva la actual (comportamiento documentado del PUT). */
+function generarContrasenaTemporal(): string {
+    const todos = MINUSCULAS + MAYUSCULAS + DIGITOS + ESPECIALES;
+    const caracteres = [
+        MINUSCULAS[azar(MINUSCULAS.length)],
+        MAYUSCULAS[azar(MAYUSCULAS.length)],
+        DIGITOS[azar(DIGITOS.length)],
+        ESPECIALES[azar(ESPECIALES.length)]
+    ];
+    while (caracteres.length < 12) caracteres.push(todos[azar(todos.length)]);
+
+    for (let i = caracteres.length - 1; i > 0; i--) {
+        const j = azar(i + 1);
+        [caracteres[i], caracteres[j]] = [caracteres[j], caracteres[i]];
+    }
+    return caracteres.join('');
+}
+
+/* Modal crear/editar usuario (api.md §4.3). No tiene campo de contraseña:
+   en el alta se genera una temporal que se muestra una sola vez al guardar
+   (salida contrasenaTemporal); al editar la contraseña no se toca. */
 @Component({
     selector: 'app-usuario-modal',
-    imports: [ReactiveFormsModule, IconoSvg, Modal],
+    imports: [ReactiveFormsModule, Modal],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './usuario-modal.html'
 })
@@ -48,8 +68,8 @@ export class UsuarioModal {
     readonly usuario = input<UsuarioLista | null>(null);
     readonly cerrado = output<void>();
     readonly guardado = output<void>();
+    readonly contrasenaTemporal = output<{ cuenta: string; contrasena: string }>();
 
-    protected readonly iconoInfo = ICONO_INFO;
     protected readonly guardando = signal(false);
     protected readonly mensajeError = signal('');
 
@@ -58,13 +78,11 @@ export class UsuarioModal {
         cuenta: ['', [Validators.required, cuentaValida, Validators.maxLength(50)]],
         rolId: ['', Validators.required],
         email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
-        telefono: ['', [Validators.maxLength(20)]],
-        contrasena: ['']
+        telefono: ['', [Validators.maxLength(20)]]
     });
 
     constructor() {
-        /* Cada vez que se abre el modal se rellena según alta/edición y la
-           contraseña pasa a obligatoria solo en el alta. */
+        /* Cada vez que se abre el modal se rellena según alta/edición. */
         effect(() => {
             if (!this.abierto()) return;
 
@@ -74,11 +92,9 @@ export class UsuarioModal {
                 cuenta: u?.usuario ?? '',
                 rolId: u ? String(u.rolId) : '',
                 email: u?.email ?? '',
-                telefono: u?.telefono ?? '',
-                contrasena: ''
+                telefono: u?.telefono ?? ''
             });
             this.mensajeError.set('');
-            this.aplicarReglasContrasena(!u);
         });
     }
 
@@ -99,16 +115,22 @@ export class UsuarioModal {
         }
 
         const valores = this.formulario.getRawValue();
+        const cuenta = valores.cuenta.trim();
         const dto: UsuarioGuardarDto = {
             nombreCompleto: valores.nombreCompleto.trim(),
             email: valores.email.trim(),
             telefono: valores.telefono.trim() || undefined,
-            cuenta: valores.cuenta.trim(),
+            cuenta,
             rolId: Number(valores.rolId)
         };
-        if (valores.contrasena) dto.contrasena = valores.contrasena;
 
         const existente = this.usuario();
+        let temporal: string | undefined;
+        if (!existente) {
+            temporal = generarContrasenaTemporal();
+            dto.contrasena = temporal;
+        }
+
         const peticion$ = existente
             ? this.usuariosService.actualizar(existente.id, dto)
             : this.usuariosService.crear(dto);
@@ -119,6 +141,7 @@ export class UsuarioModal {
             .subscribe({
                 next: () => {
                     this.cerrado.emit();
+                    if (temporal) this.contrasenaTemporal.emit({ cuenta, contrasena: temporal });
                     this.guardado.emit();
                 },
                 error: (error: unknown) => {
@@ -126,14 +149,6 @@ export class UsuarioModal {
                     this.mensajeError.set(mensajeDeError(error, MENSAJE_ERROR));
                 }
             });
-    }
-
-    private aplicarReglasContrasena(obligatoria: boolean): void {
-        const control = this.formulario.controls.contrasena;
-        control.setValidators(obligatoria
-            ? [Validators.required, politicaContrasena]
-            : politicaContrasena);
-        control.updateValueAndValidity();
     }
 
     private primerError(): string {
@@ -146,10 +161,6 @@ export class UsuarioModal {
         if (c.cuenta.invalid) return 'Ingrese un nombre de usuario válido (letras, números, punto, guion o guion bajo).';
         if (c.rolId.hasError('required')) return 'Seleccione un rol válido.';
         if (c.telefono.invalid) return 'El teléfono no puede exceder los 20 caracteres.';
-
-        const errorContrasena = c.contrasena.errors?.['politica'] as string | undefined;
-        if (errorContrasena) return errorContrasena;
-        if (c.contrasena.hasError('required')) return 'Debe asignar una contraseña al usuario.';
 
         return 'Revise los campos marcados antes de continuar.';
     }

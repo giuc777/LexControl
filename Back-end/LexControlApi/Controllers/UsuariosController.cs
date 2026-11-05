@@ -89,4 +89,14 @@ public class UsuariosController : ControllerBase
         await _usuarioService.DesbloquearAsync(id);
         return NoContent();
     }
+
+    /// <summary>Restablece la contraseña con una temporal aleatoria (se devuelve una sola vez).</summary>
+    [HttpPost("{id:int}/restablecer")]
+    [ProducesResponseType(typeof(ApiResponse<UsuarioRestablecerDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<UsuarioRestablecerDto>>> RestablecerContrasena(int id)
+    {
+        var resultado = await _usuarioService.RestablecerContrasenaAsync(id);
+        return Ok(ApiResponse<UsuarioRestablecerDto>.Correcto(resultado));
+    }
 }

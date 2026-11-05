@@ -14,6 +14,7 @@ function respuestaSesion(): RespuestaApi<SesionRespuesta> {
         data: {
             token: 'jwt-de-prueba',
             expiracion: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+            refreshToken: 'rt-de-prueba',
             usuarioId: 1,
             usuario: 'admin',
             nombreCompleto: 'Administrador del Sistema',

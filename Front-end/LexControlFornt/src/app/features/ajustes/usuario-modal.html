@@ -37,16 +37,11 @@
                     maxlength="20" placeholder="+502 5XXX-XXXX" autocomplete="off">
             </div>
 
-            <div class="field full">
-                <label for="usuarioContrasena">Contraseña<span class="req">{{ usuario() ? '' : ' *' }}</span></label>
-                <input type="password" id="usuarioContrasena" formControlName="contrasena"
-                    autocomplete="new-password"
-                    [placeholder]="usuario() ? 'Deje vacía para conservar la actual' : 'Min. 8 caracteres'">
-                <small class="aj-hint">
-                    <svg appIcono [appIcono]="iconoInfo"></svg>
-                    Debe incluir números y caracteres especiales.
-                </small>
-            </div>
+            @if (!usuario()) {
+                <div class="field full">
+                    <small class="aj-hint">La contraseña temporal se generará automáticamente y se mostrará una sola vez al guardar.</small>
+                </div>
+            }
         </div>
 
         <footer class="modal-footer">

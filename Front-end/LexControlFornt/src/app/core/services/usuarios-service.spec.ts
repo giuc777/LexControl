@@ -92,4 +92,20 @@ describe('UsuariosService', () => {
         expect(peticion.request.method).toBe('POST');
         peticion.flush(null, { status: 204, statusText: 'No Content' });
     });
+
+    it('restablece la contraseña y desenvuelve la temporal', () => {
+        let resultado: { contrasenaTemporal: string } | undefined;
+
+        servicio.restablecerContrasena(7).subscribe(r => (resultado = r));
+
+        const peticion = httpMock.expectOne(`${BASE}/7/restablecer`);
+        expect(peticion.request.method).toBe('POST');
+        peticion.flush({
+            success: true,
+            data: { id: 7, usuario: 'alopez', contrasenaTemporal: 'kR7!mpQ2wXe9' },
+            error: null
+        });
+
+        expect(resultado?.contrasenaTemporal).toBe('kR7!mpQ2wXe9');
+    });
 });

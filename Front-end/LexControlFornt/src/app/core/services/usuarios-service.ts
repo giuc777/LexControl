@@ -8,13 +8,15 @@ import {
     RolCatalogo,
     UsuarioFiltros,
     UsuarioGuardarDto,
-    UsuarioLista
+    UsuarioLista,
+    UsuarioRestablecer
 } from '../models/usuario.model';
 
 /* Gestión de usuarios del sistema — solo rol Administrador (api.md §4.3).
    Borrado lógico vía PUT /{id}/estado; desbloqueo tras intentos fallidos.
    POST responde 201 con el usuario creado · PUT /{id} responde 200 ·
-   estado y desbloquear responden 204. */
+   estado y desbloquear responden 204 · restablecer devuelve la
+   contraseña temporal una sola vez. */
 @Injectable({ providedIn: 'root' })
 export class UsuariosService {
     private readonly http = inject(HttpClient);
@@ -55,5 +57,11 @@ export class UsuariosService {
 
     desbloquear(id: number): Observable<void> {
         return this.http.post<void>(`${this.baseUrl}/${id}/desbloquear`, null);
+    }
+
+    restablecerContrasena(id: number): Observable<UsuarioRestablecer> {
+        return this.http
+            .post<RespuestaApi<UsuarioRestablecer>>(`${this.baseUrl}/${id}/restablecer`, null)
+            .pipe(map(respuesta => respuesta.data));
     }
 }

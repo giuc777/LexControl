@@ -1,0 +1,32 @@
+<app-modal [titulo]="'Contraseña temporal'" [abierto]="abierto()" ancho="min(480px,94vw)" (cerrado)="cerrar()">
+    <div class="modal-form">
+        <div class="aj-temporal-aviso" role="alert">
+            Esta contraseña se muestra <strong>una sola vez</strong>. Compártala con el usuario
+            y guárdela en un lugar seguro: no podrá consultarse de nuevo.
+        </div>
+
+        <div class="field">
+            <label for="temporalCuenta">Cuenta</label>
+            <input type="text" id="temporalCuenta" readonly [value]="cuenta()">
+        </div>
+
+        <div class="field">
+            <label for="temporalClave">Contraseña temporal</label>
+            <input type="text" id="temporalClave" class="aj-input-code" readonly [value]="contrasena()"
+                data-testid="contrasena-temporal-valor">
+        </div>
+
+        @if (errorCopia()) {
+            <p class="aj-temporal-error" role="alert">No se pudo copiar; seleccione el texto manualmente.</p>
+        }
+
+        <footer class="modal-footer">
+            <button type="button" class="btn-secondary" data-testid="btn-copiar" (click)="copiar()">
+                {{ copiado() ? 'Copiada' : 'Copiar' }}
+            </button>
+            <button type="button" class="btn-primary" data-testid="btn-cerrar-temporal" (click)="cerrar()">
+                Entendido
+            </button>
+        </footer>
+    </div>
+</app-modal>

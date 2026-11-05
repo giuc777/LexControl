@@ -81,6 +81,9 @@
                                     <div class="aj-u-acciones">
                                         <button type="button" class="btn-link" (click)="abrirEdicion(u)">Editar</button>
 
+                                        <button type="button" class="btn-link" data-testid="btn-restablecer"
+                                            [disabled]="procesando()" (click)="solicitarRestablecer(u)">Restablecer</button>
+
                                         @if (u.bloqueado) {
                                             <button type="button" class="btn-link" [disabled]="procesando()"
                                                 (click)="desbloquear(u)">Desbloquear</button>
@@ -108,4 +111,28 @@
 </article>
 
 <app-usuario-modal [abierto]="modalAbierto()" [roles]="roles()" [usuario]="editando()"
-    (cerrado)="cerrarModal()" (guardado)="alGuardar()" />
+    (cerrado)="cerrarModal()" (guardado)="alGuardar()" (contrasenaTemporal)="mostrarTemporal($event)" />
+
+<app-modal [titulo]="'Restablecer contraseña'" [abierto]="confirmando() !== null"
+    ancho="min(440px,94vw)" (cerrado)="cerrarConfirmacion()">
+    <div class="modal-form">
+        <p class="aj-temporal-texto">
+            Se generará una <strong>contraseña temporal</strong> para
+            <strong>{{ confirmando()?.usuario }}</strong> y la contraseña actual dejará
+            de funcionar. El usuario deberá cambiarla desde Ajustes &gt; Seguridad.
+        </p>
+
+        <footer class="modal-footer">
+            <button type="button" class="btn-secondary" data-testid="btn-cancelar-restablecer"
+                (click)="cerrarConfirmacion()">Cancelar</button>
+            <button type="button" class="btn-primary" data-testid="btn-confirmar-restablecer"
+                [disabled]="procesando()" (click)="restablecer()">
+                {{ procesando() ? 'Generando…' : 'Restablecer' }}
+            </button>
+        </footer>
+    </div>
+</app-modal>
+
+<app-contrasena-temporal-modal [abierto]="temporal() !== null"
+    [cuenta]="temporal()?.cuenta ?? ''" [contrasena]="temporal()?.contrasena ?? ''"
+    (cerrado)="cerrarTemporal()" />

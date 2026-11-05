@@ -13,6 +13,7 @@ public interface IUsuarioService
     Task<UsuarioDto> ActualizarAsync(int id, UsuarioActualizarDto datos);
     Task ActivarDesactivarAsync(int id, bool activo);
     Task DesbloquearAsync(int id);
+    Task<UsuarioRestablecerDto> RestablecerContrasenaAsync(int id);
     Task<List<Dtos.Roles.RolDto>> ListarRolesAsync();
 }
 
@@ -115,6 +116,30 @@ public class UsuarioService : IUsuarioService
         var retorno = await _repositorio.EjecutarRetornoAsync(
             "SP_Usuario_Desbloquear", new { ID = id });
         VerificarAccion(retorno);
+    }
+
+    public async Task<UsuarioRestablecerDto> RestablecerContrasenaAsync(int id)
+    {
+        var usuario = await ObtenerPorIdAsync(id);
+
+        var temporal = ContrasenaTemporalGenerator.Generar();
+        var hash = HashHelper.HashPassword(temporal);
+
+        var retorno = await _repositorio.EjecutarRetornoAsync(
+            "SP_Usuario_ActualizarHash",
+            new { ID = id, ContraseñaHash = hash, HashLegacy = false });
+        VerificarAccion(retorno);
+
+        // Limpia intentos fallidos y desbloquea la cuenta
+        await _repositorio.EjecutarRetornoAsync(
+            "SP_Usuario_Desbloquear", new { ID = id });
+
+        return new UsuarioRestablecerDto
+        {
+            Id = id,
+            Usuario = usuario.Usuario,
+            ContrasenaTemporal = temporal
+        };
     }
 
     public async Task<List<Dtos.Roles.RolDto>> ListarRolesAsync()
